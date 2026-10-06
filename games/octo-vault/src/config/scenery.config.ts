@@ -15,11 +15,14 @@ export const ambientSeaLook: AmbientSeaLook = {
     maxSpeed: 22,
     wobble: 20,
     alpha: 0.45,
-    color: '#9ffcf0',
+    color: '#bfeaff',
   },
   // Free spins: the deep turns violet, the keeper's colour.
-  freeSpins: { color: '#2a0b4a', alpha: 0.4, fadeMs: 700 },
+  freeSpins: { color: '#2a0b5a', alpha: 0.38, fadeMs: 700 },
 };
 
-/** The frame drawn around the reel panel, design pixels of the field. Matches `reel-frame.svg`. */
-export const reelFrameBorder = 40;
+/**
+ * Where `reel-frame.svg` sits around the reel panel, design pixels of the field: its border
+ * is 40 wide, and above it is room for the crest and the tentacles.
+ */
+export const reelFrameOffset = { x: -40, y: -110 };

@@ -35,7 +35,7 @@ export const reelsConfig: ReelsConfig = {
     cellHeight: 170,
     gap: 12,
     padding: 28,
-    panelColor: '#05151a',
+    panelColor: '#071630',
     motionBlur: { fromSpeed: 6, fullSpeed: maxSpeed, strength: 12, quality: 3 },
   },
   // A short spin, as observed in the reference games: ~1.7 s from the start to the last reel.

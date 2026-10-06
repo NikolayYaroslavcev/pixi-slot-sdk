@@ -8,7 +8,7 @@ import {
   type Feature,
 } from 'slot-sdk';
 import { reelsConfig } from '../config/reels.config';
-import { reelFrameBorder } from '../config/scenery.config';
+import { reelFrameOffset } from '../config/scenery.config';
 import type { SymbolId } from '../config/symbols';
 
 /** The parts of the field that the game's mechanics work with. */
@@ -53,7 +53,7 @@ export function reels(): ReelsFeature {
       // The frame goes over the symbols: its dividers sit in the gaps between reels and its
       // shade darkens the top and bottom rows a little, as if the reels were deep in the frame.
       const frame = new Sprite(Assets.get<Texture>('reelFrame'));
-      frame.position.set(-reelFrameBorder);
+      frame.position.copyFrom(reelFrameOffset);
       view.container.addChild(frame);
       context.layers.reels.addChild(view.container);
       context.layout.addNode('reels', view.container);
