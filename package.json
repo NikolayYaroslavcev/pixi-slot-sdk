@@ -1,0 +1,29 @@
+{
+  "name": "pixi-slot-sdk",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/*",
+    "games/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w games/octo-vault --",
+    "build": "npm run build -w games/octo-vault --",
+    "preview": "npm run preview -w games/octo-vault --",
+    "lint": "eslint . && prettier --check .",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}
