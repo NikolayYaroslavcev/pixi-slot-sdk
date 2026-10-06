@@ -8,6 +8,7 @@ import {
   type HudView,
 } from './HudPresenter';
 import { LabeledValue } from './LabeledValue';
+import type { Popup } from './Popup';
 
 /** Layout nodes of the HUD. Every game's `layout.ts` places each of them in both variants. */
 export const hudNodeNames = ['spinButton', 'balance', 'bet', 'win', 'message'] as const;
@@ -27,17 +28,30 @@ export interface HudStyle {
   spinButton: { radius: number; fontSize: number };
   /** The − and + buttons around the bet. `offset` is from the bet's center to theirs. */
   betButtons: { size: number; fontSize: number; offset: number };
+  /** Buttons a game adds with `context.hud.addButton`. */
+  extraButtons: { width: number; height: number; fontSize: number };
   texts: HudTexts;
 }
 
 /** Keys that press Spin, as on most slot sites. */
 const spinKeys = new Set(['Space', 'Enter']);
 
+/** The part of the HUD that features see. */
+export interface HudControls {
+  /**
+   * Adds a button in the look of the HUD, e.g. to buy a bonus. The layout places it as the node
+   * `nodeName`, which the game's `layout.ts` describes. The feature decides what it does
+   * and when it is enabled.
+   */
+  addButton(nodeName: string, label: string): Button;
+}
+
 /**
  * Balance, bet with − / +, win, a message line and the Spin / Stop button.
  * A plain class, not ECS. It draws what `HudPresenter` decides and passes presses back to it.
+ * Keys do nothing while a popup is open: the popup has the player's attention.
  */
-export class Hud {
+export class Hud implements HudControls {
   private readonly balance: LabeledValue;
   private readonly win: LabeledValue;
   private readonly bet: LabeledValue;
@@ -47,9 +61,9 @@ export class Hud {
   private readonly betUp: Button;
 
   constructor(
-    context: Pick<GameContext, 'layers' | 'layout'>,
+    private readonly context: Pick<GameContext, 'layers' | 'layout'> & { popup: Popup },
     dependencies: Omit<HudPresenterDependencies, 'texts'>,
-    style: HudStyle,
+    private readonly style: HudStyle,
   ) {
     const { texts } = style;
     const valueStyle = { ...style, valueColor: style.textColor };
@@ -87,12 +101,23 @@ export class Hud {
     });
     window.addEventListener('keydown', (event) => {
       // A held key repeats: one press is one Spin, not a new round every few frames.
-      if (!spinKeys.has(event.code) || event.repeat) {
+      if (!spinKeys.has(event.code) || event.repeat || this.context.popup.isOpen) {
         return;
       }
       event.preventDefault();
       presenter.pressSpin();
     });
+  }
+
+  addButton(nodeName: string, label: string): Button {
+    const { width, height, fontSize } = this.style.extraButtons;
+    const button = new Button(
+      { ...buttonColors(this.style), shape: { width, height }, fontSize },
+      label,
+    );
+    this.context.layers.hud.addChild(button.view);
+    this.context.layout.addNode(nodeName, button.view);
+    return button;
   }
 
   private addNodes(

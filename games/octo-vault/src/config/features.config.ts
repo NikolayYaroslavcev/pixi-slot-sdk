@@ -41,6 +41,22 @@ export const freeSpinsConfig: FreeSpinsSettings = {
   ],
 };
 
+export interface BonusBuySettings {
+  /** `RoundRequest.mode` of a bought round. */
+  mode: string;
+  /** What the bonus costs, in bets: at a bet of 1.00 a price of 100 is 100.00. */
+  priceInBets: number;
+  /** Free spins the purchase gives. */
+  freeSpins: number;
+}
+
+/** Buy free spins straight away instead of waiting for 3 Keys. */
+export const bonusBuyConfig: BonusBuySettings = {
+  mode: 'bonus',
+  priceInBets: 100,
+  freeSpins: 10,
+};
+
 /** A tentacle on screen: quick enough that four of them read as one gesture. */
 export const tentacleLook: TentacleLook = {
   color: '#c86bff',
@@ -80,4 +96,13 @@ export const freeSpinsLook: {
     spinsCaption: 'FREE SPINS',
     winCaption: 'SERIES WIN',
   },
+};
+
+/** Texts of the Bonus Buy button and its confirmation. `{spins}` and `{price}` are filled in. */
+export const bonusBuyTexts = {
+  button: 'BUY BONUS',
+  title: 'BUY FREE SPINS',
+  message: '{spins} free spins for {price}?',
+  confirm: 'BUY',
+  cancel: 'CANCEL',
 };

@@ -15,6 +15,7 @@ const hud: HudStyle = {
   messageFontSize: 24,
   spinButton: { radius: 80, fontSize: 30 },
   betButtons: { size: 60, fontSize: 30, offset: 100 },
+  extraButtons: { width: 200, height: 80, fontSize: 30 },
   texts: {
     balance: 'BALANCE',
     bet: 'BET',
@@ -60,6 +61,26 @@ const wins: GameConfig['wins'] = {
   },
 };
 
+const popup: GameConfig['popup'] = {
+  width: 600,
+  padding: 40,
+  panelColor: '#000000',
+  dimColor: '#000000',
+  dimAlpha: 0.5,
+  titleColor: '#ffffff',
+  titleFontSize: 40,
+  messageColor: '#ffffff',
+  messageFontSize: 30,
+  button: {
+    width: 200,
+    height: 80,
+    fontSize: 30,
+    fontFamily: 'Arial',
+    color: '#336699',
+    textColor: '#ffffff',
+  },
+};
+
 const hudNodes = Object.fromEntries(hudNodeNames.map((name) => [name, { x: 0, y: 0 }]));
 
 function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
@@ -72,6 +93,7 @@ function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
       loadingScreen: { logo: 'logo', barColor: '#ffffff', textColor: '#ffffff' },
       wins,
       hud,
+      popup,
       ...config,
     },
     assets: {

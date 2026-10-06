@@ -2,6 +2,8 @@ import type { Application } from 'pixi.js';
 import type { LoadedAssets } from '../assets/LoadedAssets';
 import type { World } from '../ecs/World';
 import type { RoundControls } from '../flow/RoundFlow';
+import type { HudControls } from '../ui/Hud';
+import type { Popup } from '../ui/Popup';
 import type { StepRegistry } from '../flow/RoundPlayer';
 import type { WinControls } from '../flow/winSteps';
 import type { LayoutManager } from '../layout/LayoutManager';
@@ -34,4 +36,8 @@ export interface GameContext {
   readonly round: RoundControls;
   /** The win presentation. The game connects the field that shows wins here. */
   readonly wins: WinControls;
+  /** Extra buttons of the game go into the HUD here. */
+  readonly hud: HudControls;
+  /** One modal dialog for the whole game, e.g. to confirm a purchase. */
+  readonly popup: Popup;
 }

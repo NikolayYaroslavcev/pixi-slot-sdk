@@ -2,6 +2,7 @@ import { createSlotGame } from 'slot-sdk';
 import { assets } from './assets';
 import { gameConfig, mockConfig } from './config/game.config';
 import { layout } from './layout';
+import { bonusBuy } from './features/bonusBuy/bonusBuy';
 import { freeSpins } from './features/freeSpins/freeSpins';
 import { tentacleGrab } from './features/tentacleGrab/tentacleGrab';
 import { MockResultSource } from './mock/MockResultSource';
@@ -21,5 +22,5 @@ await createSlotGame({
     scenario: scenarioFromAddress(window.location.search),
     seed: Date.now(),
   }),
-  features: [scenery(), field, tentacleGrab(field), freeSpins(field)],
+  features: [scenery(), field, tentacleGrab(field), freeSpins(field), bonusBuy()],
 }).start();

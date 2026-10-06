@@ -219,4 +219,66 @@ describe('RoundFlow', () => {
       flow.useReels(reels);
     }).toThrow('reels are already connected');
   });
+
+  describe('a bought round', () => {
+    const bought = { mode: 'bonus', cost: 500 };
+
+    it('takes its cost instead of the bet and sends its mode', async () => {
+      const pending = createPendingResult();
+      const { flow, model, resultSource } = createRoundFlow(pending.play);
+
+      const round = flow.buy(bought);
+      expect(model.balance).toBe(500);
+      expect(resultSource.play).toHaveBeenCalledWith({ bet: 100, mode: 'bonus' });
+
+      pending.answer(wonRound);
+      await round;
+      expect(model.balance).toBe(wonRound.balance);
+      expect(model.lastWin).toBe(wonRound.totalWin);
+    });
+
+    it('keeps the reels still until the script lands them', async () => {
+      const pending = createPendingResult();
+      const { flow, reels, states } = createRoundFlow(pending.play);
+
+      const round = flow.buy(bought);
+      expect(reels.isSpinning).toBe(false);
+      expect(flow.state).toBe('spinning');
+
+      pending.answer(wonRound);
+      await round;
+      expect(states).toEqual(['spinning', 'presenting', 'idle']);
+      expect(reels.target).toEqual(grid);
+    });
+
+    it('is not available during a round or without the balance for it', async () => {
+      const pending = createPendingResult();
+      const { flow, model, resultSource } = createRoundFlow(pending.play);
+
+      expect(flow.canBuy(1000)).toBe(true);
+      expect(flow.canBuy(1001)).toBe(false);
+      await flow.buy({ mode: 'bonus', cost: 1001 });
+      expect(resultSource.play).not.toHaveBeenCalled();
+      expect(model.balance).toBe(1000);
+
+      void flow.spin();
+      expect(flow.canBuy(1)).toBe(false);
+      await flow.buy(bought);
+      expect(resultSource.play).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns its cost when the source fails', async () => {
+      const error = silenceConsoleError();
+      const { flow, model, events } = createRoundFlow(() => Promise.reject(new Error('offline')));
+      const failed = vi.fn();
+      events.on('roundFailed', failed);
+
+      await flow.buy(bought);
+
+      expect(model.balance).toBe(1000);
+      expect(flow.state).toBe('idle');
+      expect(failed).toHaveBeenCalledWith({ betReturned: true });
+      error.mockRestore();
+    });
+  });
 });

@@ -32,7 +32,7 @@ describe('free spins in a round', () => {
 
     expect(round.freeSpins?.spins).toHaveLength(count);
     expect(start?.count).toBe(count);
-    expect(start?.scatters).toEqual(round.base.outcome.scatters);
+    expect(start?.scatters).toEqual(round.base?.outcome.scatters);
     expect(stepsOf(round.steps, 'freeSpinsUpdate')).toHaveLength(count);
     expect(stepsOf(round.steps, 'reveal')).toHaveLength(count + 1);
   });
@@ -66,7 +66,7 @@ describe('free spins in a round', () => {
       before += spins[index]?.spin.outcome.totalWin ?? 0;
     });
     expect(end?.seriesWin).toBe(seriesWin);
-    expect(round.totalWin).toBe(round.base.outcome.totalWin + seriesWin);
+    expect(round.totalWin).toBe((round.base?.outcome.totalWin ?? 0) + seriesWin);
     expect(round.steps.at(-1)).toEqual({ type: 'totalWin', amount: round.totalWin });
   });
 });

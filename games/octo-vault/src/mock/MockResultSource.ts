@@ -5,8 +5,10 @@ import {
   type RoundRequest,
   type RoundResult,
 } from 'slot-sdk';
-import { playRound } from '../math/playRound';
-import { playlist, scenarios, type ScenarioName } from './scenarios';
+import { bonusBuyConfig } from '../config/features.config';
+import { bonusPrice, playBonusRound } from '../math/bonusBuy';
+import { playRound, type PlayedRound } from '../math/playRound';
+import { playlist, scenarios, type FieldScenario, type ScenarioName } from './scenarios';
 
 export interface MockResultSourceOptions {
   /** Balance of the mock wallet at the start, minor units. */
@@ -39,12 +41,30 @@ export class MockResultSource implements ResultSource {
     if (scenario === 'error') {
       throw new Error('MockResultSource: the "error" scenario fails on purpose');
     }
-    if (request.bet > this.balance) {
-      throw new Error('MockResultSource: the bet is higher than the balance');
+    const cost = this.costOf(request);
+    if (cost > this.balance) {
+      throw new Error('MockResultSource: the round costs more than the balance');
     }
-    const { steps, totalWin } = playRound(request.bet, this.rng, scenarios[scenario]);
-    this.balance += totalWin - request.bet;
+    const { steps, totalWin } = this.playRequest(request, scenario);
+    this.balance += totalWin - cost;
     return { steps, totalWin, balance: this.balance };
+  }
+
+  /** A server checks the mode and sets the price itself: the client only names what it wants. */
+  private costOf(request: RoundRequest): number {
+    if (request.mode === undefined) {
+      return request.bet;
+    }
+    if (request.mode === bonusBuyConfig.mode) {
+      return bonusPrice(request.bet);
+    }
+    throw new Error(`MockResultSource: unknown round mode "${request.mode}"`);
+  }
+
+  private playRequest(request: RoundRequest, scenario: FieldScenario): PlayedRound {
+    return request.mode === bonusBuyConfig.mode
+      ? playBonusRound(request.bet, this.rng)
+      : playRound(request.bet, this.rng, scenarios[scenario]);
   }
 
   private nextScenario(): ScenarioName {

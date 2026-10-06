@@ -20,6 +20,7 @@ import type { GameContext } from './GameContext';
 import type { GameEvents } from './GameEvents';
 import { GameModel } from './GameModel';
 import { Hud } from '../ui/Hud';
+import { Popup } from '../ui/Popup';
 import { BigWinOverlay } from '../wins/BigWinOverlay';
 import { createSceneLayers, type SceneLayers } from './sceneLayers';
 import { configureTicker } from './ticker';
@@ -57,9 +58,7 @@ export class SlotGame {
     const assets = await loadAssetsWithRetry(loader, loadingScreen);
 
     const world = new World();
-    const { context, round } = this.createContext({ app, layers, layout, world, assets });
-    const { events, model } = context;
-    new Hud(context, { events, model, round, betLevels: config.betLevels }, config.hud);
+    const context = this.createContext({ app, layers, layout, world, assets });
     for (const feature of features) {
       feature.install(context);
     }
@@ -68,10 +67,13 @@ export class SlotGame {
     await loadingScreen.hide();
   }
 
-  /** Builds the context and the round flow, which the HUD needs whole and features only in part. */
+  /**
+   * Builds the core parts and the context. The HUD gets the whole round flow,
+   * features only its controls.
+   */
   private createContext(
     parts: Pick<GameContext, 'app' | 'layers' | 'layout' | 'world' | 'assets'>,
-  ): { context: GameContext; round: RoundFlow } {
+  ): GameContext {
     const { config, resultSource } = this.options;
     const events = new EventBus<GameEvents>();
     const model = new GameModel(events, { balance: config.initialBalance, bet: config.initialBet });
@@ -81,9 +83,22 @@ export class SlotGame {
     const { timing, bigWins } = config.wins;
     const wins = new WinSteps(player, { events, model, pause, timing, bigWins, bigWinScreen });
     const round = new RoundFlow({ events, model, resultSource, player });
+    const popup = new Popup(parts.layers.popups, parts.layout, parts.app.ticker, config.popup);
+    const hudDependencies = { events, model, round, betLevels: config.betLevels };
+    const hud = new Hud({ ...parts, popup }, hudDependencies, config.hud);
     // Features see the round player only as a registry: playing a round is the core's job.
-    const context = { ...parts, events, model, config, resultSource, steps: player, round, wins };
-    return { context, round };
+    return {
+      ...parts,
+      events,
+      model,
+      config,
+      resultSource,
+      steps: player,
+      round,
+      wins,
+      hud,
+      popup,
+    };
   }
 }
 

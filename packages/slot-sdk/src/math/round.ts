@@ -4,6 +4,11 @@ import type { CellPosition } from '../reels/components';
 export interface RoundRequest {
   /** Minor units. */
   bet: number;
+  /**
+   * The kind of round, named by the game, e.g. a feature the player bought.
+   * Absent for a regular spin. The source decides what the round costs and contains.
+   */
+  mode?: string;
 }
 
 /**

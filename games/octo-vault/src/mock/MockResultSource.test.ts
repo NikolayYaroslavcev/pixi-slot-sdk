@@ -1,5 +1,6 @@
 import type { RevealStep, RoundResult, WinsStep } from 'slot-sdk';
 import { describe, expect, it, vi } from 'vitest';
+import { bonusBuyConfig } from '../config/features.config';
 import { gameConfig } from '../config/game.config';
 import { reelsConfig } from '../config/reels.config';
 import { symbols, type SymbolId } from '../config/symbols';
@@ -109,6 +110,20 @@ describe('MockResultSource', () => {
     expect(grids).toEqual(playlist.map((name) => scenarios[name]));
   });
 
+  it('sells a bonus round for its price and opens it with free spins', async () => {
+    const result = await createSource('win').play({ bet, mode: 'bonus' });
+
+    expect(stepTypes(result)[0]).toBe('freeSpinsStart');
+    expect(result.balance).toBe(10_000 - bet * bonusBuyConfig.priceInBets + result.totalWin);
+  });
+
+  it('rejects a bonus it cannot pay for, and an unknown mode', async () => {
+    const poor = new MockResultSource({ initialBalance: bet, latencyMs: 0, seed: 1 });
+
+    await expect(poor.play({ bet, mode: 'bonus' })).rejects.toThrow('costs more');
+    await expect(createSource('win').play({ bet, mode: 'jackpot' })).rejects.toThrow('unknown');
+  });
+
   it('takes the bet once for a round with free spins', async () => {
     const result = await createSource('scatter').play({ bet });
 
@@ -143,7 +158,7 @@ describe('MockResultSource', () => {
       seed: 1,
     });
 
-    await expect(source.play({ bet })).rejects.toThrow('higher than the balance');
+    await expect(source.play({ bet })).rejects.toThrow('costs more than the balance');
   });
 
   it('answers only after the pretend network time', async () => {

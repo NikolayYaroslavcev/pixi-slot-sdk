@@ -29,6 +29,7 @@ export type {
   LayoutVariantName,
 } from './layout/LayoutConfig';
 export type { StepHandler, StepRegistry } from './flow/RoundPlayer';
+export type { BoughtRound, RoundControls, RoundState } from './flow/RoundFlow';
 export type { WinControls, WinField, WinTiming } from './flow/winSteps';
 export {
   Highlight,
@@ -42,7 +43,9 @@ export type { WinStyle } from './wins/WinStyle';
 export type { ParticleStyle } from './wins/WinParticles';
 export { WinCounter, type WinCounterStyle } from './ui/WinCounter';
 export { LabeledValue, type LabeledValueStyle } from './ui/LabeledValue';
-export type { HudNodeName } from './ui/Hud';
+export type { HudControls, HudNodeName } from './ui/Hud';
+export type { Button } from './ui/Button';
+export type { Popup, PopupContent, PopupStyle } from './ui/Popup';
 export type {
   ResultSource,
   RoundRequest,

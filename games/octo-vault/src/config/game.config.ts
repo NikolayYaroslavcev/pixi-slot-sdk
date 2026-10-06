@@ -1,5 +1,26 @@
 import type { GameConfig } from 'slot-sdk';
 
+/** A dialog over the game, e.g. to confirm buying free spins. */
+const popupStyle: GameConfig['popup'] = {
+  width: 860,
+  padding: 56,
+  panelColor: '#0a2c44',
+  dimColor: '#020c14',
+  dimAlpha: 0.7,
+  titleColor: '#3ee6c4',
+  titleFontSize: 64,
+  messageColor: '#e8fbff',
+  messageFontSize: 44,
+  button: {
+    width: 300,
+    height: 120,
+    fontSize: 48,
+    fontFamily: 'Lilita One',
+    color: '#3ee6c4',
+    textColor: '#062033',
+  },
+};
+
 export const gameConfig: GameConfig = {
   initialBalance: 100_000,
   initialBet: 100,
@@ -68,6 +89,7 @@ export const gameConfig: GameConfig = {
     messageFontSize: 38,
     spinButton: { radius: 110, fontSize: 52 },
     betButtons: { size: 120, fontSize: 64, offset: 200 },
+    extraButtons: { width: 300, height: 120, fontSize: 40 },
     texts: {
       balance: 'BALANCE',
       bet: 'BET',
@@ -83,6 +105,7 @@ export const gameConfig: GameConfig = {
       notEnoughBalance: 'Not enough balance. Lower the bet.',
     },
   },
+  popup: popupStyle,
 };
 
 /** The mock game server used until a real one exists. */

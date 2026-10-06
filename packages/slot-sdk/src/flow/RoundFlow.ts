@@ -2,7 +2,7 @@ import type { EventBus } from '../core/EventBus';
 import type { GameEvents } from '../core/GameEvents';
 import type { GameModel } from '../core/GameModel';
 import { isMinorUnits } from '../math/money';
-import type { ResultSource, RevealStep, RoundResult } from '../math/round';
+import type { ResultSource, RevealStep, RoundRequest, RoundResult } from '../math/round';
 import type { ReelSpinner } from './ReelSpinner';
 import type { RoundPlayer } from './RoundPlayer';
 import { StateMachine, type Transitions } from './StateMachine';
@@ -22,10 +22,27 @@ const roundTransitions: Transitions<RoundState> = {
   presenting: ['idle'],
 };
 
+/** A round the player buys instead of spinning, e.g. straight into a bonus. */
+export interface BoughtRound {
+  /** Sent to the result source as `RoundRequest.mode`. */
+  mode: string;
+  /** Taken from the balance instead of the bet, minor units. */
+  cost: number;
+}
+
 /** The part of the round flow that features see. */
 export interface RoundControls {
+  readonly state: RoundState;
   /** Connects the reels that rounds spin and `reveal` steps stop. Called once by the game. */
   useReels(reels: ReelSpinner): void;
+  /** True when a round costing `cost` could start now: nothing is playing and the balance covers it. */
+  canBuy(cost: number): boolean;
+  /**
+   * Plays a bought round if `canBuy`, otherwise does nothing. Like a spin, it goes through
+   * `spinning` (waiting for the result) and `presenting`, but the reels stay still until
+   * its script lands them: a bought round opens with its own steps. Never rejects.
+   */
+  buy(round: BoughtRound): Promise<void>;
 }
 
 export interface RoundFlowDependencies {
@@ -58,8 +75,11 @@ export class RoundFlow implements RoundControls {
 
   /** True when Spin would start a round now: nothing is playing and the balance covers the bet. */
   get canSpin(): boolean {
-    const { model } = this.dependencies;
-    return this.state === 'idle' && model.bet <= model.balance;
+    return this.canBuy(this.dependencies.model.bet);
+  }
+
+  canBuy(cost: number): boolean {
+    return this.state === 'idle' && cost <= this.dependencies.model.balance;
   }
 
   useReels(reels: ReelSpinner): void {
@@ -77,22 +97,15 @@ export class RoundFlow implements RoundControls {
     if (!this.canSpin) {
       return;
     }
-    const reels = this.requireReels();
-    const { model, resultSource } = this.dependencies;
-    const { bet } = model;
-    const balanceBefore = model.balance;
-    model.setBalance(balanceBefore - bet);
-    model.setLastWin(0);
-    this.machine.changeTo('spinning');
-    reels.start();
-    let result: RoundResult;
-    try {
-      result = checkResult(await resultSource.play({ bet }));
-    } catch (error) {
-      await this.fail(error, { balance: balanceBefore, betReturned: true });
+    const { bet } = this.dependencies.model;
+    await this.play({ bet }, bet, true);
+  }
+
+  async buy({ mode, cost }: BoughtRound): Promise<void> {
+    if (!isMinorUnits(cost) || !this.canBuy(cost)) {
       return;
     }
-    await this.present(result);
+    await this.play({ bet: this.dependencies.model.bet, mode }, cost, false);
   }
 
   /** Stop button: hurries the reels while spinning, skips the step on screen while presenting. */
@@ -104,6 +117,33 @@ export class RoundFlow implements RoundControls {
     if (this.state === 'presenting') {
       this.dependencies.player.skip();
     }
+  }
+
+  /**
+   * Takes `cost`, asks the source for the round and plays it. The reels of a spin start at once,
+   * so they turn while the request is on its way.
+   */
+  private async play(request: RoundRequest, cost: number, spinReels: boolean): Promise<void> {
+    const reels = this.requireReels();
+    const { model, resultSource } = this.dependencies;
+    const balanceBefore = model.balance;
+    model.setBalance(balanceBefore - cost);
+    model.setLastWin(0);
+    this.machine.changeTo('spinning');
+    if (spinReels) {
+      reels.start();
+    }
+    let result: RoundResult;
+    try {
+      result = checkResult(await resultSource.play(request));
+    } catch (error) {
+      await this.fail(error, { balance: balanceBefore, betReturned: true });
+      return;
+    }
+    if (!spinReels) {
+      this.machine.changeTo('presenting');
+    }
+    await this.present(result);
   }
 
   private async present(result: RoundResult): Promise<void> {

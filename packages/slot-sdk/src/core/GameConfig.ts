@@ -2,6 +2,7 @@ import type { ColorSource } from 'pixi.js';
 import type { LoadingScreenStyle } from '../assets/LoadingScreen';
 import type { WinTiming } from '../flow/winSteps';
 import type { HudStyle } from '../ui/Hud';
+import type { PopupStyle } from '../ui/Popup';
 import type { BigWinTier } from '../wins/bigWinTier';
 import type { WinStyle } from '../wins/WinStyle';
 
@@ -19,6 +20,7 @@ export interface GameConfig {
   /** How wins are shown. */
   wins: WinPresentationConfig;
   hud: HudStyle;
+  popup: PopupStyle;
 }
 
 export interface WinPresentationConfig {

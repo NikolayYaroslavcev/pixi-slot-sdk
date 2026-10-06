@@ -31,7 +31,12 @@ export class Button {
     this.label = new Text({
       text,
       anchor: 0.5,
-      style: { fill: style.textColor, fontFamily: style.fontFamily, fontSize: style.fontSize },
+      style: {
+        fill: style.textColor,
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        align: 'center',
+      },
     });
     this.content.addChild(background, this.label);
     this.view.addChild(this.content);

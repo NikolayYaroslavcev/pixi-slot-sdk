@@ -10,7 +10,8 @@ export interface PlayedRound {
   readonly steps: readonly OctoVaultStep[];
   /** Everything the round won, free spins included, minor units. */
   readonly totalWin: number;
-  readonly base: SpinResult;
+  /** The paid spin; absent in a bought round, which is free spins only. */
+  readonly base?: SpinResult;
   /** Present when the Scatters started free spins. */
   readonly freeSpins?: FreeSpinsSeries;
 }

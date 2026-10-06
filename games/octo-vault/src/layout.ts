@@ -1,13 +1,14 @@
 import type { HudNodeName, LayoutConfig } from 'slot-sdk';
 
 /** Objects the layout places. Both variants must describe each of them. */
-type NodeName = 'title' | 'reels' | 'freeSpinsCount' | 'freeSpinsWin' | HudNodeName;
+type NodeName = 'title' | 'reels' | 'freeSpinsCount' | 'freeSpinsWin' | 'bonusBuy' | HudNodeName;
 
 const center = { x: 0.5, y: 0.5 };
 
 /**
  * Where the scene objects go, in design coordinates of each variant.
  * Landscape: the reels in the middle, Spin to their right, balance, bet and win in a row below.
+ * Bonus Buy sits under Spin in landscape and next to it in portrait.
  * Free spins put their counter and series win left of the reels in landscape and on both sides
  * of the title in portrait.
  * Portrait: the reels in the upper half, the values below them and a large Spin
@@ -24,6 +25,7 @@ export const layout: LayoutConfig<NodeName> = {
       freeSpinsCount: { x: 255, y: 440 },
       freeSpinsWin: { x: 255, y: 590 },
       spinButton: { x: 1665, y: 515 },
+      bonusBuy: { x: 1665, y: 760 },
       message: { x: 960, y: 918 },
       balance: { x: 330, y: 1005 },
       bet: { x: 960, y: 1005 },
@@ -43,6 +45,7 @@ export const layout: LayoutConfig<NodeName> = {
       win: { x: 820, y: 1335, scale: 1.15 },
       bet: { x: 540, y: 1485, scale: 1.1 },
       spinButton: { x: 540, y: 1720, scale: 1.3 },
+      bonusBuy: { x: 890, y: 1720 },
     },
   },
 };
