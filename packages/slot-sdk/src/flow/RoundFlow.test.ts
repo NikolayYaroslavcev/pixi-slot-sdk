@@ -221,7 +221,7 @@ describe('RoundFlow', () => {
   });
 
   describe('a bought round', () => {
-    const bought = { mode: 'bonus', cost: 500 };
+    const bought = { mode: 'feature', cost: 500 };
 
     it('takes its cost instead of the bet and sends its mode', async () => {
       const pending = createPendingResult();
@@ -229,7 +229,7 @@ describe('RoundFlow', () => {
 
       const round = flow.buy(bought);
       expect(model.balance).toBe(500);
-      expect(resultSource.play).toHaveBeenCalledWith({ bet: 100, mode: 'bonus' });
+      expect(resultSource.play).toHaveBeenCalledWith({ bet: 100, mode: 'feature' });
 
       pending.answer(wonRound);
       await round;
@@ -257,7 +257,7 @@ describe('RoundFlow', () => {
 
       expect(flow.canBuy(1000)).toBe(true);
       expect(flow.canBuy(1001)).toBe(false);
-      await flow.buy({ mode: 'bonus', cost: 1001 });
+      await flow.buy({ mode: 'feature', cost: 1001 });
       expect(resultSource.play).not.toHaveBeenCalled();
       expect(model.balance).toBe(1000);
 

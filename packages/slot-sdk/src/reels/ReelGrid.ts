@@ -60,7 +60,7 @@ export class ReelGrid<SymbolId extends string> {
     return reel;
   }
 
-  /** The symbol entity in the cell. Game components such as a multiplier go on it. */
+  /** The symbol entity in the cell. Components a game adds to a symbol go on it. */
   symbolEntity(position: CellPosition): Entity {
     const symbol = this.cells[position.reelIndex]?.[position.rowIndex];
     if (symbol === undefined) {

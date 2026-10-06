@@ -39,7 +39,7 @@ const spinKeys = new Set(['Space', 'Enter']);
 /** The part of the HUD that features see. */
 export interface HudControls {
   /**
-   * Adds a button in the look of the HUD, e.g. to buy a bonus. The layout places it as the node
+   * Adds a button in the look of the HUD, e.g. to buy a feature. The layout places it as the node
    * `nodeName`, which the game's `layout.ts` describes. The feature decides what it does
    * and when it is enabled.
    */

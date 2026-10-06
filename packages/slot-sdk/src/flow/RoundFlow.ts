@@ -22,7 +22,7 @@ const roundTransitions: Transitions<RoundState> = {
   presenting: ['idle'],
 };
 
-/** A round the player buys instead of spinning, e.g. straight into a bonus. */
+/** A round the player buys instead of spinning, e.g. straight into a feature. */
 export interface BoughtRound {
   /** Sent to the result source as `RoundRequest.mode`. */
   mode: string;

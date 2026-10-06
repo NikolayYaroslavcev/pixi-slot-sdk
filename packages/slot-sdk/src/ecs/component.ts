@@ -11,7 +11,7 @@ export interface ComponentType<Data> {
 
 /**
  * Declares a component. Call it once per component, at module level:
- * `export const Multiplier = defineComponent<{ value: number }>('Multiplier');`
+ * `export const Shield = defineComponent<{ hits: number }>('Shield');`
  */
 export function defineComponent<Data>(name: string): ComponentType<Data> {
   return { name };
