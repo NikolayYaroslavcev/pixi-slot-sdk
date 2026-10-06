@@ -2,7 +2,8 @@ import { createSlotGame, type ResultSource } from 'slot-sdk';
 import { assets } from './assets';
 import { gameConfig } from './config/game.config';
 import { layout } from './layout';
-import { coreDemo } from './scene/coreDemo';
+import { reels } from './scene/reels';
+import { scenery } from './scene/scenery';
 
 // Nothing starts a round yet. The mock result source replaces this placeholder.
 const resultSource: ResultSource = {
@@ -14,5 +15,5 @@ await createSlotGame({
   assets,
   layout,
   resultSource,
-  features: [coreDemo()],
+  features: [scenery(), reels()],
 }).start();

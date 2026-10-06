@@ -1,4 +1,5 @@
 import type { AssetManifest } from 'slot-sdk';
+import type { SymbolId } from './config/symbols';
 
 /** Every resource of the game. Files live in `public/assets/`. */
 export const assets = {
@@ -17,7 +18,7 @@ export const assets = {
     anchor: { color: '#d6894a', label: 'Anchor' },
     chest: { color: '#c9a23a', label: 'Chest' },
     crown: { color: '#e0573f', label: 'Crown' },
-    wild: { color: '#8e3fd6', label: 'WILD' },
-    scatter: { color: '#e8c547', label: 'KEY' },
+    octopus: { color: '#8e3fd6', label: 'WILD' },
+    key: { color: '#e8c547', label: 'KEY' },
   },
-} satisfies AssetManifest;
+} satisfies AssetManifest<SymbolId>;
