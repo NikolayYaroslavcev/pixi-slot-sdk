@@ -7,14 +7,14 @@ export type SymbolTier = 'low' | 'high' | 'wild' | 'scatter';
  * the paytable are checked against it.
  */
 export const symbols = {
-  shell: { tier: 'low' },
-  starfish: { tier: 'low' },
-  seahorse: { tier: 'low' },
-  fish: { tier: 'low' },
-  pearl: { tier: 'high' },
+  jack: { tier: 'low' },
+  queen: { tier: 'low' },
+  king: { tier: 'low' },
+  ace: { tier: 'low' },
+  bottle: { tier: 'high' },
   anchor: { tier: 'high' },
-  chest: { tier: 'high' },
-  crown: { tier: 'high' },
+  wheel: { tier: 'high' },
+  skull: { tier: 'high' },
   octopus: { tier: 'wild' },
   key: { tier: 'scatter' },
 } as const satisfies Record<string, { tier: SymbolTier }>;

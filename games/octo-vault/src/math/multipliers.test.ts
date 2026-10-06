@@ -70,8 +70,8 @@ describe('Wild multipliers on lines', () => {
     const wild = { reelIndex: 2, rowIndex: 0 };
     const grid = gridWithLine(
       12,
-      ['pearl', 'pearl'],
-      gridWithLine(0, ['pearl', 'pearl', 'octopus']),
+      ['bottle', 'bottle'],
+      gridWithLine(0, ['bottle', 'bottle', 'octopus']),
     );
     const outcome = evaluateSpin(grid, bet, multipliersOf(grid, [[2, 0, 2]]));
     const throughWild = outcome.wins.filter((win) => includesCell(win.cells, wild));

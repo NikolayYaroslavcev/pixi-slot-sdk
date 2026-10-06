@@ -8,86 +8,86 @@ import type { SymbolGrid } from '../config/symbols';
 export const scenarios = {
   /** Reel 1 has only low symbols, reel 2 only high ones and no Octopus can grab, so no line pays. */
   nowin: [
-    ['shell', 'starfish', 'seahorse', 'fish'],
-    ['pearl', 'anchor', 'chest', 'crown'],
-    ['fish', 'key', 'shell', 'starfish'],
-    ['crown', 'chest', 'pearl', 'anchor'],
-    ['seahorse', 'fish', 'starfish', 'shell'],
+    ['jack', 'queen', 'king', 'ace'],
+    ['bottle', 'anchor', 'wheel', 'skull'],
+    ['ace', 'key', 'jack', 'queen'],
+    ['skull', 'wheel', 'bottle', 'anchor'],
+    ['king', 'ace', 'queen', 'jack'],
   ],
   /** One line: 3 Anchors on the second row. */
   win: [
-    ['shell', 'anchor', 'seahorse', 'fish'],
-    ['pearl', 'anchor', 'chest', 'crown'],
-    ['starfish', 'anchor', 'fish', 'shell'],
-    ['chest', 'seahorse', 'crown', 'pearl'],
-    ['fish', 'shell', 'starfish', 'key'],
+    ['jack', 'anchor', 'king', 'ace'],
+    ['bottle', 'anchor', 'wheel', 'skull'],
+    ['queen', 'anchor', 'ace', 'jack'],
+    ['wheel', 'king', 'skull', 'bottle'],
+    ['ace', 'jack', 'queen', 'key'],
   ],
-  /** Two lines: 4 Crowns on the top row and 3 Fish on the bottom row. */
+  /** Two lines: 4 Skulls on the top row and 3 Ace on the bottom row. */
   multiwin: [
-    ['crown', 'starfish', 'shell', 'fish'],
-    ['crown', 'pearl', 'anchor', 'fish'],
-    ['crown', 'seahorse', 'chest', 'fish'],
-    ['crown', 'shell', 'pearl', 'starfish'],
-    ['pearl', 'chest', 'seahorse', 'anchor'],
+    ['skull', 'queen', 'jack', 'ace'],
+    ['skull', 'bottle', 'anchor', 'ace'],
+    ['skull', 'king', 'wheel', 'ace'],
+    ['skull', 'jack', 'bottle', 'queen'],
+    ['bottle', 'wheel', 'king', 'anchor'],
   ],
   /** Two Octopus Wilds complete 5 Chests on the second row and 4 Shells on another line. */
   wild: [
-    ['seahorse', 'chest', 'shell', 'starfish'],
-    ['anchor', 'octopus', 'pearl', 'fish'],
-    ['shell', 'chest', 'crown', 'seahorse'],
-    ['fish', 'octopus', 'starfish', 'pearl'],
-    ['crown', 'chest', 'key', 'shell'],
+    ['king', 'wheel', 'jack', 'queen'],
+    ['anchor', 'octopus', 'bottle', 'ace'],
+    ['jack', 'wheel', 'skull', 'king'],
+    ['ace', 'octopus', 'queen', 'bottle'],
+    ['skull', 'wheel', 'key', 'jack'],
   ],
   /**
    * Two Octopuses next to almost-lines of Anchors and Pearls: the Grab turns some of them
    * into winning lines with multipliers. Which ones depends on the seed.
    */
   tentacles: [
-    ['anchor', 'pearl', 'shell', 'fish'],
-    ['anchor', 'octopus', 'pearl', 'chest'],
-    ['starfish', 'anchor', 'pearl', 'shell'],
-    ['fish', 'pearl', 'octopus', 'anchor'],
-    ['chest', 'shell', 'seahorse', 'anchor'],
+    ['anchor', 'bottle', 'jack', 'ace'],
+    ['anchor', 'octopus', 'bottle', 'wheel'],
+    ['queen', 'anchor', 'bottle', 'jack'],
+    ['ace', 'bottle', 'octopus', 'anchor'],
+    ['wheel', 'jack', 'king', 'anchor'],
   ],
   /** 3 Key Scatters and no line win: 8 free spins. */
   scatter: [
-    ['key', 'shell', 'pearl', 'fish'],
-    ['anchor', 'key', 'crown', 'pearl'],
-    ['seahorse', 'fish', 'starfish', 'shell'],
-    ['key', 'crown', 'octopus', 'anchor'],
-    ['starfish', 'pearl', 'shell', 'seahorse'],
+    ['key', 'jack', 'bottle', 'ace'],
+    ['anchor', 'key', 'skull', 'bottle'],
+    ['king', 'ace', 'queen', 'jack'],
+    ['key', 'skull', 'octopus', 'anchor'],
+    ['queen', 'bottle', 'jack', 'king'],
   ],
   /** 4 Key Scatters: 10 free spins. */
   freespins4: [
-    ['key', 'shell', 'pearl', 'fish'],
-    ['anchor', 'key', 'crown', 'pearl'],
-    ['seahorse', 'fish', 'key', 'shell'],
-    ['chest', 'crown', 'starfish', 'anchor'],
-    ['starfish', 'pearl', 'shell', 'key'],
+    ['key', 'jack', 'bottle', 'ace'],
+    ['anchor', 'key', 'skull', 'bottle'],
+    ['king', 'ace', 'key', 'jack'],
+    ['wheel', 'skull', 'queen', 'anchor'],
+    ['queen', 'bottle', 'jack', 'key'],
   ],
   /** A Key Scatter on every reel: 12 free spins. */
   freespins5: [
-    ['key', 'shell', 'pearl', 'fish'],
-    ['anchor', 'key', 'crown', 'pearl'],
-    ['seahorse', 'fish', 'key', 'shell'],
-    ['chest', 'crown', 'starfish', 'key'],
-    ['key', 'pearl', 'shell', 'seahorse'],
+    ['key', 'jack', 'bottle', 'ace'],
+    ['anchor', 'key', 'skull', 'bottle'],
+    ['king', 'ace', 'key', 'jack'],
+    ['wheel', 'skull', 'queen', 'key'],
+    ['key', 'bottle', 'jack', 'king'],
   ],
-  /** 5 Crowns on the top row and 3 Fish on the bottom: 15.3 bets, a Big Win below Mega Win. */
+  /** 5 Skulls on the top row and 3 Ace on the bottom: 15.3 bets, a Big Win below Mega Win. */
   bigwin: [
-    ['crown', 'shell', 'pearl', 'fish'],
-    ['crown', 'starfish', 'anchor', 'fish'],
-    ['crown', 'fish', 'key', 'fish'],
-    ['crown', 'seahorse', 'shell', 'anchor'],
-    ['crown', 'pearl', 'starfish', 'seahorse'],
+    ['skull', 'jack', 'bottle', 'ace'],
+    ['skull', 'queen', 'anchor', 'ace'],
+    ['skull', 'ace', 'key', 'ace'],
+    ['skull', 'king', 'jack', 'anchor'],
+    ['skull', 'bottle', 'queen', 'king'],
   ],
-  /** Crowns and Wilds almost everywhere: ten lines at once, over 100 bets. */
+  /** Skulls and Wilds almost everywhere: ten lines at once, over 100 bets. */
   megawin: [
-    ['crown', 'crown', 'crown', 'chest'],
-    ['crown', 'octopus', 'crown', 'chest'],
-    ['crown', 'crown', 'octopus', 'chest'],
-    ['crown', 'crown', 'crown', 'chest'],
-    ['crown', 'anchor', 'crown', 'chest'],
+    ['skull', 'skull', 'skull', 'wheel'],
+    ['skull', 'octopus', 'skull', 'wheel'],
+    ['skull', 'skull', 'octopus', 'wheel'],
+    ['skull', 'skull', 'skull', 'wheel'],
+    ['skull', 'anchor', 'skull', 'wheel'],
   ],
 } as const satisfies Record<string, SymbolGrid>;
 

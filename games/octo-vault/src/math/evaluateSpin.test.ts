@@ -29,8 +29,8 @@ describe('evaluateSpin', () => {
   it('sums the wins of every line into the total win', () => {
     const grid = gridWithLine(
       3,
-      ['fish', 'fish', 'fish'],
-      gridWithLine(0, ['crown', 'crown', 'crown']),
+      ['ace', 'ace', 'ace'],
+      gridWithLine(0, ['skull', 'skull', 'skull']),
     );
 
     const outcome = evaluateSpin(grid, 100);
@@ -42,8 +42,8 @@ describe('evaluateSpin', () => {
   it('reports Scatters together with line wins', () => {
     const grid = gridWithLine(
       1,
-      ['key', 'shell', 'key', 'pearl', 'key'],
-      gridWithLine(0, ['chest', 'chest', 'chest']),
+      ['key', 'jack', 'key', 'bottle', 'key'],
+      gridWithLine(0, ['wheel', 'wheel', 'wheel']),
     );
 
     const outcome = evaluateSpin(grid, 100);
