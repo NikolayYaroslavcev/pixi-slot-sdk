@@ -1,5 +1,5 @@
 import type { ReelGridSize, ReelGridViewOptions, ReelMotionSettings } from 'slot-sdk';
-import type { SymbolId } from './symbols';
+import type { SymbolGrid, SymbolId } from './symbols';
 
 interface ReelsConfig {
   size: ReelGridSize;
@@ -7,7 +7,7 @@ interface ReelsConfig {
   view: ReelGridViewOptions;
   motion: ReelMotionSettings;
   /** What the field shows before the first spin, one array per reel from the top. */
-  initialSymbols: readonly (readonly SymbolId[])[];
+  initialSymbols: SymbolGrid;
   /**
    * The symbols each reel shows while it spins, in the order they pass from top to bottom.
    * A strip repeats endlessly, its last symbol is followed by the first.

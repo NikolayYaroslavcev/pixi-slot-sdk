@@ -20,3 +20,24 @@ export const symbols = {
 } as const satisfies Record<string, { tier: SymbolTier }>;
 
 export type SymbolId = keyof typeof symbols;
+
+/** Symbols that pay on lines by themselves: every symbol except the Wild and the Scatter. */
+export type RegularSymbolId = {
+  [Id in SymbolId]: (typeof symbols)[Id]['tier'] extends 'low' | 'high' ? Id : never;
+}[SymbolId];
+
+/** A whole field: one array of symbols per reel, from the top. */
+export type SymbolGrid = readonly (readonly SymbolId[])[];
+
+export function isRegularSymbol(symbolId: SymbolId): symbolId is RegularSymbolId {
+  const { tier } = symbols[symbolId];
+  return tier === 'low' || tier === 'high';
+}
+
+export function isWild(symbolId: SymbolId): boolean {
+  return symbols[symbolId].tier === 'wild';
+}
+
+export function isScatter(symbolId: SymbolId): boolean {
+  return symbols[symbolId].tier === 'scatter';
+}
