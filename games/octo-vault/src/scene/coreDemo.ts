@@ -1,4 +1,4 @@
-import { Container, Graphics, Sprite, Text } from 'pixi.js';
+import { Assets, Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
 import { easeInOutQuad, tween, wait, type Feature, type GameContext } from 'slot-sdk';
 import { assets } from '../assets';
 
@@ -15,11 +15,14 @@ const SYMBOLS_TOP = 12;
 /**
  * Temporary scene that shows the SDK core at work until the reels exist:
  * a rectangle swings with `tween`, and every swing adds the bet to the last win,
- * which reaches the label through a model event. Above it, every symbol placeholder.
+ * which reaches the label through a model event. Above it, every symbol placeholder,
+ * and behind everything the background from the `game` bundle.
  */
 export function coreDemo(): Feature {
   return {
     install(context) {
+      const background = new Sprite(Assets.get<Texture>('background'));
+      context.layers.background.addChild(background);
       const symbols = createSymbolStrip(context);
       const group = new Container();
       const rectangle = new Graphics().rect(-120, -80, 240, 160).fill('#f2b134');
@@ -33,6 +36,8 @@ export function coreDemo(): Feature {
       context.layers.scene.addChild(symbols, group);
 
       context.layout.onResize((width, height) => {
+        // Stretched to the screen for now. The layout stage replaces this with cover scaling.
+        background.setSize(width, height);
         symbols.position.set((width - symbols.width) / 2, SYMBOLS_TOP);
         const symbolsBottom = symbols.y + symbols.height;
         group.position.set(width / 2, symbolsBottom + (height - symbolsBottom) / 2);

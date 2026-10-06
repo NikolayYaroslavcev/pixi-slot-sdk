@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d4a6b"/>
+      <stop offset="0.55" stop-color="#062033"/>
+      <stop offset="1" stop-color="#031321"/>
+    </linearGradient>
+    <linearGradient id="ray" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3ee6c4" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#3ee6c4" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#water)"/>
+  <g fill="url(#ray)">
+    <polygon points="300,0 380,0 260,760 120,760"/>
+    <polygon points="480,0 540,0 560,820 440,820"/>
+    <polygon points="660,0 730,0 900,700 780,700"/>
+  </g>
+</svg>

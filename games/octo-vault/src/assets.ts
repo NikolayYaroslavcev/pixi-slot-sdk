@@ -3,7 +3,10 @@ import type { AssetManifest } from 'slot-sdk';
 /** Every resource of the game. Files live in `public/assets/`. */
 export const assets = {
   preload: [{ alias: 'logo', src: 'assets/logo.svg' }],
-  game: [{ alias: 'titleFont', src: 'assets/fonts/LilitaOne-Regular.ttf', family: 'Lilita One' }],
+  game: [
+    { alias: 'background', src: 'assets/background.svg' },
+    { alias: 'titleFont', src: 'assets/fonts/LilitaOne-Regular.ttf', family: 'Lilita One' },
+  ],
   // Placeholder art until the final symbols are drawn. Lower symbols are cool, higher ones warm.
   symbols: {
     shell: { color: '#3d8fb8', label: 'Shell' },
