@@ -25,6 +25,7 @@ describe('evaluateLines', () => {
           { reelIndex: 2, rowIndex: 0 },
         ],
         path: [0, 1, 2, 3, 4].map((reelIndex) => ({ reelIndex, rowIndex: 0 })),
+        multiplier: 1,
         amount: 100,
       },
     ]);

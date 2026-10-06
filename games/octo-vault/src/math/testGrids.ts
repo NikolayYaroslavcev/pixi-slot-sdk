@@ -1,3 +1,4 @@
+import type { CellPosition, Rng } from 'slot-sdk';
 import { paylines } from '../config/paylines';
 import type { SymbolGrid, SymbolId } from '../config/symbols';
 
@@ -35,4 +36,30 @@ export function gridWithLine(
 /** A field of one symbol in every cell. */
 export function gridOf(symbolId: SymbolId): SymbolGrid {
   return noWinGrid.map((column) => column.map(() => symbolId));
+}
+
+/** `grid` with `symbolId` put in the cell. */
+export function withSymbol(
+  grid: SymbolGrid,
+  { reelIndex, rowIndex }: CellPosition,
+  symbolId: SymbolId,
+): SymbolGrid {
+  return grid.map((column, reel) =>
+    reel === reelIndex ? column.map((cell, row) => (row === rowIndex ? symbolId : cell)) : column,
+  );
+}
+
+/** An Rng that returns `values` in turn, so a test decides every random choice. */
+export function scriptedRng(values: readonly number[]): Rng {
+  let index = 0;
+  return {
+    next() {
+      const value = values[index];
+      if (value === undefined) {
+        throw new Error(`scriptedRng: only ${String(values.length)} values were given`);
+      }
+      index += 1;
+      return value;
+    },
+  };
 }

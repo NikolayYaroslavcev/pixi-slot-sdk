@@ -8,6 +8,7 @@ import {
   type SymbolGrid,
   type SymbolId,
 } from '../config/symbols';
+import { multiplierAt, type MultiplierGrid } from './field';
 
 /** A paying line. `cells` are only the matching cells, from the first reel. */
 export interface LineWin extends Win {
@@ -17,6 +18,8 @@ export interface LineWin extends Win {
   readonly symbolId: RegularSymbolId;
   /** Matching symbols in a row from the first reel. */
   readonly count: MatchCount;
+  /** The pay of the line is multiplied by it: the sum of the Wild multipliers on its cells, or 1. */
+  readonly multiplier: number;
 }
 
 /** What a line shows from the left: the symbol it pays as and how many cells match it. */
@@ -29,26 +32,40 @@ interface LineMatch {
  * Wins of every payline on `grid` for a total `bet` in minor units.
  * A line pays for equal symbols in a row from the first reel, from 3 of them.
  * The Wild stands for any regular symbol, the Scatter never pays on a line.
+ * Multipliers of the Wilds among the matching cells add up and multiply the line once.
  */
-export function evaluateLines(grid: SymbolGrid, bet: number): LineWin[] {
+export function evaluateLines(
+  grid: SymbolGrid,
+  bet: number,
+  multipliers: MultiplierGrid = [],
+): LineWin[] {
   return paylines.flatMap((line, lineIndex) => {
     const { symbolId, count } = matchLine(grid, line);
     if (count < minimumMatch) {
       return [];
     }
     const matchCount = count as MatchCount;
+    const cells = lineCells(line).slice(0, count);
+    const multiplier = lineMultiplier(multipliers, cells);
     return [
       {
         lineIndex,
         symbolId,
         count: matchCount,
-        cells: lineCells(line).slice(0, count),
+        multiplier,
+        cells,
         path: lineCells(line),
         // Pays are fractions of the bet; money is rounded to whole minor units once, here.
-        amount: Math.round(bet * paytable[symbolId][matchCount]),
+        amount: Math.round(bet * paytable[symbolId][matchCount] * multiplier),
       },
     ];
   });
+}
+
+/** Multipliers on the matching cells add up: ×2 and ×3 make ×5. Without any, the line pays ×1. */
+function lineMultiplier(multipliers: MultiplierGrid, cells: readonly CellPosition[]): number {
+  const sum = cells.reduce((total, cell) => total + multiplierAt(multipliers, cell), 0);
+  return Math.max(sum, 1);
 }
 
 /**

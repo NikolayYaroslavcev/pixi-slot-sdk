@@ -34,6 +34,8 @@ export interface Win {
    * not a line, e.g. scattered symbols: such a win is shown by its cells alone.
    */
   readonly path?: readonly CellPosition[];
+  /** A few characters shown before the amount when the win is shown alone, e.g. "×5". */
+  readonly caption?: string;
 }
 
 /** Show the wins of the field that has just been revealed. */

@@ -11,6 +11,7 @@ export type { GameEvents } from './core/GameEvents';
 export type { GameModel } from './core/GameModel';
 
 export type { World, System, Entity } from './ecs/World';
+export { defineComponent, type ComponentType } from './ecs/component';
 export type { CellPosition } from './reels/components';
 export { ReelGrid, type ReelGridSize } from './reels/ReelGrid';
 export {
@@ -52,6 +53,7 @@ export type {
   StandardStep,
   Win,
 } from './math/round';
+export { createRng, randomIndex, pickWeighted, type Rng, type Weighted } from './math/rng';
 
 export type { AssetEntry, AssetManifest, SymbolPlaceholder } from './assets/AssetManifest';
 export type { LoadedAssets } from './assets/LoadedAssets';

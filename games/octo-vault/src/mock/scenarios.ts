@@ -6,12 +6,12 @@ import type { SymbolGrid } from '../config/symbols';
  * the mock evaluates every field with the game math.
  */
 export const scenarios = {
-  /** Reel 1 has only low symbols and reel 2 only high ones, so no line can pay. */
+  /** Reel 1 has only low symbols, reel 2 only high ones and no Octopus can grab, so no line pays. */
   nowin: [
     ['shell', 'starfish', 'seahorse', 'fish'],
     ['pearl', 'anchor', 'chest', 'crown'],
     ['fish', 'key', 'shell', 'starfish'],
-    ['crown', 'octopus', 'pearl', 'anchor'],
+    ['crown', 'chest', 'pearl', 'anchor'],
     ['seahorse', 'fish', 'starfish', 'shell'],
   ],
   /** One line: 3 Anchors on the second row. */
@@ -37,6 +37,17 @@ export const scenarios = {
     ['shell', 'chest', 'crown', 'seahorse'],
     ['fish', 'octopus', 'starfish', 'pearl'],
     ['crown', 'chest', 'key', 'shell'],
+  ],
+  /**
+   * Two Octopuses next to almost-lines of Anchors and Pearls: the Grab turns some of them
+   * into winning lines with multipliers. Which ones depends on the seed.
+   */
+  tentacles: [
+    ['anchor', 'pearl', 'shell', 'fish'],
+    ['anchor', 'octopus', 'pearl', 'chest'],
+    ['starfish', 'anchor', 'pearl', 'shell'],
+    ['fish', 'pearl', 'octopus', 'anchor'],
+    ['chest', 'shell', 'seahorse', 'anchor'],
   ],
   /** 3 Key Scatters and no line win. Free spins come in stage 10. */
   scatter: [
@@ -76,6 +87,7 @@ export const playlist: readonly FieldScenario[] = [
   'multiwin',
   'scatter',
   'wild',
+  'tentacles',
   'nowin',
   'bigwin',
   'megawin',

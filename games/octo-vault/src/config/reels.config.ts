@@ -4,6 +4,7 @@ import type {
   ReelGridViewOptions,
   ReelMotionSettings,
 } from 'slot-sdk';
+import type { MultiplierBadgeStyle } from '../scene/MultiplierBadges';
 import type { SymbolGrid, SymbolId } from './symbols';
 
 interface ReelsConfig {
@@ -13,6 +14,8 @@ interface ReelsConfig {
   motion: ReelMotionSettings;
   /** How winning symbols stand out while wins are shown. */
   highlight: HighlightStyle;
+  /** The multiplier of a Wild, in the corner of its cell. */
+  multiplierBadge: MultiplierBadgeStyle;
   /** What the field shows before the first spin, one array per reel from the top. */
   initialSymbols: SymbolGrid;
   /**
@@ -51,6 +54,13 @@ export const reelsConfig: ReelsConfig = {
   },
   // Dimmed symbols stay recognisable; a winning one breathes about once a second.
   highlight: { dimBrightness: 0.3, fadeMs: 220, pulseScale: 0.1, pulseMs: 900 },
+  multiplierBadge: {
+    fontFamily: 'Lilita One',
+    fontSize: 54,
+    color: '#ffd23f',
+    outlineColor: '#062033',
+    offset: { x: 48, y: 52 },
+  },
   // Every symbol once or twice, the Octopus only on reels 2–4 as the rules allow.
   initialSymbols: [
     ['shell', 'pearl', 'starfish', 'key'],

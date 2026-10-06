@@ -115,7 +115,8 @@ export class FieldWinView implements WinField {
 
   private showAmount(win: Win): void {
     const { amountFontSize, outlineColor, lineWidth } = this.style;
-    this.amountText.text = formatMoney(win.amount);
+    const money = formatMoney(win.amount);
+    this.amountText.text = win.caption ? `${win.caption}  ${money}` : money;
     const height = amountFontSize * 1.3;
     const width = this.amountText.width + amountFontSize;
     this.amountPill

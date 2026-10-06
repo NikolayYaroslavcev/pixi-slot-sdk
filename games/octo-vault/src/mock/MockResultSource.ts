@@ -1,6 +1,11 @@
-import type { ResultSource, RoundRequest, RoundResult, StandardStep } from 'slot-sdk';
-import type { SymbolGrid } from '../config/symbols';
-import { evaluateSpin, type SpinOutcome } from '../math/evaluateSpin';
+import {
+  createRng,
+  type ResultSource,
+  type Rng,
+  type RoundRequest,
+  type RoundResult,
+} from 'slot-sdk';
+import { playSpin, spinSteps } from '../math/playSpin';
 import { playlist, scenarios, type ScenarioName } from './scenarios';
 
 export interface MockResultSourceOptions {
@@ -10,18 +15,22 @@ export interface MockResultSourceOptions {
   latencyMs: number;
   /** Plays only this scenario. Without it the mock goes through `playlist`. */
   scenario?: ScenarioName;
+  /** Seed of every random choice of the rules: the same seed plays the same rounds. */
+  seed: number;
 }
 
 /**
- * Stands in for the game server. It keeps the wallet, picks a fixed field, evaluates it
- * with the game math and answers with a round script. Same scenario, same round.
+ * Stands in for the game server. It keeps the wallet, picks a fixed field, plays it
+ * with the game rules and answers with a round script. Same scenario and seed, same round.
  */
 export class MockResultSource implements ResultSource {
   private balance: number;
   private roundCount = 0;
+  private readonly rng: Rng;
 
   constructor(private readonly options: MockResultSourceOptions) {
     this.balance = options.initialBalance;
+    this.rng = createRng(options.seed);
   }
 
   async play(request: RoundRequest): Promise<RoundResult> {
@@ -33,10 +42,11 @@ export class MockResultSource implements ResultSource {
     if (request.bet > this.balance) {
       throw new Error('MockResultSource: the bet is higher than the balance');
     }
-    const grid = scenarios[scenario];
-    const outcome = evaluateSpin(grid, request.bet);
-    this.balance += outcome.totalWin - request.bet;
-    return { steps: buildSteps(grid, outcome), totalWin: outcome.totalWin, balance: this.balance };
+    const spin = playSpin(scenarios[scenario], request.bet, this.rng);
+    const totalWin = spin.outcome.totalWin;
+    this.balance += totalWin - request.bet;
+    const steps = [...spinSteps(spin), { type: 'totalWin', amount: totalWin }];
+    return { steps, totalWin, balance: this.balance };
   }
 
   private nextScenario(): ScenarioName {
@@ -44,16 +54,6 @@ export class MockResultSource implements ResultSource {
     this.roundCount += 1;
     return this.options.scenario ?? fromPlaylist;
   }
-}
-
-/** The script of a base game round: stop the reels, show the wins if any, show the total. */
-function buildSteps(grid: SymbolGrid, outcome: SpinOutcome): StandardStep[] {
-  const steps: StandardStep[] = [{ type: 'reveal', grid }];
-  if (outcome.wins.length > 0) {
-    steps.push({ type: 'wins', wins: outcome.wins, amount: outcome.totalWin });
-  }
-  steps.push({ type: 'totalWin', amount: outcome.totalWin });
-  return steps;
 }
 
 function delay(ms: number): Promise<void> {

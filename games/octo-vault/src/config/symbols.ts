@@ -21,6 +21,9 @@ export const symbols = {
 
 export type SymbolId = keyof typeof symbols;
 
+/** The symbol a cell becomes when the Grab turns it into a Wild. */
+export const wildSymbol: SymbolId = 'octopus';
+
 /** Symbols that pay on lines by themselves: every symbol except the Wild and the Scatter. */
 export type RegularSymbolId = {
   [Id in SymbolId]: (typeof symbols)[Id]['tier'] extends 'low' | 'high' ? Id : never;

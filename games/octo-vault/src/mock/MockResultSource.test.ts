@@ -10,7 +10,7 @@ import { playlist, scenarioFromAddress, scenarios, type FieldScenario } from './
 const bet = 100;
 
 function createSource(scenario?: FieldScenario | 'error') {
-  return new MockResultSource({ initialBalance: 10_000, latencyMs: 0, scenario });
+  return new MockResultSource({ initialBalance: 10_000, latencyMs: 0, scenario, seed: 1 });
 }
 
 function stepTypes(result: RoundResult): string[] {
@@ -109,7 +109,13 @@ describe('MockResultSource', () => {
     expect(grids).toEqual(playlist.map((name) => scenarios[name]));
   });
 
-  it('gives the same round for the same scenario', async () => {
+  it('throws the tentacles of a landed Octopus before the wins', async () => {
+    const result = await createSource('tentacles').play({ bet });
+
+    expect(stepTypes(result).slice(0, 2)).toEqual(['reveal', 'tentacles']);
+  });
+
+  it('gives the same round for the same scenario and seed', async () => {
     expect(await createSource('wild').play({ bet })).toEqual(
       await createSource('wild').play({ bet }),
     );
@@ -123,7 +129,12 @@ describe('MockResultSource', () => {
   });
 
   it('rejects a bet above its balance', async () => {
-    const source = new MockResultSource({ initialBalance: 50, latencyMs: 0, scenario: 'win' });
+    const source = new MockResultSource({
+      initialBalance: 50,
+      latencyMs: 0,
+      scenario: 'win',
+      seed: 1,
+    });
 
     await expect(source.play({ bet })).rejects.toThrow('higher than the balance');
   });
@@ -134,6 +145,7 @@ describe('MockResultSource', () => {
       initialBalance: 10_000,
       latencyMs: 300,
       scenario: 'win',
+      seed: 1,
     });
     const answered = vi.fn();
     void source.play({ bet }).then(answered);
