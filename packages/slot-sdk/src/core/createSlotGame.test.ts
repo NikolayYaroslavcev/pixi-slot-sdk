@@ -1,16 +1,48 @@
 import { describe, expect, it } from 'vitest';
+import { hudNodeNames, type HudStyle } from '../ui/Hud';
 import type { GameConfig } from './GameConfig';
 import type { SlotGameOptions } from './SlotGame';
 import { createSlotGame } from './createSlotGame';
+
+const hud: HudStyle = {
+  fontFamily: 'Arial',
+  textColor: '#ffffff',
+  captionColor: '#cccccc',
+  buttonColor: '#336699',
+  buttonTextColor: '#ffffff',
+  captionFontSize: 20,
+  valueFontSize: 30,
+  messageFontSize: 24,
+  spinButton: { radius: 80, fontSize: 30 },
+  betButtons: { size: 60, fontSize: 30, offset: 100 },
+  texts: {
+    balance: 'BALANCE',
+    bet: 'BET',
+    win: 'WIN',
+    spin: 'SPIN',
+    stop: 'STOP',
+    skip: 'SKIP',
+    idle: 'Press SPIN',
+    spinning: 'Good luck',
+    wins: 'Win',
+    betReturned: 'Bet returned',
+    roundError: 'Error',
+    notEnoughBalance: 'Not enough balance',
+  },
+};
+
+const hudNodes = Object.fromEntries(hudNodeNames.map((name) => [name, { x: 0, y: 0 }]));
 
 function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
   return {
     config: {
       initialBalance: 10_000,
       initialBet: 100,
+      betLevels: [50, 100, 200],
       backgroundColor: '#000000',
       loadingScreen: { logo: 'logo', barColor: '#ffffff', textColor: '#ffffff' },
       presentation: { winsMs: 1000, totalWinMs: 500 },
+      hud,
       ...config,
     },
     assets: {
@@ -19,8 +51,8 @@ function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
       symbols: { low: { color: '#3366cc', label: 'Low' } },
     },
     layout: {
-      landscape: { width: 1920, height: 1080, nodes: {} },
-      portrait: { width: 1080, height: 1920, nodes: {} },
+      landscape: { width: 1920, height: 1080, nodes: hudNodes },
+      portrait: { width: 1080, height: 1920, nodes: hudNodes },
     },
     resultSource: { play: () => Promise.reject(new Error('not used')) },
   };
@@ -44,6 +76,25 @@ describe('createSlotGame', () => {
   it('lists every problem in one error', () => {
     expect(() => createSlotGame(createOptions({ initialBalance: -1, initialBet: 0 }))).toThrow(
       /initialBalance[\s\S]*initialBet/,
+    );
+  });
+
+  it('rejects bet levels that are not ascending or miss the initial bet', () => {
+    expect(() => createSlotGame(createOptions({ betLevels: [200, 100] }))).toThrow(
+      'config.betLevels must be positive integers in minor units, ascending, got [200, 100]',
+    );
+    expect(() => createSlotGame(createOptions({ betLevels: [50, 200] }))).toThrow(
+      'config.initialBet 100 must be one of config.betLevels',
+    );
+  });
+
+  it('rejects a layout without the HUD nodes', () => {
+    const options = createOptions();
+    const emptyVariant = { width: 1920, height: 1080, nodes: {} };
+    const layout = { landscape: emptyVariant, portrait: emptyVariant };
+
+    expect(() => createSlotGame({ ...options, layout })).toThrow(
+      'layout.landscape.nodes is missing the HUD node "spinButton"',
     );
   });
 

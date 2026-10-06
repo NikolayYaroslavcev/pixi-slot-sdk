@@ -1,12 +1,12 @@
 import { ReelGrid, ReelGridView, ReelMotionSystem, type Feature } from 'slot-sdk';
 import { reelsConfig } from '../config/reels.config';
 import type { SymbolId } from '../config/symbols';
-import { connectDebugSpin } from './debugSpin';
 
 /**
  * The 5 × 4 field. `ReelGrid` holds which symbol is in each cell as entities of the world,
  * `ReelMotionSystem` spins the reels, `ReelGridView` draws them in the `reels` layer.
  * The world updates the motion first, so the view draws each frame's final positions.
+ * The round flow gets the spinner: it starts the reels on Spin and lands them on each `reveal`.
  */
 export function reels(): Feature {
   return {
@@ -19,7 +19,7 @@ export function reels(): Feature {
       context.world.addSystem(view);
       context.layers.reels.addChild(view.container);
       context.layout.addNode('reels', view.container);
-      connectDebugSpin(context, grid, spinner);
+      context.round.useReels(spinner);
     },
   };
 }

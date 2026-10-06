@@ -28,6 +28,7 @@ export type {
   LayoutVariantName,
 } from './layout/LayoutConfig';
 export type { StepHandler, StepRegistry } from './flow/RoundPlayer';
+export type { HudNodeName } from './ui/Hud';
 export type {
   ResultSource,
   RoundRequest,
@@ -35,7 +36,6 @@ export type {
   RoundStep,
   RevealStep,
   WinsStep,
-  TotalWinStep,
   StandardStep,
   Win,
 } from './math/round';

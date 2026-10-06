@@ -19,6 +19,7 @@ const settings: ReelMotionSettings = {
   bounceMs: 150,
   startDelayMs: 40,
   stopDelayMs: 170,
+  quickStopDelayMs: 50,
 };
 const size = { reelCount: 3, rowCount: 2 };
 const strips: TestSymbol[][] = [
@@ -138,6 +139,56 @@ describe('ReelMotionSystem', () => {
     void system.stop(target);
     const { stops } = runSpin(system, events);
     expect(stops[0]?.ms).toBeLessThan(settings.decelerateMs + settings.bounceMs + 100);
+  });
+
+  it('hurries the stop: no minimumSpinMs, quickStopDelayMs apart, same landing', async () => {
+    const { events, grid, system } = createSystem();
+    system.start();
+    const done = system.stop(target);
+    system.hurry();
+    const { stops } = runSpin(system, events);
+    await done;
+    const [first, second] = stops.map((stop) => stop.ms);
+    expect(first).toBeLessThan(settings.minimumSpinMs + settings.decelerateMs);
+    expect((second ?? 0) - (first ?? 0)).toBeLessThan(settings.quickStopDelayMs + 45);
+    expect(grid.columns).toEqual(target);
+  });
+
+  it('applies a hurry that comes before stop() to the coming stop', () => {
+    const { events, system } = createSystem();
+    system.start();
+    system.hurry();
+    system.update(16);
+    void system.stop(target);
+    const { stops } = runSpin(system, events);
+    expect(stops[0]?.ms).toBeLessThan(settings.minimumSpinMs + settings.decelerateMs);
+  });
+
+  it('cancels a spin onto the field it started from', async () => {
+    const { events, grid, system } = createSystem();
+    const before = grid.columns;
+    system.start();
+    const cancelled = system.cancel();
+    runSpin(system, events);
+    await cancelled;
+    expect(grid.columns).toEqual(before);
+  });
+
+  it('lets a cancel wait for a stop that is already on its way', async () => {
+    const { events, grid, system } = createSystem();
+    system.start();
+    void system.stop(target);
+    const cancelled = system.cancel();
+    runSpin(system, events);
+    await cancelled;
+    expect(grid.columns).toEqual(target);
+  });
+
+  it('does nothing on hurry or cancel at rest', async () => {
+    const { system } = createSystem();
+    system.hurry();
+    await expect(system.cancel()).resolves.toBeUndefined();
+    expect(system.isSpinning).toBe(false);
   });
 
   it('spins again from where it stopped, many times in a row', async () => {

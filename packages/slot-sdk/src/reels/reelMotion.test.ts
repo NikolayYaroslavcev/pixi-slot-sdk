@@ -19,6 +19,7 @@ const settings: ReelMotionSettings = {
   bounceMs: 150,
   startDelayMs: 40,
   stopDelayMs: 170,
+  quickStopDelayMs: 50,
 };
 const rowCount = 4;
 const target = ['a', 'b', 'c', 'd'];

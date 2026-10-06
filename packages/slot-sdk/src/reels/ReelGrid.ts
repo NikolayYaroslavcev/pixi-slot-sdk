@@ -45,6 +45,13 @@ export class ReelGrid<SymbolId extends string> {
     );
   }
 
+  /** The symbols of the field, one array per reel from the top. */
+  get columns(): SymbolId[][] {
+    return this.cells.map((column, reelIndex) =>
+      column.map((_symbol, rowIndex) => this.symbolAt({ reelIndex, rowIndex })),
+    );
+  }
+
   reelEntity(reelIndex: number): Entity {
     const reel = this.reels[reelIndex];
     if (reel === undefined) {

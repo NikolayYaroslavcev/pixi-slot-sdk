@@ -6,7 +6,7 @@ import { loadAssetsWithRetry } from '../assets/loadAssetsWithRetry';
 import { World } from '../ecs/World';
 import { waitUnlessSkipped } from '../anim/tween';
 import { RoundPlayer } from '../flow/RoundPlayer';
-import { StateMachine } from '../flow/StateMachine';
+import { RoundFlow } from '../flow/RoundFlow';
 import { registerWinSteps, type Pause } from '../flow/winSteps';
 import type { LayoutConfig } from '../layout/LayoutConfig';
 import { LayoutDebug, isLayoutDebugEnabled } from '../layout/LayoutDebug';
@@ -19,6 +19,7 @@ import type { GameConfig } from './GameConfig';
 import type { GameContext } from './GameContext';
 import type { GameEvents } from './GameEvents';
 import { GameModel } from './GameModel';
+import { Hud } from '../ui/Hud';
 import { createSceneLayers, type SceneLayers } from './sceneLayers';
 import { configureTicker } from './ticker';
 
@@ -55,27 +56,31 @@ export class SlotGame {
     const assets = await loadAssetsWithRetry(loader, loadingScreen);
 
     const world = new World();
-    const stateMachine = new StateMachine();
-    const context = this.createContext({ app, layers, layout, world, assets });
+    const { context, round } = this.createContext({ app, layers, layout, world, assets });
+    const { events, model } = context;
+    new Hud(context, { events, model, round, betLevels: config.betLevels }, config.hud);
     for (const feature of features) {
       feature.install(context);
     }
 
-    startFrameLoop(app, world, stateMachine);
+    startFrameLoop(app, world);
     await loadingScreen.hide();
   }
 
+  /** Builds the context and the round flow, which the HUD needs whole and features only in part. */
   private createContext(
     parts: Pick<GameContext, 'app' | 'layers' | 'layout' | 'world' | 'assets'>,
-  ): GameContext {
+  ): { context: GameContext; round: RoundFlow } {
     const { config, resultSource } = this.options;
     const events = new EventBus<GameEvents>();
     const model = new GameModel(events, { balance: config.initialBalance, bet: config.initialBet });
     const player = new RoundPlayer();
     const pause = createPause(parts.app.ticker);
     registerWinSteps(player, { events, model, pause, timing: config.presentation });
+    const round = new RoundFlow({ events, model, resultSource, player });
     // Features see the round player only as a registry: playing a round is the core's job.
-    return { ...parts, events, model, config, resultSource, steps: player };
+    const context = { ...parts, events, model, config, resultSource, steps: player, round };
+    return { context, round };
   }
 }
 
@@ -125,11 +130,10 @@ function createPause(ticker: Ticker): Pause {
   return (ms, skip) => waitUnlessSkipped(ticker, ms, skip);
 }
 
-/** Updates the world and the current state every frame, then starts the ticker. */
-function startFrameLoop(app: Application, world: World, stateMachine: StateMachine): void {
+/** Updates the world every frame, then starts the ticker. */
+function startFrameLoop(app: Application, world: World): void {
   app.ticker.add((ticker) => {
     world.update(ticker.deltaMS);
-    stateMachine.update(ticker.deltaMS);
   });
   // Set up only now: returning to the tab during loading must not start the ticker early.
   configureTicker(app.ticker);

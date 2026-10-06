@@ -1,14 +1,16 @@
-import type { LayoutConfig } from 'slot-sdk';
+import type { HudNodeName, LayoutConfig } from 'slot-sdk';
 
 /** Objects the layout places. Both variants must describe each of them. */
-type NodeName = 'title' | 'reels';
+type NodeName = 'title' | 'reels' | HudNodeName;
 
 const center = { x: 0.5, y: 0.5 };
 
 /**
  * Where the scene objects go, in design coordinates of each variant.
- * Landscape keeps a strip below the reels for the HUD. Portrait puts the reels
- * in the upper half and leaves the lower part for the character and the HUD.
+ * Landscape: the reels in the middle, Spin to their right, balance, bet and win in a row below.
+ * Portrait: the reels in the upper half, the values below them and a large Spin
+ * in the bottom third, where the thumb reaches it. HUD parts are centered on their origin,
+ * so they need no anchor; their scale keeps touch targets large on phones.
  */
 export const layout: LayoutConfig<NodeName> = {
   landscape: {
@@ -16,15 +18,25 @@ export const layout: LayoutConfig<NodeName> = {
     height: 1080,
     nodes: {
       title: { x: 960, y: 74, anchor: center },
-      reels: { x: 960, y: 540, anchor: center },
+      reels: { x: 960, y: 515, scale: 0.94, anchor: center },
+      spinButton: { x: 1665, y: 515 },
+      message: { x: 960, y: 918 },
+      balance: { x: 330, y: 1005 },
+      bet: { x: 960, y: 1005 },
+      win: { x: 1590, y: 1005 },
     },
   },
   portrait: {
     width: 1080,
     height: 1920,
     nodes: {
-      title: { x: 540, y: 220, anchor: center },
-      reels: { x: 540, y: 740, scale: 1.05, anchor: center },
+      title: { x: 540, y: 200, anchor: center },
+      reels: { x: 540, y: 720, scale: 1.05, anchor: center },
+      message: { x: 540, y: 1215 },
+      balance: { x: 260, y: 1335, scale: 1.15 },
+      win: { x: 820, y: 1335, scale: 1.15 },
+      bet: { x: 540, y: 1485, scale: 1.1 },
+      spinButton: { x: 540, y: 1720, scale: 1.3 },
     },
   },
 };

@@ -1,21 +1,31 @@
-/** One phase of the game, e.g. waiting for Spin. All hooks are optional. */
-export interface State {
-  enter?(): void;
-  exit?(): void;
-  update?(deltaMs: number): void;
-}
+/** For each state, the states it may change to. The whole flow is visible in this one table. */
+export type Transitions<State extends string> = Readonly<Record<State, readonly State[]>>;
 
-/** Holds the current state, switches states and updates the current one every frame. */
-export class StateMachine {
-  private current: State | undefined;
+/**
+ * Holds the current state and changes it only along the transition table.
+ * A change the table does not allow is a bug in the caller, so it throws instead of being ignored.
+ */
+export class StateMachine<State extends string> {
+  private currentState: State;
 
-  changeTo(next: State): void {
-    this.current?.exit?.();
-    this.current = next;
-    next.enter?.();
+  /** `onChange` is called after every change with the new state. */
+  constructor(
+    private readonly transitions: Transitions<State>,
+    initial: State,
+    private readonly onChange: (state: State) => void,
+  ) {
+    this.currentState = initial;
   }
 
-  update(deltaMs: number): void {
-    this.current?.update?.(deltaMs);
+  get current(): State {
+    return this.currentState;
+  }
+
+  changeTo(next: State): void {
+    if (!this.transitions[this.currentState].includes(next)) {
+      throw new Error(`StateMachine: "${this.currentState}" cannot change to "${next}"`);
+    }
+    this.currentState = next;
+    this.onChange(next);
   }
 }

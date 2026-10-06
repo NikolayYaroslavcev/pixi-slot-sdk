@@ -1,6 +1,7 @@
 import type { Application } from 'pixi.js';
 import type { LoadedAssets } from '../assets/LoadedAssets';
 import type { World } from '../ecs/World';
+import type { RoundControls } from '../flow/RoundFlow';
 import type { StepRegistry } from '../flow/RoundPlayer';
 import type { LayoutManager } from '../layout/LayoutManager';
 import type { ResultSource } from '../math/round';
@@ -28,4 +29,6 @@ export interface GameContext {
   readonly resultSource: ResultSource;
   /** Handlers of round steps. A feature registers the steps its mechanic adds. */
   readonly steps: StepRegistry;
+  /** The round flow. The game connects its reels here. */
+  readonly round: RoundControls;
 }

@@ -39,6 +39,8 @@ export const reelsConfig: ReelsConfig = {
     bounceMs: 160,
     startDelayMs: 40,
     stopDelayMs: 170,
+    // Stop pressed: the reels still land one by one, just much closer together.
+    quickStopDelayMs: 60,
   },
   // Every symbol once or twice, the Octopus only on reels 2–4 as the rules allow.
   initialSymbols: [

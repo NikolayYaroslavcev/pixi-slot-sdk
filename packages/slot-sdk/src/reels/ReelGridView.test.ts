@@ -41,6 +41,7 @@ const motion = {
   bounceMs: 100,
   startDelayMs: 0,
   stopDelayMs: 100,
+  quickStopDelayMs: 50,
 };
 const target: TestSymbol[][] = [
   ['c', 'c'],

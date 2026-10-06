@@ -21,6 +21,11 @@ export interface ReelMotionSettings {
   startDelayMs: number;
   /** Each next reel starts braking this much later than the previous one. */
   stopDelayMs: number;
+  /**
+   * The same delay when the player asks to stop early. The reels then also skip
+   * `minimumSpinMs` and land with the usual animation, only sooner.
+   */
+  quickStopDelayMs: number;
 }
 
 /** `idle → accelerate → spinning → decelerate → bounce → idle`. */
