@@ -1,9 +1,14 @@
-import { Application, Graphics } from 'pixi.js';
+import { createSlotGame, type ResultSource } from 'slot-sdk';
+import { gameConfig } from './config/game.config';
+import { coreDemo } from './scene/coreDemo';
 
-const app = new Application();
-await app.init({ background: '#062033', resizeTo: window });
-document.body.appendChild(app.canvas);
+// Nothing starts a round yet. The mock result source replaces this placeholder.
+const resultSource: ResultSource = {
+  play: () => Promise.reject(new Error('Rounds are not available yet')),
+};
 
-const testRectangle = new Graphics().rect(-120, -80, 240, 160).fill('#f2b134');
-testRectangle.position.set(app.screen.width / 2, app.screen.height / 2);
-app.stage.addChild(testRectangle);
+await createSlotGame({
+  config: gameConfig,
+  resultSource,
+  features: [coreDemo()],
+}).start();
