@@ -30,7 +30,7 @@ describe('evaluateSpin', () => {
     const grid = gridWithLine(
       3,
       ['ace', 'ace', 'ace'],
-      gridWithLine(0, ['shark', 'shark', 'shark']),
+      gridWithLine(0, ['skull', 'skull', 'skull']),
     );
 
     const outcome = evaluateSpin(grid, 100);
@@ -43,7 +43,7 @@ describe('evaluateSpin', () => {
     const grid = gridWithLine(
       1,
       ['key', 'jack', 'key', 'bottle', 'key'],
-      gridWithLine(0, ['turtle', 'turtle', 'turtle']),
+      gridWithLine(0, ['wheel', 'wheel', 'wheel']),
     );
 
     const outcome = evaluateSpin(grid, 100);

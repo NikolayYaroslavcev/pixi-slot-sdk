@@ -5,7 +5,7 @@ import type { AmbientSeaLook } from '../scene/AmbientSea';
  * Few objects on purpose: the background lives without pulling the eye from the reels.
  */
 export const ambientSeaLook: AmbientSeaLook = {
-  rays: { alpha: 0.32, swayDegrees: 3, periodMs: 11_000 },
+  rays: { alpha: 0.1, swayDegrees: 3, periodMs: 11_000 },
   bubbles: { count: 14, minSize: 10, maxSize: 34, minSpeed: 50, maxSpeed: 130, wobble: 14 },
   plankton: {
     count: 24,
@@ -15,7 +15,7 @@ export const ambientSeaLook: AmbientSeaLook = {
     maxSpeed: 22,
     wobble: 20,
     alpha: 0.45,
-    color: '#bfeaff',
+    color: '#bffff6',
   },
   // Free spins: the deep turns violet, the keeper's colour.
   freeSpins: { color: '#2a0b5a', alpha: 0.38, fadeMs: 700 },

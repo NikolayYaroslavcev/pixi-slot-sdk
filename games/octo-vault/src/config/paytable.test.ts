@@ -31,17 +31,12 @@ describe('Octo Vault paytable', () => {
       expect(pays[4]).toBeGreaterThan(pays[3]);
       expect(pays[5]).toBeGreaterThan(pays[4]);
     }
-    const lowTop = Math.max(
-      paytable.jack[5],
-      paytable.queen[5],
-      paytable.king[5],
-      paytable.ace[5],
-    );
+    const lowTop = Math.max(paytable.jack[5], paytable.queen[5], paytable.king[5], paytable.ace[5]);
     const highBottom = Math.min(
       paytable.bottle[5],
       paytable.anchor[5],
-      paytable.turtle[5],
-      paytable.shark[5],
+      paytable.wheel[5],
+      paytable.skull[5],
     );
     expect(highBottom).toBeGreaterThan(lowTop);
   });

@@ -5,7 +5,7 @@ import type { SymbolGrid, SymbolId } from '../config/symbols';
 // Helpers for the math tests. Not used by the game.
 
 const lowColumn: SymbolId[] = ['jack', 'queen', 'king', 'ace'];
-const highColumn: SymbolId[] = ['bottle', 'anchor', 'turtle', 'shark'];
+const highColumn: SymbolId[] = ['bottle', 'anchor', 'wheel', 'skull'];
 
 /**
  * A field without a single win: neighbouring reels never share a symbol,
