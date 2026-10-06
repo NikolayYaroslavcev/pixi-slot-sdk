@@ -49,13 +49,29 @@ export const scenarios = {
     ['fish', 'pearl', 'octopus', 'anchor'],
     ['chest', 'shell', 'seahorse', 'anchor'],
   ],
-  /** 3 Key Scatters and no line win. Free spins come in stage 10. */
+  /** 3 Key Scatters and no line win: 8 free spins. */
   scatter: [
     ['key', 'shell', 'pearl', 'fish'],
     ['anchor', 'key', 'crown', 'pearl'],
     ['seahorse', 'fish', 'starfish', 'shell'],
     ['key', 'crown', 'octopus', 'anchor'],
     ['starfish', 'pearl', 'shell', 'seahorse'],
+  ],
+  /** 4 Key Scatters: 10 free spins. */
+  freespins4: [
+    ['key', 'shell', 'pearl', 'fish'],
+    ['anchor', 'key', 'crown', 'pearl'],
+    ['seahorse', 'fish', 'key', 'shell'],
+    ['chest', 'crown', 'starfish', 'anchor'],
+    ['starfish', 'pearl', 'shell', 'key'],
+  ],
+  /** A Key Scatter on every reel: 12 free spins. */
+  freespins5: [
+    ['key', 'shell', 'pearl', 'fish'],
+    ['anchor', 'key', 'crown', 'pearl'],
+    ['seahorse', 'fish', 'key', 'shell'],
+    ['chest', 'crown', 'starfish', 'key'],
+    ['key', 'pearl', 'shell', 'seahorse'],
   ],
   /** 5 Crowns on the top row and 3 Fish on the bottom: 15.3 bets, a Big Win below Mega Win. */
   bigwin: [

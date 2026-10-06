@@ -1,5 +1,5 @@
 import { Container, Text, type ColorSource } from 'pixi.js';
-import { Highlight, type CellPosition, type System, type World } from 'slot-sdk';
+import { Held, Highlight, type CellPosition, type System, type World } from 'slot-sdk';
 import { Multiplier } from './Multiplier';
 import type { FieldParts } from './reels';
 
@@ -23,7 +23,7 @@ interface Badge {
 /**
  * Draws the `Multiplier` of every cell as a badge on the field. One text per cell is created
  * once and only changes when its value does. Badges hide while the reels spin: the symbols
- * they belong to are leaving the field. A badge dims with its symbol while wins are shown.
+ * they belong to are leaving the field. A held symbol stays, and so does its badge. A badge dims with its symbol while wins are shown.
  */
 export class MultiplierBadges implements System {
   private readonly container = new Container({ label: 'multipliers' });
@@ -58,7 +58,8 @@ export class MultiplierBadges implements System {
     const spinning = this.field.spinner.isSpinning;
     for (const badge of this.badges) {
       const symbol = this.field.grid.symbolEntity(badge.cell);
-      this.show(badge, spinning ? 0 : (this.world.get(symbol, Multiplier)?.value ?? 0));
+      const leaving = spinning && !this.world.has(symbol, Held);
+      this.show(badge, leaving ? 0 : (this.world.get(symbol, Multiplier)?.value ?? 0));
       badge.text.alpha = this.world.get(symbol, Highlight)?.brightness ?? 1;
     }
   }

@@ -2,7 +2,7 @@ import type { EventBus } from '../core/EventBus';
 import type { GameEvents } from '../core/GameEvents';
 import type { System, World } from '../ecs/World';
 import type { ReelSpinner } from '../flow/ReelSpinner';
-import { ReelMotion, ReelStrip } from './components';
+import { Held, ReelMotion, ReelStrip } from './components';
 import type { ReelGrid } from './ReelGrid';
 import {
   advanceReel,
@@ -18,7 +18,7 @@ import {
  *
  * Gives every reel entity a `ReelStrip` and a `ReelMotion` and moves them each frame.
  * When a reel comes to rest, its cells in `ReelGrid` get the target symbols, then
- * `reelStopped` is emitted. After the last reel, `spinCompleted` is emitted and `stop()` resolves.
+ * `reelStopped` is emitted. A cell whose symbol is `Held` keeps its symbol entity as it is. After the last reel, `spinCompleted` is emitted and `stop()` resolves.
  */
 export class ReelMotionSystem<SymbolId extends string> implements System, ReelSpinner {
   /** Motion of each reel by reel index. The same objects as the `ReelMotion` components. */
@@ -125,8 +125,12 @@ export class ReelMotionSystem<SymbolId extends string> implements System, ReelSp
     // `target` is only ever set by `stop()`, from columns of `SymbolId`.
     const target = (motion.target ?? []) as readonly SymbolId[];
     target.forEach((symbolId, rowIndex) => {
+      const cell = { reelIndex, rowIndex };
+      if (this.world.has(this.grid.symbolEntity(cell), Held)) {
+        return;
+      }
       // A new entity: whatever a game attached to the old symbol does not land with the new one.
-      this.grid.replaceSymbol({ reelIndex, rowIndex }, symbolId);
+      this.grid.replaceSymbol(cell, symbolId);
     });
     motion.target = null;
     this.events.emit('reelStopped', { reelIndex });

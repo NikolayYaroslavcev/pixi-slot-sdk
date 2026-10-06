@@ -10,9 +10,9 @@ export { EventBus } from './core/EventBus';
 export type { GameEvents } from './core/GameEvents';
 export type { GameModel } from './core/GameModel';
 
-export type { World, System, Entity } from './ecs/World';
+export { World, type System, type Entity } from './ecs/World';
 export { defineComponent, type ComponentType } from './ecs/component';
-export type { CellPosition } from './reels/components';
+export { Held, type CellPosition } from './reels/components';
 export { ReelGrid, type ReelGridSize } from './reels/ReelGrid';
 export {
   ReelGridView,
@@ -41,6 +41,7 @@ export type { BigWinTier } from './wins/bigWinTier';
 export type { WinStyle } from './wins/WinStyle';
 export type { ParticleStyle } from './wins/WinParticles';
 export { WinCounter, type WinCounterStyle } from './ui/WinCounter';
+export { LabeledValue, type LabeledValueStyle } from './ui/LabeledValue';
 export type { HudNodeName } from './ui/Hud';
 export type {
   ResultSource,
@@ -59,7 +60,15 @@ export type { AssetEntry, AssetManifest, SymbolPlaceholder } from './assets/Asse
 export type { LoadedAssets } from './assets/LoadedAssets';
 export type { LoadingScreenStyle } from './assets/LoadingScreen';
 
-export { tween, wait, type Tween, type TweenOptions, type TweenProps } from './anim/tween';
+export {
+  tween,
+  wait,
+  waitUnlessSkipped,
+  type Tween,
+  type TweenOptions,
+  type TweenProps,
+} from './anim/tween';
+export { formatMoney } from './math/money';
 export {
   linear,
   easeInQuad,

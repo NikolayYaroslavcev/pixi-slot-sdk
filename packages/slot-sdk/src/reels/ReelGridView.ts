@@ -3,10 +3,12 @@ import type { LoadedAssets } from '../assets/LoadedAssets';
 import type { System, World } from '../ecs/World';
 import { Highlight, type HighlightData } from '../wins/Highlight';
 import { ReelMotion, ReelStrip, type CellPosition } from './components';
+import { HeldSymbols } from './HeldSymbols';
 import { cellCenter, cellsSize, reelCenterX, rowCenterY, type CellMetrics } from './reelGeometry';
 import type { ReelGrid } from './ReelGrid';
 import type { ReelMotionData } from './reelMotion';
 import { poolSlot, slotSymbol, type FieldColumn } from './reelSlots';
+import { showHighlight, showTexture } from './symbolLook';
 
 /** Vertical blur of a moving reel, growing with its speed. Speeds are in symbols per second. */
 export interface MotionBlurOptions {
@@ -47,7 +49,8 @@ interface ReelColumn {
  * below for the symbols that are scrolling in and out. Every frame each sprite is placed
  * by the reel's `ReelMotion` and gets the texture of the slot it shows now. A mask hides
  * the spare sprites. Sprites live here, not in components: the world stays free of Pixi.
- * A symbol with a `Highlight` is drawn with its brightness and size.
+ * A symbol with a `Highlight` is drawn with its brightness and size. A symbol with `Held`
+ * is drawn still in its cell, above its spinning reel (`HeldSymbols`).
  *
  * Create it after `ReelMotionSystem`, which gives the reels their strip and motion.
  */
@@ -55,6 +58,7 @@ export class ReelGridView implements System {
   /** Add it to the `reels` layer and register it with the layout. */
   readonly container = new Container({ label: 'reels' });
   private readonly columns: ReelColumn[];
+  private readonly held: HeldSymbols;
 
   constructor(
     private readonly world: World,
@@ -74,7 +78,8 @@ export class ReelGridView implements System {
     this.columns = Array.from({ length: grid.size.reelCount }, (_reel, reelIndex) =>
       this.createColumn(grid, reelIndex),
     );
-    symbols.addChild(...this.columns.map((column) => column.container));
+    this.held = new HeldSymbols(world, grid, assets, options);
+    symbols.addChild(...this.columns.map((column) => column.container), this.held.container);
     // Fixed bounds: the layout anchors the field by its panel, whatever the symbols do.
     this.container.boundsArea = new Rectangle(0, 0, width, height);
     this.container.addChild(panel, symbols);
@@ -93,6 +98,7 @@ export class ReelGridView implements System {
     for (const column of this.columns) {
       this.drawColumn(column);
     }
+    this.held.update();
   }
 
   private drawColumn(column: ReelColumn): void {
@@ -105,31 +111,13 @@ export class ReelGridView implements System {
       const slot = poolSlot(poolIndex, motion.position, sprites.length);
       sprite.y = rowCenterY(slot + motion.position, this.options);
       const symbolId = slotSymbol(slot, motion, column.strip, column.field);
-      this.showSymbol(sprite, symbolId);
-      this.showHighlight(sprite, column, slot - motion.restSlot);
+      showTexture(sprite, this.assets.symbolTexture(symbolId));
+      showHighlight(sprite, this.highlightAt(column, slot - motion.restSlot), this.options);
     }
     this.blurBySpeed(column.blur, motion.speed);
   }
 
-  private showSymbol(sprite: Sprite, symbolId: string): void {
-    const texture = this.assets.symbolTexture(symbolId);
-    if (sprite.texture === texture) {
-      return;
-    }
-    sprite.texture = texture;
-  }
-
   /** `rowIndex` is the field row the sprite shows; outside the field there is no highlight. */
-  private showHighlight(sprite: Sprite, column: ReelColumn, rowIndex: number): void {
-    const highlight = this.highlightAt(column, rowIndex);
-    const scale = highlight?.scale ?? 1;
-    sprite.setSize(this.options.cellWidth * scale, this.options.cellHeight * scale);
-    const tint = grayTint(highlight?.brightness ?? 1);
-    if (sprite.tint !== tint) {
-      sprite.tint = tint;
-    }
-  }
-
   private highlightAt(column: ReelColumn, rowIndex: number): HighlightData | undefined {
     if (rowIndex < 0 || rowIndex >= column.field.rowCount) {
       return undefined;
@@ -192,10 +180,4 @@ function fieldColumn(grid: ReelGrid<string>, reelIndex: number): FieldColumn {
       return grid.symbolAt(cell);
     },
   };
-}
-
-/** A tint that darkens a sprite evenly: 1 keeps its colors, 0 makes it black. */
-function grayTint(brightness: number): number {
-  const level = Math.round(Math.min(Math.max(brightness, 0), 1) * 255);
-  return (level << 16) | (level << 8) | level;
 }

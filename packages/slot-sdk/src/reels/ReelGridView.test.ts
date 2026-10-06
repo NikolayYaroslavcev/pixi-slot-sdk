@@ -7,6 +7,7 @@ import { World } from '../ecs/World';
 import { rowCenterY } from './reelGeometry';
 import { ReelGrid } from './ReelGrid';
 import { ReelGridView } from './ReelGridView';
+import { Held } from './components';
 import { ReelMotionSystem } from './ReelMotionSystem';
 import { HighlightSystem } from '../wins/Highlight';
 
@@ -210,5 +211,28 @@ describe('ReelGridView', () => {
     expect(() => new ReelGridView(world, grid, new LoadedAssets(textures), options)).toThrow(
       'ReelGridView: reel 0 has no motion, create ReelMotionSystem first',
     );
+  });
+
+  it('draws a held symbol still in its cell while the reel spins under it', () => {
+    const { world, grid, system, view, frame } = createView();
+    world.add(grid.symbolEntity({ reelIndex: 1, rowIndex: 0 }), Held, {});
+    const layer = view.container.getChildByLabel('held', true);
+    const shown = () => layer?.children.filter((child) => child.visible) ?? [];
+    frame(0);
+    const [cell] = shown();
+    const sprite = cell?.children.find((child): child is Sprite => child instanceof Sprite);
+
+    expect(shown()).toHaveLength(1);
+    expect([cell?.x, cell?.y]).toEqual([160, 50]);
+    expect(sprite?.texture).toBe(textures.get('b'));
+    system.start();
+    for (let ms = 0; ms < 200; ms += 16) {
+      frame(16);
+    }
+    expect([cell?.x, cell?.y]).toEqual([160, 50]);
+
+    world.remove(grid.symbolEntity({ reelIndex: 1, rowIndex: 0 }), Held);
+    frame(16);
+    expect(shown()).toHaveLength(0);
   });
 });

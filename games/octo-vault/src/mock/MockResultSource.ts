@@ -5,7 +5,7 @@ import {
   type RoundRequest,
   type RoundResult,
 } from 'slot-sdk';
-import { playSpin, spinSteps } from '../math/playSpin';
+import { playRound } from '../math/playRound';
 import { playlist, scenarios, type ScenarioName } from './scenarios';
 
 export interface MockResultSourceOptions {
@@ -42,10 +42,8 @@ export class MockResultSource implements ResultSource {
     if (request.bet > this.balance) {
       throw new Error('MockResultSource: the bet is higher than the balance');
     }
-    const spin = playSpin(scenarios[scenario], request.bet, this.rng);
-    const totalWin = spin.outcome.totalWin;
+    const { steps, totalWin } = playRound(request.bet, this.rng, scenarios[scenario]);
     this.balance += totalWin - request.bet;
-    const steps = [...spinSteps(spin), { type: 'totalWin', amount: totalWin }];
     return { steps, totalWin, balance: this.balance };
   }
 

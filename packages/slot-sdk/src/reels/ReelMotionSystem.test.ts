@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { EventBus } from '../core/EventBus';
 import type { GameEvents } from '../core/GameEvents';
 import { World } from '../ecs/World';
-import { ReelMotion, ReelStrip } from './components';
+import { Held, ReelMotion, ReelStrip } from './components';
 import { ReelGrid } from './ReelGrid';
 import type { ReelMotionSettings } from './reelMotion';
 import { ReelMotionSystem } from './ReelMotionSystem';
@@ -234,5 +234,20 @@ describe('ReelMotionSystem', () => {
     expect(
       () => new ReelMotionSystem(world, grid, strips, { ...settings, bounce: 5 }, events),
     ).toThrow(/bounce/);
+  });
+
+  it('keeps a held symbol in its cell with its entity and components', async () => {
+    const { world, events, grid, system } = createSystem();
+    const held = { reelIndex: 1, rowIndex: 0 };
+    const entity = grid.symbolEntity(held);
+    world.add(entity, Held, {});
+    system.start();
+    const done = system.stop(target);
+    runSpin(system, events);
+    await done;
+
+    expect(grid.symbolEntity(held)).toBe(entity);
+    expect(grid.symbolAt(held)).toBe('b');
+    expect(grid.symbolAt({ reelIndex: 1, rowIndex: 1 })).toBe('x');
   });
 });

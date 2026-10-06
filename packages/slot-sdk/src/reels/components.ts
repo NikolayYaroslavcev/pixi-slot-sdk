@@ -27,3 +27,10 @@ export const GridPosition = defineComponent<CellPosition>('GridPosition');
  * the game's symbols. `ReelGrid<SymbolId>` types it for the game.
  */
 export const SymbolKind = defineComponent<{ symbolId: string }>('SymbolKind');
+
+/**
+ * Keeps a symbol in its cell while the reel spins: the reel moves around it, and landing
+ * leaves the entity and every component on it as they are. A game adds it to a symbol entity
+ * for as long as the symbol must stay, e.g. a sticky symbol through a series of spins.
+ */
+export const Held = defineComponent<Record<string, never>>('Held');

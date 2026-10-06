@@ -14,6 +14,7 @@ export interface FieldParts {
   readonly grid: ReelGrid<SymbolId>;
   readonly view: ReelGridView;
   readonly spinner: ReelMotionSystem<SymbolId>;
+  readonly highlight: HighlightSystem;
 }
 
 /** The reels feature. Features installed after it reach the field through `parts`. */
@@ -51,7 +52,7 @@ export function reels(): ReelsFeature {
       context.layout.addNode('reels', view.container);
       context.round.useReels(spinner);
       context.wins.useField(new FieldWinView(context, view, highlight));
-      parts = { grid, view, spinner };
+      parts = { grid, view, spinner, highlight };
     },
   };
 }

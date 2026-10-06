@@ -109,6 +109,13 @@ describe('MockResultSource', () => {
     expect(grids).toEqual(playlist.map((name) => scenarios[name]));
   });
 
+  it('takes the bet once for a round with free spins', async () => {
+    const result = await createSource('scatter').play({ bet });
+
+    expect(stepTypes(result)).toContain('freeSpinsStart');
+    expect(result.balance).toBe(10_000 - bet + result.totalWin);
+  });
+
   it('throws the tentacles of a landed Octopus before the wins', async () => {
     const result = await createSource('tentacles').play({ bet });
 
