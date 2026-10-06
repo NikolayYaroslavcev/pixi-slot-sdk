@@ -6,7 +6,7 @@ export type MatchCount = 3 | 4 | 5;
 export const minimumMatch = 3;
 
 /** A line of only Wilds pays as this symbol. */
-export const wildPaysAs: RegularSymbolId = 'skull';
+export const wildPaysAs: RegularSymbolId = 'shark';
 
 /**
  * Line pays in multiples of the total bet, by the number of matching symbols.
@@ -19,6 +19,6 @@ export const paytable: Readonly<Record<RegularSymbolId, Readonly<Record<MatchCou
   ace: { 3: 0.3, 4: 0.8, 5: 2 },
   bottle: { 3: 0.5, 4: 1.5, 5: 4 },
   anchor: { 3: 0.8, 4: 2, 5: 6 },
-  wheel: { 3: 1, 4: 3, 5: 8 },
-  skull: { 3: 1.5, 4: 5, 5: 15 },
+  turtle: { 3: 1, 4: 3, 5: 8 },
+  shark: { 3: 1.5, 4: 5, 5: 15 },
 };

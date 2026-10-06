@@ -12,12 +12,12 @@ describe('evaluateLines', () => {
   });
 
   it('pays 3 equal symbols from the first reel by the paytable', () => {
-    const grid = gridWithLine(0, ['wheel', 'wheel', 'wheel']);
+    const grid = gridWithLine(0, ['turtle', 'turtle', 'turtle']);
 
     expect(evaluateLines(grid, bet)).toEqual([
       {
         lineIndex: 0,
-        symbolId: 'wheel',
+        symbolId: 'turtle',
         count: 3,
         cells: [
           { reelIndex: 0, rowIndex: 0 },
@@ -50,18 +50,18 @@ describe('evaluateLines', () => {
   });
 
   it('pays nothing for 2 in a row or for matches that do not start on the first reel', () => {
-    expect(evaluateLines(gridWithLine(0, ['skull', 'skull']), bet)).toEqual([]);
-    expect(evaluateLines(gridWithLine(0, ['jack', 'skull', 'skull', 'skull']), bet)).toEqual([]);
+    expect(evaluateLines(gridWithLine(0, ['shark', 'shark']), bet)).toEqual([]);
+    expect(evaluateLines(gridWithLine(0, ['jack', 'shark', 'shark', 'shark']), bet)).toEqual([]);
   });
 
-  it('pays the longest combination: 5 Skulls is the top line pay', () => {
+  it('pays the longest combination: 5 Sharks is the top line pay', () => {
     const [win] = evaluateLines(
-      gridWithLine(3, ['skull', 'skull', 'skull', 'skull', 'skull']),
+      gridWithLine(3, ['shark', 'shark', 'shark', 'shark', 'shark']),
       bet,
     );
 
-    expect(win).toMatchObject({ lineIndex: 3, symbolId: 'skull', count: 5 });
-    expect(win?.amount).toBe(bet * paytable.skull[5]);
+    expect(win).toMatchObject({ lineIndex: 3, symbolId: 'shark', count: 5 });
+    expect(win?.amount).toBe(bet * paytable.shark[5]);
   });
 
   // On the base field a Wild can also join equal neighbours of other lines,
@@ -83,11 +83,11 @@ describe('evaluateLines', () => {
     );
   });
 
-  it('pays a line of only Wilds as the Skull', () => {
+  it('pays a line of only Wilds as the Shark', () => {
     const grid = gridWithLine(0, ['octopus', 'octopus', 'octopus', 'octopus', 'octopus']);
 
     expect(evaluateLines(grid, bet)).toContainEqual(
-      expect.objectContaining({ lineIndex: 0, symbolId: 'skull', count: 5 }),
+      expect.objectContaining({ lineIndex: 0, symbolId: 'shark', count: 5 }),
     );
   });
 
@@ -96,7 +96,7 @@ describe('evaluateLines', () => {
     expect(evaluateLines(gridWithLine(0, ['jack', 'key', 'jack', 'jack']), bet)).toEqual([]);
     expect(
       evaluateLines(gridWithLine(0, ['octopus', 'octopus', 'octopus', 'key']), bet),
-    ).toContainEqual(expect.objectContaining({ lineIndex: 0, symbolId: 'skull', count: 3 }));
+    ).toContainEqual(expect.objectContaining({ lineIndex: 0, symbolId: 'shark', count: 3 }));
   });
 
   it('pays every winning line, even when lines share cells', () => {
@@ -117,10 +117,10 @@ describe('evaluateLines', () => {
   });
 
   it('pays all 15 lines on a field of one symbol', () => {
-    const wins = evaluateLines(gridOf('skull'), bet);
+    const wins = evaluateLines(gridOf('shark'), bet);
 
     expect(wins).toHaveLength(paylines.length);
-    expect(wins.every((win) => win.count === 5 && win.amount === bet * paytable.skull[5])).toBe(
+    expect(wins.every((win) => win.count === 5 && win.amount === bet * paytable.shark[5])).toBe(
       true,
     );
   });

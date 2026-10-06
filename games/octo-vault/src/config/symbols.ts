@@ -13,8 +13,8 @@ export const symbols = {
   ace: { tier: 'low' },
   bottle: { tier: 'high' },
   anchor: { tier: 'high' },
-  wheel: { tier: 'high' },
-  skull: { tier: 'high' },
+  turtle: { tier: 'high' },
+  shark: { tier: 'high' },
   octopus: { tier: 'wild' },
   key: { tier: 'scatter' },
 } as const satisfies Record<string, { tier: SymbolTier }>;

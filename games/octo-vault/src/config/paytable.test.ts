@@ -40,8 +40,8 @@ describe('Octo Vault paytable', () => {
     const highBottom = Math.min(
       paytable.bottle[5],
       paytable.anchor[5],
-      paytable.wheel[5],
-      paytable.skull[5],
+      paytable.turtle[5],
+      paytable.shark[5],
     );
     expect(highBottom).toBeGreaterThan(lowTop);
   });
