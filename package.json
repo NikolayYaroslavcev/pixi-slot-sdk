@@ -15,7 +15,7 @@
     "preview": "npm run preview -w games/octo-vault --",
     "lint": "eslint . && prettier --check .",
     "typecheck": "npm run typecheck --workspaces",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

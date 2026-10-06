@@ -23,6 +23,11 @@ export default defineConfig([
     },
   },
   {
+    // A describe block groups many short cases, so its length says nothing about readability.
+    files: ['**/*.test.ts'],
+    rules: { 'max-lines-per-function': 'off' },
+  },
+  {
     files: ['games/**'],
     rules: {
       'no-restricted-imports': [
