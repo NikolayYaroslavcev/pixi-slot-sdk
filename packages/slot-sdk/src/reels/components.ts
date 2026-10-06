@@ -1,4 +1,5 @@
 import { defineComponent } from '../ecs/component';
+import type { ReelMotionData } from './reelMotion';
 
 /** A cell of the field. Reels count from the left, rows from the top, both from 0. */
 export interface CellPosition {
@@ -6,8 +7,17 @@ export interface CellPosition {
   rowIndex: number;
 }
 
-/** Marks a reel entity. The reel's own state (motion, holds) goes into more components later. */
+/** Marks a reel entity. */
 export const Reel = defineComponent<{ reelIndex: number }>('Reel');
+
+/**
+ * Symbols of a reel in the order they pass the window, repeated endlessly.
+ * Strings for the same reason as `SymbolKind`.
+ */
+export const ReelStrip = defineComponent<{ symbols: readonly string[] }>('ReelStrip');
+
+/** How a reel moves right now. `ReelMotionSystem` changes it, `ReelGridView` draws it. */
+export const ReelMotion = defineComponent<ReelMotionData>('ReelMotion');
 
 /** The cell a symbol entity stands in. */
 export const GridPosition = defineComponent<CellPosition>('GridPosition');

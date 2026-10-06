@@ -13,7 +13,13 @@ export type { GameModel } from './core/GameModel';
 export type { World, System, Entity } from './ecs/World';
 export type { CellPosition } from './reels/components';
 export { ReelGrid, type ReelGridSize } from './reels/ReelGrid';
-export { ReelGridView, type ReelGridViewOptions } from './reels/ReelGridView';
+export {
+  ReelGridView,
+  type ReelGridViewOptions,
+  type MotionBlurOptions,
+} from './reels/ReelGridView';
+export { ReelMotionSystem } from './reels/ReelMotionSystem';
+export type { ReelMotionSettings } from './reels/reelMotion';
 export type { LayoutManager } from './layout/LayoutManager';
 export type {
   LayoutConfig,

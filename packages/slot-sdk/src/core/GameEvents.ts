@@ -18,4 +18,8 @@ export interface GameEvents {
   betChanged: number;
   /** New last win in minor units. */
   lastWinChanged: number;
+  /** A reel has come to rest on its target symbols, which are already in `ReelGrid`. */
+  reelStopped: { reelIndex: number };
+  /** The last reel of the spin has come to rest. */
+  spinCompleted: undefined;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cellCenter, cellsSize } from './reelGeometry';
+import { cellCenter, cellsSize, rowCenterY } from './reelGeometry';
 
 const metrics = { cellWidth: 200, cellHeight: 180, gap: 10 };
 
@@ -30,5 +30,16 @@ describe('cellCenter', () => {
 
     expect(last.x + metrics.cellWidth / 2).toBe(size.width);
     expect(last.y + metrics.cellHeight / 2).toBe(size.height);
+  });
+});
+
+describe('rowCenterY', () => {
+  it('matches the cell center on whole rows', () => {
+    expect(rowCenterY(3, metrics)).toBe(cellCenter({ reelIndex: 0, rowIndex: 3 }, metrics).y);
+  });
+
+  it('lies between the rows on fractional rows, also above the first row', () => {
+    expect(rowCenterY(1.5, metrics)).toBe((rowCenterY(1, metrics) + rowCenterY(2, metrics)) / 2);
+    expect(rowCenterY(-1, metrics)).toBe(90 - 190);
   });
 });
