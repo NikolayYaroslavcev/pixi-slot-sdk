@@ -4,4 +4,9 @@ export const gameConfig: GameConfig = {
   initialBalance: 100_000,
   initialBet: 100,
   backgroundColor: '#062033',
+  loadingScreen: {
+    logo: 'logo',
+    barColor: '#3ee6c4',
+    textColor: '#e8fbff',
+  },
 };

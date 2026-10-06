@@ -15,6 +15,10 @@ export type { LayoutManager, ResizeListener } from './layout/LayoutManager';
 export type { StepHandler, StepRegistry } from './flow/RoundPlayer';
 export type { ResultSource, RoundRequest, RoundResult, RoundStep } from './math/round';
 
+export type { AssetEntry, AssetManifest, SymbolPlaceholder } from './assets/AssetManifest';
+export type { LoadedAssets } from './assets/LoadedAssets';
+export type { LoadingScreenStyle } from './assets/LoadingScreen';
+
 export { tween, wait, type Tween, type TweenOptions, type TweenProps } from './anim/tween';
 export {
   linear,

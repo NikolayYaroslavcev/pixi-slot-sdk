@@ -5,7 +5,18 @@ import { createSlotGame } from './createSlotGame';
 
 function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
   return {
-    config: { initialBalance: 10_000, initialBet: 100, backgroundColor: '#000000', ...config },
+    config: {
+      initialBalance: 10_000,
+      initialBet: 100,
+      backgroundColor: '#000000',
+      loadingScreen: { logo: 'logo', barColor: '#ffffff', textColor: '#ffffff' },
+      ...config,
+    },
+    assets: {
+      preload: [{ alias: 'logo', src: 'assets/logo.svg' }],
+      game: [],
+      symbols: { low: { color: '#3366cc', label: 'Low' } },
+    },
     resultSource: { play: () => Promise.reject(new Error('not used')) },
   };
 }
@@ -37,5 +48,20 @@ describe('createSlotGame', () => {
     expect(() => createSlotGame(options)).toThrow(
       'features[0] must have an install(context) method',
     );
+  });
+
+  it('rejects a loading screen logo that is not preloaded', () => {
+    const loadingScreen = { logo: 'missing', barColor: '#ffffff', textColor: '#ffffff' };
+
+    expect(() => createSlotGame(createOptions({ loadingScreen }))).toThrow(
+      'config.loadingScreen.logo "missing" must be an alias from assets.preload',
+    );
+  });
+
+  it('reports manifest problems together with config problems', () => {
+    const options = createOptions({ initialBet: 0 });
+    options.assets = { ...options.assets, symbols: {} };
+
+    expect(() => createSlotGame(options)).toThrow(/initialBet[\s\S]*assets\.symbols/);
   });
 });

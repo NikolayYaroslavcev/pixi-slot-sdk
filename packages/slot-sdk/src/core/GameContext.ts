@@ -1,4 +1,5 @@
 import type { Application } from 'pixi.js';
+import type { LoadedAssets } from '../assets/LoadedAssets';
 import type { World } from '../ecs/World';
 import type { StepRegistry } from '../flow/RoundPlayer';
 import type { LayoutManager } from '../layout/LayoutManager';
@@ -22,6 +23,8 @@ export interface GameContext {
   readonly model: GameModel;
   readonly layout: LayoutManager;
   readonly config: GameConfig;
+  /** Resources loaded from the manifest before the features were installed. */
+  readonly assets: LoadedAssets;
   readonly resultSource: ResultSource;
   /** Handlers of round steps. A feature registers the steps its mechanic adds. */
   readonly steps: StepRegistry;

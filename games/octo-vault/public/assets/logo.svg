@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="280" viewBox="0 0 480 280">
+  <defs>
+    <linearGradient id="door" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3ee6c4"/>
+      <stop offset="1" stop-color="#1a7f9c"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(240 92)">
+    <circle r="78" fill="#0b3550" stroke="url(#door)" stroke-width="10"/>
+    <circle r="46" fill="none" stroke="#3ee6c4" stroke-width="6" stroke-dasharray="14 10"/>
+    <circle r="16" fill="#3ee6c4"/>
+    <g stroke="#3ee6c4" stroke-width="8" stroke-linecap="round">
+      <line x1="0" y1="-16" x2="0" y2="-40"/>
+      <line x1="14" y1="8" x2="35" y2="20"/>
+      <line x1="-14" y1="8" x2="-35" y2="20"/>
+    </g>
+  </g>
+  <text x="240" y="262" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="58" letter-spacing="4" fill="#e8fbff">OCTO VAULT</text>
+</svg>

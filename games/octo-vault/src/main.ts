@@ -1,4 +1,5 @@
 import { createSlotGame, type ResultSource } from 'slot-sdk';
+import { assets } from './assets';
 import { gameConfig } from './config/game.config';
 import { coreDemo } from './scene/coreDemo';
 
@@ -9,6 +10,7 @@ const resultSource: ResultSource = {
 
 await createSlotGame({
   config: gameConfig,
+  assets,
   resultSource,
   features: [coreDemo()],
 }).start();
