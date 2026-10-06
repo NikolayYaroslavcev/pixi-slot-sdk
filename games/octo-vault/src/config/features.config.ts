@@ -12,18 +12,18 @@ export interface TentacleGrabSettings {
 
 /**
  * The Grab: every Octopus that lands throws 2–4 tentacles, each turns a cell into a Wild
- * with ×2, ×3 or ×5. Weights are relative: 50 / 35 / 15 means half of the Octopuses throw two.
+ * with ×2, ×3 or ×5. Weights are relative: 60 / 30 / 10 means 60% of the Octopuses throw two.
  */
 export const tentacleGrabConfig: TentacleGrabSettings = {
   tentacles: [
-    { value: 2, weight: 50 },
-    { value: 3, weight: 35 },
-    { value: 4, weight: 15 },
-  ],
-  multipliers: [
     { value: 2, weight: 60 },
     { value: 3, weight: 30 },
-    { value: 5, weight: 10 },
+    { value: 4, weight: 10 },
+  ],
+  multipliers: [
+    { value: 2, weight: 72 },
+    { value: 3, weight: 21 },
+    { value: 5, weight: 7 },
   ],
 };
 
@@ -53,7 +53,7 @@ export interface BonusBuySettings {
 /** Buy free spins straight away instead of waiting for 3 Keys. */
 export const bonusBuyConfig: BonusBuySettings = {
   mode: 'bonus',
-  priceInBets: 100,
+  priceInBets: 88,
   freeSpins: 10,
 };
 

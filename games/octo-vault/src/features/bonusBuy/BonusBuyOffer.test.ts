@@ -1,4 +1,4 @@
-import type { BoughtRound, PopupContent } from 'slot-sdk';
+import { formatMoney, type BoughtRound, type PopupContent } from 'slot-sdk';
 import { describe, expect, it, vi } from 'vitest';
 import { bonusBuyConfig } from '../../config/features.config';
 import { BonusBuyOffer } from './BonusBuyOffer';
@@ -24,7 +24,7 @@ describe('BonusBuyOffer', () => {
     const { offer } = createOffer();
 
     expect(offer.price).toBe(price);
-    expect(offer.label).toContain('200.00');
+    expect(offer.label).toContain(formatMoney(price));
   });
 
   it('asks for confirmation with the price, then buys the bonus round for it', async () => {
@@ -32,7 +32,7 @@ describe('BonusBuyOffer', () => {
 
     await offer.press();
 
-    expect(popup.open.mock.calls[0]?.[0].message).toContain('200.00');
+    expect(popup.open.mock.calls[0]?.[0].message).toContain(formatMoney(price));
     expect(round.buy).toHaveBeenCalledWith({ mode: bonusBuyConfig.mode, cost: price });
   });
 
