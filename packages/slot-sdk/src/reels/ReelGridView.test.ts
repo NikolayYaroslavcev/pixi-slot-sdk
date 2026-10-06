@@ -8,6 +8,7 @@ import { rowCenterY } from './reelGeometry';
 import { ReelGrid } from './ReelGrid';
 import { ReelGridView } from './ReelGridView';
 import { ReelMotionSystem } from './ReelMotionSystem';
+import { HighlightSystem } from '../wins/Highlight';
 
 type TestSymbol = 'a' | 'b' | 'c';
 
@@ -64,7 +65,7 @@ function createView() {
     system.update(ms);
     view.update();
   };
-  return { grid, system, view, frame };
+  return { world, grid, system, view, frame };
 }
 
 function reelSprites(view: ReelGridView, reelIndex: number): Sprite[] {
@@ -93,6 +94,37 @@ describe('ReelGridView', () => {
     expect(visibleTextures(view, 0)).toEqual([textures.get('a'), textures.get('b')]);
     expect(visibleTextures(view, 1)).toEqual([textures.get('b'), textures.get('a')]);
     expect(reelSprites(view, 1).every((sprite) => sprite.x === 160)).toBe(true);
+  });
+
+  it('draws highlighted symbols larger and dimmed ones darker, and restores them', () => {
+    const { world, grid, view } = createView();
+    const highlight = new HighlightSystem(world, grid, {
+      dimBrightness: 0.5,
+      fadeMs: 0,
+      pulseScale: 0.2,
+      pulseMs: 400,
+    });
+    const spriteAt = (rowIndex: number) =>
+      reelSprites(view, 0).find((sprite) => sprite.y === rowCenterY(rowIndex, options));
+
+    highlight.show([{ reelIndex: 0, rowIndex: 0 }]);
+    highlight.update(200);
+    view.update();
+
+    expect(spriteAt(0)?.width).toBeCloseTo(120);
+    expect(spriteAt(0)?.tint).toBe(0xffffff);
+    expect(spriteAt(1)?.width).toBe(100);
+    expect(spriteAt(1)?.tint).toBe(0x808080);
+
+    highlight.clear();
+    view.update();
+    expect(spriteAt(0)?.width).toBe(100);
+    expect(spriteAt(1)?.tint).toBe(0xffffff);
+  });
+
+  it('gives the center of a cell inside the panel', () => {
+    const { view } = createView();
+    expect(view.cellCenter({ reelIndex: 1, rowIndex: 0 })).toEqual({ x: 180, y: 70 });
   });
 
   it('keeps fixed bounds of panel size', () => {

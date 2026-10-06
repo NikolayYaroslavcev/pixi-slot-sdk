@@ -1,8 +1,9 @@
 import { BlurFilter, Container, Graphics, Rectangle, Sprite, type ColorSource } from 'pixi.js';
 import type { LoadedAssets } from '../assets/LoadedAssets';
 import type { System, World } from '../ecs/World';
-import { ReelMotion, ReelStrip } from './components';
-import { cellsSize, reelCenterX, rowCenterY, type CellMetrics } from './reelGeometry';
+import { Highlight, type HighlightData } from '../wins/Highlight';
+import { ReelMotion, ReelStrip, type CellPosition } from './components';
+import { cellCenter, cellsSize, reelCenterX, rowCenterY, type CellMetrics } from './reelGeometry';
 import type { ReelGrid } from './ReelGrid';
 import type { ReelMotionData } from './reelMotion';
 import { poolSlot, slotSymbol, type FieldColumn } from './reelSlots';
@@ -35,6 +36,8 @@ interface ReelColumn {
   readonly field: FieldColumn;
   readonly motion: ReelMotionData;
   readonly strip: readonly string[];
+  /** Reused to look up a cell of this reel every frame without creating objects. */
+  readonly cell: CellPosition;
 }
 
 /**
@@ -44,6 +47,7 @@ interface ReelColumn {
  * below for the symbols that are scrolling in and out. Every frame each sprite is placed
  * by the reel's `ReelMotion` and gets the texture of the slot it shows now. A mask hides
  * the spare sprites. Sprites live here, not in components: the world stays free of Pixi.
+ * A symbol with a `Highlight` is drawn with its brightness and size.
  *
  * Create it after `ReelMotionSystem`, which gives the reels their strip and motion.
  */
@@ -54,7 +58,7 @@ export class ReelGridView implements System {
 
   constructor(
     private readonly world: World,
-    grid: ReelGrid<string>,
+    private readonly grid: ReelGrid<string>,
     private readonly assets: LoadedAssets,
     private readonly options: ReelGridViewOptions,
   ) {
@@ -78,6 +82,12 @@ export class ReelGridView implements System {
     this.update();
   }
 
+  /** Center of a cell in the coordinates of `container`. */
+  cellCenter(position: CellPosition): { x: number; y: number } {
+    const center = cellCenter(position, this.options);
+    return { x: center.x + this.options.padding, y: center.y + this.options.padding };
+  }
+
   update(): void {
     // Plain loops: this runs every frame and creates nothing.
     for (const column of this.columns) {
@@ -96,6 +106,7 @@ export class ReelGridView implements System {
       sprite.y = rowCenterY(slot + motion.position, this.options);
       const symbolId = slotSymbol(slot, motion, column.strip, column.field);
       this.showSymbol(sprite, symbolId);
+      this.showHighlight(sprite, column, slot - motion.restSlot);
     }
     this.blurBySpeed(column.blur, motion.speed);
   }
@@ -106,7 +117,25 @@ export class ReelGridView implements System {
       return;
     }
     sprite.texture = texture;
-    sprite.setSize(this.options.cellWidth, this.options.cellHeight);
+  }
+
+  /** `rowIndex` is the field row the sprite shows; outside the field there is no highlight. */
+  private showHighlight(sprite: Sprite, column: ReelColumn, rowIndex: number): void {
+    const highlight = this.highlightAt(column, rowIndex);
+    const scale = highlight?.scale ?? 1;
+    sprite.setSize(this.options.cellWidth * scale, this.options.cellHeight * scale);
+    const tint = grayTint(highlight?.brightness ?? 1);
+    if (sprite.tint !== tint) {
+      sprite.tint = tint;
+    }
+  }
+
+  private highlightAt(column: ReelColumn, rowIndex: number): HighlightData | undefined {
+    if (rowIndex < 0 || rowIndex >= column.field.rowCount) {
+      return undefined;
+    }
+    column.cell.rowIndex = rowIndex;
+    return this.world.get(this.grid.symbolEntity(column.cell), Highlight);
   }
 
   private blurBySpeed(blur: BlurFilter, speed: number): void {
@@ -148,6 +177,7 @@ export class ReelGridView implements System {
       motion,
       strip: strip.symbols,
       field: fieldColumn(grid, reelIndex),
+      cell: { reelIndex, rowIndex: 0 },
     };
   }
 }
@@ -162,4 +192,10 @@ function fieldColumn(grid: ReelGrid<string>, reelIndex: number): FieldColumn {
       return grid.symbolAt(cell);
     },
   };
+}
+
+/** A tint that darkens a sprite evenly: 1 keeps its colors, 0 makes it black. */
+function grayTint(brightness: number): number {
+  const level = Math.round(Math.min(Math.max(brightness, 0), 1) * 255);
+  return (level << 16) | (level << 8) | level;
 }
