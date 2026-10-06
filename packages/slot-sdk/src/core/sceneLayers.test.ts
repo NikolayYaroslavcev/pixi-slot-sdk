@@ -3,12 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { createSceneLayers } from './sceneLayers';
 
 describe('createSceneLayers', () => {
-  it('adds the layers to the stage from back to front', () => {
-    const stage = new Container();
+  it('adds the layers to the design root from back to front', () => {
+    const designRoot = new Container();
 
-    createSceneLayers(stage);
+    createSceneLayers(designRoot);
 
-    expect(stage.children.map((layer) => layer.label)).toEqual([
+    expect(designRoot.children.map((layer) => layer.label)).toEqual([
       'background',
       'scene',
       'reels',

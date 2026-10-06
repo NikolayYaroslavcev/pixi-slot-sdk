@@ -1,13 +1,15 @@
-import { Application } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
 import { AssetLoader } from '../assets/AssetLoader';
 import type { AssetManifest } from '../assets/AssetManifest';
-import type { LoadedAssets } from '../assets/LoadedAssets';
 import { LoadingScreen } from '../assets/LoadingScreen';
 import { loadAssetsWithRetry } from '../assets/loadAssetsWithRetry';
 import { World } from '../ecs/World';
 import { RoundPlayer } from '../flow/RoundPlayer';
 import { StateMachine } from '../flow/StateMachine';
+import type { LayoutConfig } from '../layout/LayoutConfig';
+import { LayoutDebug, isLayoutDebugEnabled } from '../layout/LayoutDebug';
 import { LayoutManager } from '../layout/LayoutManager';
+import { connectLayoutToPage, screenResolution } from '../layout/viewport';
 import type { ResultSource } from '../math/round';
 import { EventBus } from './EventBus';
 import type { Feature } from './Feature';
@@ -21,6 +23,7 @@ import { configureTicker } from './ticker';
 export interface SlotGameOptions {
   config: GameConfig;
   assets: AssetManifest;
+  layout: LayoutConfig;
   resultSource: ResultSource;
   /** Installed in this order, after assets have loaded and before the first frame. */
   features?: Feature[];
@@ -43,7 +46,7 @@ export class SlotGame {
     const { config, features = [] } = this.options;
 
     const app = await createApplication(config);
-    const layers = createSceneLayers(app.stage);
+    const { layers, layout } = createScene(app, this.options.layout);
     const loadingScreen = new LoadingScreen(app, config.loadingScreen, config.backgroundColor);
     app.stage.addChild(loadingScreen.view);
     const loader = new AssetLoader(this.options.assets, app.renderer);
@@ -51,7 +54,7 @@ export class SlotGame {
 
     const world = new World();
     const stateMachine = new StateMachine();
-    const context = this.createContext(app, layers, world, assets);
+    const context = this.createContext({ app, layers, layout, world, assets });
     for (const feature of features) {
       feature.install(context);
     }
@@ -61,36 +64,61 @@ export class SlotGame {
   }
 
   private createContext(
-    app: Application,
-    layers: SceneLayers,
-    world: World,
-    assets: LoadedAssets,
+    parts: Pick<GameContext, 'app' | 'layers' | 'layout' | 'world' | 'assets'>,
   ): GameContext {
     const { config, resultSource } = this.options;
     const events = new EventBus<GameEvents>();
     return {
-      app,
-      layers,
-      world,
+      ...parts,
       events,
       model: new GameModel(events, { balance: config.initialBalance, bet: config.initialBet }),
-      layout: new LayoutManager(app.renderer),
       config,
       resultSource,
-      assets,
       // Features see the round player only as a registry: playing a round is the core's job.
       steps: new RoundPlayer(),
     };
   }
 }
 
-/** Creates the Pixi application and adds its canvas to the page. Its ticker is not running yet. */
+/**
+ * Creates the Pixi application and adds its canvas to the page. Its ticker is not running yet.
+ * The canvas takes the size of `<body>`, which the page stretches to the visible viewport.
+ */
 async function createApplication(config: GameConfig): Promise<Application> {
   const app = new Application();
-  // autoStart: false keeps frames from running until assets are loaded and features installed.
-  await app.init({ background: config.backgroundColor, resizeTo: window, autoStart: false });
+  await app.init({
+    background: config.backgroundColor,
+    resizeTo: document.body,
+    resolution: screenResolution(),
+    // Keeps the canvas CSS size equal to the screen while its buffer has `resolution` times more pixels.
+    autoDensity: true,
+    // Keeps frames from running until assets are loaded and features installed.
+    autoStart: false,
+  });
   document.body.appendChild(app.canvas);
   return app;
+}
+
+/**
+ * Builds the scene tree `stage → designRoot → layers` and keeps it fitted to the page.
+ * The loading screen is added to the stage later, above the design root.
+ */
+function createScene(
+  app: Application,
+  layoutConfig: LayoutConfig,
+): { layers: SceneLayers; layout: LayoutManager } {
+  const designRoot = new Container({ label: 'designRoot' });
+  app.stage.addChild(designRoot);
+  const layers = createSceneLayers(designRoot);
+  const layout = new LayoutManager(designRoot, layoutConfig);
+  connectLayoutToPage(app, document.body, layout);
+  if (isLayoutDebugEnabled(window.location.search)) {
+    const layoutDebug = new LayoutDebug(layers.debug, layout);
+    app.ticker.add(() => {
+      layoutDebug.draw();
+    });
+  }
+  return { layers, layout };
 }
 
 /** Updates the world and the current state every frame, then starts the ticker. */

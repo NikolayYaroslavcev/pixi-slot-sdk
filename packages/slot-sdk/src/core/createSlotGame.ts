@@ -1,4 +1,5 @@
 import { findManifestProblems } from '../assets/AssetManifest';
+import { findLayoutProblems } from '../layout/LayoutConfig';
 import { isMinorUnits } from '../math/money';
 import { SlotGame, type SlotGameOptions } from './SlotGame';
 
@@ -7,11 +8,15 @@ import { SlotGame, type SlotGameOptions } from './SlotGame';
  * Throws one error that lists every problem found, so a broken config is fixed in one pass.
  *
  * ```ts
- * await createSlotGame({ config, assets, resultSource, features: [myFeature()] }).start();
+ * await createSlotGame({ config, assets, layout, resultSource, features: [myFeature()] }).start();
  * ```
  */
 export function createSlotGame(options: SlotGameOptions): SlotGame {
-  const problems = [...findOptionProblems(options), ...findAssetProblems(options)];
+  const problems = [
+    ...findOptionProblems(options),
+    ...findAssetProblems(options),
+    ...findLayoutProblems(options.layout),
+  ];
   if (problems.length > 0) {
     throw new Error(`createSlotGame: invalid options\n- ${problems.join('\n- ')}`);
   }

@@ -11,7 +11,13 @@ export type { GameEvents } from './core/GameEvents';
 export type { GameModel } from './core/GameModel';
 
 export type { World, System } from './ecs/World';
-export type { LayoutManager, ResizeListener } from './layout/LayoutManager';
+export type { LayoutManager } from './layout/LayoutManager';
+export type {
+  LayoutConfig,
+  LayoutNode,
+  LayoutVariant,
+  LayoutVariantName,
+} from './layout/LayoutConfig';
 export type { StepHandler, StepRegistry } from './flow/RoundPlayer';
 export type { ResultSource, RoundRequest, RoundResult, RoundStep } from './math/round';
 

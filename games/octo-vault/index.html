@@ -21,7 +21,23 @@
         background: #062033;
       }
 
+      /*
+       * The canvas takes the size of <body>. 100dvh follows the mobile toolbar as it shows and hides
+       * (100% is the fallback for older browsers). The padding is not visual: the SDK reads it
+       * as the safe area and keeps the design area out of notches and system bars.
+       */
+      body {
+        box-sizing: border-box;
+        height: 100dvh;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+          env(safe-area-inset-left);
+      }
+
+      /* Fixed at the corner, so the background reaches under the notch despite the padding. */
       canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
         display: block;
       }
     </style>

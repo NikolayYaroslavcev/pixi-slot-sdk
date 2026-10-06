@@ -2,7 +2,7 @@ import { Container } from 'pixi.js';
 
 // A type alias rather than an interface, so `Object.values` below knows the values are containers.
 /**
- * Top-level containers of the scene, from back to front.
+ * Containers of the scene inside the design root, from back to front. They use design coordinates.
  * Each part of a game adds its objects to its own layer, so draw order never depends
  * on which code ran first.
  */
@@ -17,8 +17,8 @@ export type SceneLayers = {
   readonly debug: Container;
 };
 
-/** Creates the layers and adds them to `stage` in back-to-front order. */
-export function createSceneLayers(stage: Container): SceneLayers {
+/** Creates the layers and adds them to `designRoot` in back-to-front order. */
+export function createSceneLayers(designRoot: Container): SceneLayers {
   // Object keys keep insertion order, so this literal is the single source of the draw order.
   const layers: SceneLayers = {
     background: new Container({ label: 'background' }),
@@ -29,6 +29,6 @@ export function createSceneLayers(stage: Container): SceneLayers {
     popups: new Container({ label: 'popups' }),
     debug: new Container({ label: 'debug' }),
   };
-  stage.addChild(...Object.values<Container>(layers));
+  designRoot.addChild(...Object.values<Container>(layers));
   return layers;
 }

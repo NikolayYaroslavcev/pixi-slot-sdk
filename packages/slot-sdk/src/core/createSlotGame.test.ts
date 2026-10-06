@@ -17,6 +17,10 @@ function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
       game: [],
       symbols: { low: { color: '#3366cc', label: 'Low' } },
     },
+    layout: {
+      landscape: { width: 1920, height: 1080, nodes: {} },
+      portrait: { width: 1080, height: 1920, nodes: {} },
+    },
     resultSource: { play: () => Promise.reject(new Error('not used')) },
   };
 }
@@ -63,5 +67,12 @@ describe('createSlotGame', () => {
     options.assets = { ...options.assets, symbols: {} };
 
     expect(() => createSlotGame(options)).toThrow(/initialBet[\s\S]*assets\.symbols/);
+  });
+
+  it('reports layout problems', () => {
+    const options = createOptions();
+    options.layout.landscape.nodes = { logo: { x: 960, y: 100 } };
+
+    expect(() => createSlotGame(options)).toThrow('layout.portrait.nodes is missing "logo"');
   });
 });
