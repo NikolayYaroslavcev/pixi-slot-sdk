@@ -40,6 +40,7 @@ export function freeSpins(reels: ReelsFeature): Feature {
 class FreeSpinsSeries {
   private readonly panel = new FreeSpinsPanel(freeSpinsLook.panel);
   private readonly banner: FreeSpinsBanner;
+  private active = false;
 
   constructor(
     private readonly context: GameContext,
@@ -53,6 +54,7 @@ class FreeSpinsSeries {
   }
 
   async start(step: FreeSpinsStartStep, skip: AbortSignal): Promise<void> {
+    this.setActive(true);
     this.panel.show({ spin: 0, count: step.count, seriesWin: 0 });
     this.field.highlight.show(step.scatters);
     this.banner.show(freeSpinsLook.texts.intro, String(step.count));
@@ -82,9 +84,18 @@ class FreeSpinsSeries {
 
   /** Back to the base game: no held Wilds, no counter, no card. Safe to call at any time. */
   clear(): void {
+    this.setActive(false);
     releaseStickyWilds(this.context.world);
     this.panel.hide();
     this.banner.hide();
+  }
+
+  /** Tells the rest of the game, e.g. the background, when a series begins and ends. */
+  private setActive(active: boolean): void {
+    if (this.active !== active) {
+      this.active = active;
+      this.context.events.emit('freeSpinsActive', active);
+    }
   }
 
   private pause(ms: number, skip: AbortSignal): Promise<void> {

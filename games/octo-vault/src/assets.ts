@@ -5,7 +5,10 @@ import type { SymbolId } from './config/symbols';
 export const assets = {
   preload: [{ alias: 'logo', src: 'assets/logo.svg' }],
   game: [
-    { alias: 'background', src: 'assets/background.svg' },
+    { alias: 'background', src: 'assets/scene/background.svg' },
+    { alias: 'lightRays', src: 'assets/scene/light-rays.svg' },
+    { alias: 'bubble', src: 'assets/scene/bubble.svg' },
+    { alias: 'reelFrame', src: 'assets/scene/reel-frame.svg' },
     { alias: 'titleFont', src: 'assets/fonts/LilitaOne-Regular.ttf', family: 'Lilita One' },
   ],
   // Own vector art (docs/assets.md). Each symbol is a square tile, so it fills its cell.

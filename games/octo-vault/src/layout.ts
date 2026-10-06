@@ -7,7 +7,7 @@ const center = { x: 0.5, y: 0.5 };
 
 /**
  * Where the scene objects go, in design coordinates of each variant.
- * Landscape: the reels in the middle, Spin to their right, balance, bet and win in a row below.
+ * Landscape: the logo left of the reels, Spin to their right, balance, bet and win in a row below.
  * Bonus Buy sits under Spin in landscape and next to it in portrait.
  * Free spins put their counter and series win left of the reels in landscape and on both sides
  * of the title in portrait.
@@ -20,32 +20,32 @@ export const layout: LayoutConfig<NodeName> = {
     width: 1920,
     height: 1080,
     nodes: {
-      title: { x: 960, y: 74, anchor: center },
-      reels: { x: 960, y: 515, scale: 0.94, anchor: center },
-      freeSpinsCount: { x: 255, y: 440 },
-      freeSpinsWin: { x: 255, y: 590 },
-      spinButton: { x: 1665, y: 515 },
-      bonusBuy: { x: 1665, y: 760 },
-      message: { x: 960, y: 918 },
+      title: { x: 270, y: 290, scale: 0.82 },
+      reels: { x: 1000, y: 470, scale: 0.98, anchor: center },
+      freeSpinsCount: { x: 270, y: 610 },
+      freeSpinsWin: { x: 270, y: 760 },
+      spinButton: { x: 1715, y: 470 },
+      bonusBuy: { x: 1715, y: 720 },
+      message: { x: 1000, y: 922 },
       balance: { x: 330, y: 1005 },
-      bet: { x: 960, y: 1005 },
-      win: { x: 1590, y: 1005 },
+      bet: { x: 1000, y: 1005 },
+      win: { x: 1660, y: 1005 },
     },
   },
   portrait: {
     width: 1080,
     height: 1920,
     nodes: {
-      title: { x: 540, y: 200, anchor: center },
-      reels: { x: 540, y: 720, scale: 1.05, anchor: center },
+      title: { x: 540, y: 185, scale: 0.75 },
+      reels: { x: 540, y: 790, anchor: center },
       freeSpinsCount: { x: 145, y: 215 },
       freeSpinsWin: { x: 935, y: 215 },
-      message: { x: 540, y: 1215 },
-      balance: { x: 260, y: 1335, scale: 1.15 },
-      win: { x: 820, y: 1335, scale: 1.15 },
-      bet: { x: 540, y: 1485, scale: 1.1 },
-      spinButton: { x: 540, y: 1720, scale: 1.3 },
-      bonusBuy: { x: 890, y: 1720 },
+      message: { x: 540, y: 1262 },
+      balance: { x: 260, y: 1370, scale: 1.15 },
+      win: { x: 820, y: 1370, scale: 1.15 },
+      bet: { x: 540, y: 1515, scale: 1.1 },
+      spinButton: { x: 540, y: 1735, scale: 1.3 },
+      bonusBuy: { x: 890, y: 1735 },
     },
   },
 };

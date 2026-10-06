@@ -1,3 +1,4 @@
+import { Assets, Sprite, type Texture } from 'pixi.js';
 import {
   FieldWinView,
   HighlightSystem,
@@ -7,6 +8,7 @@ import {
   type Feature,
 } from 'slot-sdk';
 import { reelsConfig } from '../config/reels.config';
+import { reelFrameBorder } from '../config/scenery.config';
 import type { SymbolId } from '../config/symbols';
 
 /** The parts of the field that the game's mechanics work with. */
@@ -25,7 +27,7 @@ export interface ReelsFeature extends Feature {
 /**
  * The 5 × 4 field. `ReelGrid` holds which symbol is in each cell as entities of the world,
  * `ReelMotionSystem` spins the reels, `HighlightSystem` lights winning symbols and
- * `ReelGridView` draws them in the `reels` layer. The world updates motion and highlight first,
+ * `ReelGridView` draws them in the `reels` layer, inside the frame. The world updates motion and highlight first,
  * so the view draws each frame's final state.
  * The round flow gets the spinner: it starts the reels on Spin and lands them on each `reveal`.
  * The win presentation gets the field: it lights the wins and draws their lines on it.
@@ -48,6 +50,11 @@ export function reels(): ReelsFeature {
       context.world.addSystem(spinner);
       context.world.addSystem(highlight);
       context.world.addSystem(view);
+      // The frame goes over the symbols: its dividers sit in the gaps between reels and its
+      // shade darkens the top and bottom rows a little, as if the reels were deep in the frame.
+      const frame = new Sprite(Assets.get<Texture>('reelFrame'));
+      frame.position.set(-reelFrameBorder);
+      view.container.addChild(frame);
       context.layers.reels.addChild(view.container);
       context.layout.addNode('reels', view.container);
       context.round.useReels(spinner);

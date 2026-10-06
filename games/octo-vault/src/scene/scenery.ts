@@ -1,7 +1,12 @@
-import { Assets, Sprite, Text, type Texture } from 'pixi.js';
+import { Assets, Sprite, type Texture } from 'pixi.js';
 import type { Feature } from 'slot-sdk';
+import { ambientSeaLook } from '../config/scenery.config';
+import { AmbientSea } from './AmbientSea';
 
-/** Everything behind and around the reels: the sea background and the game title. */
+/**
+ * Everything behind and around the reels: the deep-sea background with its moving water,
+ * and the game logo. Free spins darken the water (`freeSpinsActive`).
+ */
 export function scenery(): Feature {
   return {
     install(context) {
@@ -9,12 +14,19 @@ export function scenery(): Feature {
       context.layers.background.addChild(background);
       context.layout.setBackground(background);
 
-      const title = new Text({
-        text: 'OCTO VAULT',
-        style: { fill: '#e8fbff', fontSize: 88, fontFamily: 'Lilita One', letterSpacing: 4 },
+      const textures = {
+        rays: Assets.get<Texture>('lightRays'),
+        bubble: Assets.get<Texture>('bubble'),
+      };
+      const sea = new AmbientSea(textures, context.layout, context.app.ticker, ambientSeaLook);
+      context.layers.background.addChild(sea.view);
+      context.events.on('freeSpinsActive', (active) => {
+        sea.setFreeSpins(active);
       });
-      context.layers.scene.addChild(title);
-      context.layout.addNode('title', title);
+
+      const logo = new Sprite({ texture: Assets.get<Texture>('logo'), anchor: 0.5 });
+      context.layers.scene.addChild(logo);
+      context.layout.addNode('title', logo);
     },
   };
 }
