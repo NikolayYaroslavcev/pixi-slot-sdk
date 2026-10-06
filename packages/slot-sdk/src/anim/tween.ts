@@ -96,6 +96,26 @@ export function wait(ticker: Ticker, durationMs: number): Tween<object> {
   return new Tween(ticker, {}, {}, { duration: durationMs });
 }
 
+/** Like `wait`, but also ends as soon as `skip` is aborted, or right away if it already is. */
+export async function waitUnlessSkipped(
+  ticker: Ticker,
+  durationMs: number,
+  skip: AbortSignal,
+): Promise<void> {
+  const timer = wait(ticker, durationMs);
+  if (skip.aborted) {
+    timer.finish();
+  }
+  skip.addEventListener(
+    'abort',
+    () => {
+      timer.finish();
+    },
+    { once: true },
+  );
+  await timer;
+}
+
 function pickValues<Target extends object>(
   target: Target,
   endValues: TweenProps<Target>,

@@ -10,6 +10,7 @@ function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
       initialBet: 100,
       backgroundColor: '#000000',
       loadingScreen: { logo: 'logo', barColor: '#ffffff', textColor: '#ffffff' },
+      presentation: { winsMs: 1000, totalWinMs: 500 },
       ...config,
     },
     assets: {
@@ -44,6 +45,12 @@ describe('createSlotGame', () => {
     expect(() => createSlotGame(createOptions({ initialBalance: -1, initialBet: 0 }))).toThrow(
       /initialBalance[\s\S]*initialBet/,
     );
+  });
+
+  it('rejects a negative presentation time', () => {
+    expect(() =>
+      createSlotGame(createOptions({ presentation: { winsMs: -1, totalWinMs: 500 } })),
+    ).toThrow('config.presentation.winsMs must be 0 or more milliseconds, got -1');
   });
 
   it('rejects a feature without install', () => {

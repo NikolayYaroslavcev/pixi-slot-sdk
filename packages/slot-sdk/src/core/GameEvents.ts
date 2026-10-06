@@ -1,3 +1,5 @@
+import type { Win } from '../math/round';
+
 /**
  * Events of the SDK core and their payloads. `GameContext.events` carries this map.
  *
@@ -22,4 +24,6 @@ export interface GameEvents {
   reelStopped: { reelIndex: number };
   /** The last reel of the spin has come to rest. */
   spinCompleted: undefined;
+  /** A `wins` step started: these combinations are on screen now. */
+  winsShown: { wins: readonly Win[]; amount: number };
 }

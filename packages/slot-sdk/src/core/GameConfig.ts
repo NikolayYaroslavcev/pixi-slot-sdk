@@ -1,5 +1,6 @@
 import type { ColorSource } from 'pixi.js';
 import type { LoadingScreenStyle } from '../assets/LoadingScreen';
+import type { PresentationTiming } from '../flow/winSteps';
 
 /** Settings of a game that the SDK core needs. Money is in minor units (cents). */
 export interface GameConfig {
@@ -10,4 +11,6 @@ export interface GameConfig {
   /** Canvas color behind all layers, also the loading screen background. */
   backgroundColor: ColorSource;
   loadingScreen: LoadingScreenStyle;
+  /** How long the SDK win steps stay on screen. */
+  presentation: PresentationTiming;
 }

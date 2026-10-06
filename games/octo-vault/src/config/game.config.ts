@@ -9,4 +9,6 @@ export const gameConfig: GameConfig = {
     barColor: '#3ee6c4',
     textColor: '#e8fbff',
   },
+  // Short holds, as in the reference games: a win reads in about a second.
+  presentation: { winsMs: 1400, totalWinMs: 900 },
 };

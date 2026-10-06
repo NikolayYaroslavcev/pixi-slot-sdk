@@ -1,11 +1,13 @@
-import { Application, Container } from 'pixi.js';
+import { Application, Container, type Ticker } from 'pixi.js';
 import { AssetLoader } from '../assets/AssetLoader';
 import type { AssetManifest } from '../assets/AssetManifest';
 import { LoadingScreen } from '../assets/LoadingScreen';
 import { loadAssetsWithRetry } from '../assets/loadAssetsWithRetry';
 import { World } from '../ecs/World';
+import { waitUnlessSkipped } from '../anim/tween';
 import { RoundPlayer } from '../flow/RoundPlayer';
 import { StateMachine } from '../flow/StateMachine';
+import { registerWinSteps, type Pause } from '../flow/winSteps';
 import type { LayoutConfig } from '../layout/LayoutConfig';
 import { LayoutDebug, isLayoutDebugEnabled } from '../layout/LayoutDebug';
 import { LayoutManager } from '../layout/LayoutManager';
@@ -68,15 +70,12 @@ export class SlotGame {
   ): GameContext {
     const { config, resultSource } = this.options;
     const events = new EventBus<GameEvents>();
-    return {
-      ...parts,
-      events,
-      model: new GameModel(events, { balance: config.initialBalance, bet: config.initialBet }),
-      config,
-      resultSource,
-      // Features see the round player only as a registry: playing a round is the core's job.
-      steps: new RoundPlayer(),
-    };
+    const model = new GameModel(events, { balance: config.initialBalance, bet: config.initialBet });
+    const player = new RoundPlayer();
+    const pause = createPause(parts.app.ticker);
+    registerWinSteps(player, { events, model, pause, timing: config.presentation });
+    // Features see the round player only as a registry: playing a round is the core's job.
+    return { ...parts, events, model, config, resultSource, steps: player };
   }
 }
 
@@ -119,6 +118,11 @@ function createScene(
     });
   }
   return { layers, layout };
+}
+
+/** Pauses of the round steps run on the game ticker, so they stop with it on a hidden tab. */
+function createPause(ticker: Ticker): Pause {
+  return (ms, skip) => waitUnlessSkipped(ticker, ms, skip);
 }
 
 /** Updates the world and the current state every frame, then starts the ticker. */

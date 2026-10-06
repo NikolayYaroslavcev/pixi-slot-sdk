@@ -1,7 +1,7 @@
 import { Ticker } from 'pixi.js';
 import { describe, expect, it, vi } from 'vitest';
 import { easeInQuad } from './easing';
-import { tween, wait } from './tween';
+import { tween, wait, waitUnlessSkipped } from './tween';
 
 // A ticker that never runs on its own: each `advance` is one frame of the given length.
 function createManualTicker(): { ticker: Ticker; advance: (ms: number) => void } {
@@ -118,5 +118,37 @@ describe('wait', () => {
     pause.finish();
 
     await expect(Promise.resolve(pause)).resolves.toBeUndefined();
+  });
+});
+
+describe('waitUnlessSkipped', () => {
+  it('waits the full time when nothing skips it', async () => {
+    const { ticker, advance } = createManualTicker();
+    const onDone = vi.fn();
+    void waitUnlessSkipped(ticker, 100, new AbortController().signal).then(onDone);
+
+    advance(60);
+    await Promise.resolve();
+    expect(onDone).not.toHaveBeenCalled();
+    advance(60);
+    await vi.waitFor(() => {
+      expect(onDone).toHaveBeenCalledOnce();
+    });
+  });
+
+  it('ends as soon as the signal is aborted', async () => {
+    const { ticker } = createManualTicker();
+    const skip = new AbortController();
+    const waiting = waitUnlessSkipped(ticker, 10_000, skip.signal);
+
+    skip.abort();
+
+    await expect(waiting).resolves.toBeUndefined();
+  });
+
+  it('ends right away when the signal is already aborted', async () => {
+    const { ticker } = createManualTicker();
+
+    await expect(waitUnlessSkipped(ticker, 10_000, AbortSignal.abort())).resolves.toBeUndefined();
   });
 });

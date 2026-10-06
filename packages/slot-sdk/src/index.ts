@@ -28,7 +28,17 @@ export type {
   LayoutVariantName,
 } from './layout/LayoutConfig';
 export type { StepHandler, StepRegistry } from './flow/RoundPlayer';
-export type { ResultSource, RoundRequest, RoundResult, RoundStep } from './math/round';
+export type {
+  ResultSource,
+  RoundRequest,
+  RoundResult,
+  RoundStep,
+  RevealStep,
+  WinsStep,
+  TotalWinStep,
+  StandardStep,
+  Win,
+} from './math/round';
 
 export type { AssetEntry, AssetManifest, SymbolPlaceholder } from './assets/AssetManifest';
 export type { LoadedAssets } from './assets/LoadedAssets';

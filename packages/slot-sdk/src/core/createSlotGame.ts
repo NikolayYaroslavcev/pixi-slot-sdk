@@ -40,6 +40,13 @@ function findOptionProblems(options: SlotGameOptions): string[] {
   if (typeof resultSource.play !== 'function') {
     problems.push('resultSource must have a play(request) method');
   }
+  for (const [name, ms] of Object.entries(config.presentation)) {
+    if (!(ms >= 0)) {
+      problems.push(
+        `config.presentation.${name} must be 0 or more milliseconds, got ${String(ms)}`,
+      );
+    }
+  }
   features.forEach((feature, index) => {
     if (typeof feature.install !== 'function') {
       problems.push(`features[${String(index)}] must have an install(context) method`);
