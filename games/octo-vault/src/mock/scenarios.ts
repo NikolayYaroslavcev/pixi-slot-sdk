@@ -46,8 +46,16 @@ export const scenarios = {
     ['key', 'crown', 'octopus', 'anchor'],
     ['starfish', 'pearl', 'shell', 'seahorse'],
   ],
-  /** Crowns and Wilds almost everywhere: many lines at once, far above 10 bets. */
+  /** 5 Crowns on the top row and 3 Fish on the bottom: 15.3 bets, a Big Win below Mega Win. */
   bigwin: [
+    ['crown', 'shell', 'pearl', 'fish'],
+    ['crown', 'starfish', 'anchor', 'fish'],
+    ['crown', 'fish', 'key', 'fish'],
+    ['crown', 'seahorse', 'shell', 'anchor'],
+    ['crown', 'pearl', 'starfish', 'seahorse'],
+  ],
+  /** Crowns and Wilds almost everywhere: ten lines at once, over 100 bets. */
+  megawin: [
     ['crown', 'crown', 'crown', 'chest'],
     ['crown', 'octopus', 'crown', 'chest'],
     ['crown', 'crown', 'octopus', 'chest'],
@@ -70,6 +78,7 @@ export const playlist: readonly FieldScenario[] = [
   'wild',
   'nowin',
   'bigwin',
+  'megawin',
 ];
 
 /**

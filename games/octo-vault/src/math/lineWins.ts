@@ -42,7 +42,8 @@ export function evaluateLines(grid: SymbolGrid, bet: number): LineWin[] {
         lineIndex,
         symbolId,
         count: matchCount,
-        cells: line.slice(0, count).map((rowIndex, reelIndex) => ({ reelIndex, rowIndex })),
+        cells: lineCells(line).slice(0, count),
+        path: lineCells(line),
         // Pays are fractions of the bet; money is rounded to whole minor units once, here.
         amount: Math.round(bet * paytable[symbolId][matchCount]),
       },
@@ -78,6 +79,10 @@ function continuesMatch(symbolId: SymbolId, paying: RegularSymbolId | undefined)
     return false;
   }
   return paying === undefined || symbolId === paying;
+}
+
+function lineCells(line: Payline): CellPosition[] {
+  return line.map((rowIndex, reelIndex) => ({ reelIndex, rowIndex }));
 }
 
 function symbolAt(grid: SymbolGrid, cell: CellPosition): SymbolId {

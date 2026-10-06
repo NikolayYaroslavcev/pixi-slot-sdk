@@ -1,5 +1,6 @@
 import type { RevealStep, RoundResult, WinsStep } from 'slot-sdk';
 import { describe, expect, it, vi } from 'vitest';
+import { gameConfig } from '../config/game.config';
 import { reelsConfig } from '../config/reels.config';
 import { symbols, type SymbolId } from '../config/symbols';
 import { evaluateSpin } from '../math/evaluateSpin';
@@ -34,7 +35,15 @@ describe('Octo Vault scenarios', () => {
     expect(evaluateSpin(scenarios.win, bet).wins).toHaveLength(1);
     expect(evaluateSpin(scenarios.multiwin, bet).wins.length).toBeGreaterThanOrEqual(2);
     expect(evaluateSpin(scenarios.scatter, bet).scatters.length).toBeGreaterThanOrEqual(3);
-    expect(evaluateSpin(scenarios.bigwin, bet).totalWin).toBeGreaterThanOrEqual(10 * bet);
+  });
+
+  it('reach the Big Win and Mega Win thresholds of the game config', () => {
+    const [big, mega] = gameConfig.wins.bigWins.map((tier) => tier.minBets * bet);
+    const bigWin = evaluateSpin(scenarios.bigwin, bet).totalWin;
+
+    expect(bigWin).toBeGreaterThanOrEqual(big ?? Infinity);
+    expect(bigWin).toBeLessThan(mega ?? 0);
+    expect(evaluateSpin(scenarios.megawin, bet).totalWin).toBeGreaterThanOrEqual(mega ?? Infinity);
   });
 
   it('use the Wild in a paying line of the wild scenario', () => {

@@ -113,6 +113,33 @@ describe('LayoutManager', () => {
     expect(bounds.maxY).toBeCloseTo((1440 + 3440) / 2);
   });
 
+  it.each([
+    [1920, 1080],
+    [1280, 720],
+    [390, 844],
+    [844, 390],
+    [768, 1024],
+    [320, 640],
+  ])(
+    'reports the whole %i × %i screen as a visible area around the design area',
+    (width, height) => {
+      const { layout } = createLayout();
+
+      layout.resize({ width, height }, noInsets);
+
+      const area = layout.visibleArea;
+      const variant = layout.variant;
+      if (!area || !variant) {
+        throw new Error('no layout after resize');
+      }
+      expect(area.x).toBeLessThanOrEqual(0);
+      expect(area.y).toBeLessThanOrEqual(0);
+      expect(area.x + area.width).toBeGreaterThanOrEqual(variant.width - 0.001);
+      expect(area.y + area.height).toBeGreaterThanOrEqual(variant.height - 0.001);
+      expect(area.width / area.height).toBeCloseTo(width / height);
+    },
+  );
+
   it('rejects a node that the config does not describe', () => {
     const layout = new LayoutManager(new Container(), config);
 

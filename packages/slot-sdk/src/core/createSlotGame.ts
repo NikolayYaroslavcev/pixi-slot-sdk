@@ -16,6 +16,7 @@ export function createSlotGame(options: SlotGameOptions): SlotGame {
   const problems = [
     ...findOptionProblems(options),
     ...findBetProblems(options.config),
+    ...findWinProblems(options.config),
     ...findAssetProblems(options),
     ...findLayoutProblems(options.layout),
     ...findHudLayoutProblems(options.layout),
@@ -38,16 +39,28 @@ function findOptionProblems(options: SlotGameOptions): string[] {
   if (typeof resultSource.play !== 'function') {
     problems.push('resultSource must have a play(request) method');
   }
-  for (const [name, ms] of Object.entries(config.presentation)) {
-    if (!(ms >= 0)) {
-      problems.push(
-        `config.presentation.${name} must be 0 or more milliseconds, got ${String(ms)}`,
-      );
-    }
-  }
   features.forEach((feature, index) => {
     if (typeof feature.install !== 'function') {
       problems.push(`features[${String(index)}] must have an install(context) method`);
+    }
+  });
+  return problems;
+}
+
+/** Times are waited on and Big Win tiers compared with wins: they must be real, non-negative numbers. */
+function findWinProblems({ wins }: SlotGameOptions['config']): string[] {
+  const problems: string[] = [];
+  for (const [name, ms] of Object.entries(wins.timing)) {
+    if (!(ms >= 0)) {
+      problems.push(`config.wins.timing.${name} must be 0 or more milliseconds, got ${String(ms)}`);
+    }
+  }
+  wins.bigWins.forEach((tier, index) => {
+    const times = [tier.countUpMs, tier.holdMs];
+    if (!(tier.minBets > 0) || !times.every((ms) => ms >= 0)) {
+      problems.push(
+        `config.wins.bigWins[${String(index)}] needs minBets above 0 and times of 0 or more milliseconds`,
+      );
     }
   });
   return problems;

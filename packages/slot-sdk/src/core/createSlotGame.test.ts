@@ -31,6 +31,35 @@ const hud: HudStyle = {
   },
 };
 
+const bigWin = {
+  title: 'BIG WIN',
+  minBets: 10,
+  countUpMs: 2000,
+  holdMs: 1000,
+  color: '#ffcc00',
+  titleScale: 1,
+  particlesPerSecond: 40,
+};
+
+const wins: GameConfig['wins'] = {
+  timing: { allWinsMs: 1000, countUpMs: 600, eachWinMs: 700, totalWinMs: 500, fadeMs: 200 },
+  bigWins: [bigWin],
+  style: {
+    fontFamily: 'Arial',
+    lineColors: ['#ffffff'],
+    lineWidth: 8,
+    textColor: '#ffffff',
+    outlineColor: '#000000',
+    counterFontSize: 80,
+    amountFontSize: 50,
+    overlayColor: '#000000',
+    overlayAlpha: 0.7,
+    bigWinTitleSize: 120,
+    bigWinCounterSize: 100,
+    particles: { colors: ['#ffffff'], radius: 8, lifeMs: 1000, speed: 1000, gravity: 1000 },
+  },
+};
+
 const hudNodes = Object.fromEntries(hudNodeNames.map((name) => [name, { x: 0, y: 0 }]));
 
 function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
@@ -41,7 +70,7 @@ function createOptions(config: Partial<GameConfig> = {}): SlotGameOptions {
       betLevels: [50, 100, 200],
       backgroundColor: '#000000',
       loadingScreen: { logo: 'logo', barColor: '#ffffff', textColor: '#ffffff' },
-      presentation: { winsMs: 1000, totalWinMs: 500 },
+      wins,
       hud,
       ...config,
     },
@@ -98,10 +127,18 @@ describe('createSlotGame', () => {
     );
   });
 
-  it('rejects a negative presentation time', () => {
-    expect(() =>
-      createSlotGame(createOptions({ presentation: { winsMs: -1, totalWinMs: 500 } })),
-    ).toThrow('config.presentation.winsMs must be 0 or more milliseconds, got -1');
+  it('rejects a negative win presentation time', () => {
+    const timing = { ...wins.timing, eachWinMs: -1 };
+    expect(() => createSlotGame(createOptions({ wins: { ...wins, timing } }))).toThrow(
+      'config.wins.timing.eachWinMs must be 0 or more milliseconds, got -1',
+    );
+  });
+
+  it('rejects a Big Win tier without a threshold', () => {
+    const bigWins = [{ ...bigWin, minBets: 0 }];
+    expect(() => createSlotGame(createOptions({ wins: { ...wins, bigWins } }))).toThrow(
+      'config.wins.bigWins[0] needs minBets above 0 and times of 0 or more milliseconds',
+    );
   });
 
   it('rejects a feature without install', () => {

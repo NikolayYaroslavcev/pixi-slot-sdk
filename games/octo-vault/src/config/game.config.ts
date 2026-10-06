@@ -10,8 +10,52 @@ export const gameConfig: GameConfig = {
     barColor: '#3ee6c4',
     textColor: '#e8fbff',
   },
-  // Short holds, as in the reference games: a win reads in about a second.
-  presentation: { winsMs: 1400, totalWinMs: 900 },
+  wins: {
+    // As in the reference games: all wins read in about a second, then each line briefly.
+    timing: { allWinsMs: 1500, countUpMs: 900, eachWinMs: 1100, totalWinMs: 400, fadeMs: 180 },
+    // Thresholds in bets. Mega Win is louder in every way: title, color, particles, time.
+    bigWins: [
+      {
+        title: 'BIG WIN',
+        minBets: 10,
+        countUpMs: 2600,
+        holdMs: 1200,
+        color: '#ffd23f',
+        titleScale: 1,
+        particlesPerSecond: 45,
+      },
+      {
+        title: 'MEGA WIN',
+        minBets: 25,
+        countUpMs: 4200,
+        holdMs: 1500,
+        color: '#ff5fd2',
+        titleScale: 1.25,
+        particlesPerSecond: 110,
+      },
+    ],
+    style: {
+      fontFamily: 'Lilita One',
+      // Bright neon against the deep blue panel, distinct from each other for neighbouring lines.
+      lineColors: ['#3ee6c4', '#ffd23f', '#ff5fd2', '#7aa8ff', '#ff8a3d'],
+      lineWidth: 10,
+      textColor: '#ffffff',
+      outlineColor: '#062033',
+      counterFontSize: 150,
+      amountFontSize: 80,
+      overlayColor: '#020c14',
+      overlayAlpha: 0.78,
+      bigWinTitleSize: 170,
+      bigWinCounterSize: 140,
+      particles: {
+        colors: ['#ffd23f', '#3ee6c4', '#ffffff', '#ff5fd2'],
+        radius: 9,
+        lifeMs: 1800,
+        speed: 1500,
+        gravity: 1500,
+      },
+    },
+  },
   // Sizes are design pixels. Bet buttons are 120 so they stay near 44 CSS px on a 390 px wide phone.
   hud: {
     fontFamily: 'Lilita One',

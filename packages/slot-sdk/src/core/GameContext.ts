@@ -3,6 +3,7 @@ import type { LoadedAssets } from '../assets/LoadedAssets';
 import type { World } from '../ecs/World';
 import type { RoundControls } from '../flow/RoundFlow';
 import type { StepRegistry } from '../flow/RoundPlayer';
+import type { WinControls } from '../flow/winSteps';
 import type { LayoutManager } from '../layout/LayoutManager';
 import type { ResultSource } from '../math/round';
 import type { EventBus } from './EventBus';
@@ -31,4 +32,6 @@ export interface GameContext {
   readonly steps: StepRegistry;
   /** The round flow. The game connects its reels here. */
   readonly round: RoundControls;
+  /** The win presentation. The game connects the field that shows wins here. */
+  readonly wins: WinControls;
 }

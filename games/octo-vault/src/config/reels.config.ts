@@ -1,4 +1,9 @@
-import type { ReelGridSize, ReelGridViewOptions, ReelMotionSettings } from 'slot-sdk';
+import type {
+  HighlightStyle,
+  ReelGridSize,
+  ReelGridViewOptions,
+  ReelMotionSettings,
+} from 'slot-sdk';
 import type { SymbolGrid, SymbolId } from './symbols';
 
 interface ReelsConfig {
@@ -6,6 +11,8 @@ interface ReelsConfig {
   /** Sizes in design coordinates. `layout.ts` places and scales the whole field. */
   view: ReelGridViewOptions;
   motion: ReelMotionSettings;
+  /** How winning symbols stand out while wins are shown. */
+  highlight: HighlightStyle;
   /** What the field shows before the first spin, one array per reel from the top. */
   initialSymbols: SymbolGrid;
   /**
@@ -42,6 +49,8 @@ export const reelsConfig: ReelsConfig = {
     // Stop pressed: the reels still land one by one, just much closer together.
     quickStopDelayMs: 60,
   },
+  // Dimmed symbols stay recognisable; a winning one breathes about once a second.
+  highlight: { dimBrightness: 0.3, fadeMs: 220, pulseScale: 0.1, pulseMs: 900 },
   // Every symbol once or twice, the Octopus only on reels 2–4 as the rules allow.
   initialSymbols: [
     ['shell', 'pearl', 'starfish', 'key'],

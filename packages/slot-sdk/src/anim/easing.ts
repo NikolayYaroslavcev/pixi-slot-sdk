@@ -11,3 +11,10 @@ export const easeInOutQuad: Easing = (progress) =>
   progress < 0.5 ? 2 * progress * progress : 1 - (-2 * progress + 2) ** 2 / 2;
 
 export const easeOutCubic: Easing = (progress) => 1 - (1 - progress) ** 3;
+
+/** Overshoots the end a little and settles back: a pop for something that appears. */
+export const easeOutBack: Easing = (progress) => {
+  const overshoot = 1.70158;
+  const shifted = progress - 1;
+  return 1 + (overshoot + 1) * shifted ** 3 + overshoot * shifted ** 2;
+};

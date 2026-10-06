@@ -7,7 +7,7 @@ import { World } from '../ecs/World';
 import { waitUnlessSkipped } from '../anim/tween';
 import { RoundPlayer } from '../flow/RoundPlayer';
 import { RoundFlow } from '../flow/RoundFlow';
-import { registerWinSteps, type Pause } from '../flow/winSteps';
+import { WinSteps, type Pause } from '../flow/winSteps';
 import type { LayoutConfig } from '../layout/LayoutConfig';
 import { LayoutDebug, isLayoutDebugEnabled } from '../layout/LayoutDebug';
 import { LayoutManager } from '../layout/LayoutManager';
@@ -20,6 +20,7 @@ import type { GameContext } from './GameContext';
 import type { GameEvents } from './GameEvents';
 import { GameModel } from './GameModel';
 import { Hud } from '../ui/Hud';
+import { BigWinOverlay } from '../wins/BigWinOverlay';
 import { createSceneLayers, type SceneLayers } from './sceneLayers';
 import { configureTicker } from './ticker';
 
@@ -76,10 +77,12 @@ export class SlotGame {
     const model = new GameModel(events, { balance: config.initialBalance, bet: config.initialBet });
     const player = new RoundPlayer();
     const pause = createPause(parts.app.ticker);
-    registerWinSteps(player, { events, model, pause, timing: config.presentation });
+    const bigWinScreen = new BigWinOverlay({ ...parts, config });
+    const { timing, bigWins } = config.wins;
+    const wins = new WinSteps(player, { events, model, pause, timing, bigWins, bigWinScreen });
     const round = new RoundFlow({ events, model, resultSource, player });
     // Features see the round player only as a registry: playing a round is the core's job.
-    const context = { ...parts, events, model, config, resultSource, steps: player, round };
+    const context = { ...parts, events, model, config, resultSource, steps: player, round, wins };
     return { context, round };
   }
 }

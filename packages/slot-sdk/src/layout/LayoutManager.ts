@@ -6,6 +6,7 @@ import {
   insetArea,
   pickVariant,
   toDesignArea,
+  type Area,
   type Fit,
   type Insets,
   type Size,
@@ -38,6 +39,18 @@ export class LayoutManager {
   /** The variant on screen, or undefined before the first resize. */
   get variant(): LayoutVariant | undefined {
     return this.placement?.variant;
+  }
+
+  /**
+   * The whole canvas in design coordinates, with the strips around the design area and
+   * under the insets. Undefined before the first resize. For what must cover the screen.
+   */
+  get visibleArea(): Area | undefined {
+    if (!this.placement) {
+      return undefined;
+    }
+    const { viewport, rootFit } = this.placement;
+    return toDesignArea({ x: 0, y: 0, ...viewport }, rootFit);
   }
 
   /** Registered objects by node name. */
@@ -90,12 +103,11 @@ export class LayoutManager {
   }
 
   private placeBackground(): void {
-    if (!this.background || !this.placement) {
+    const visibleArea = this.visibleArea;
+    if (!this.background || !visibleArea) {
       return;
     }
-    const { viewport, rootFit } = this.placement;
-    const viewportInDesign = toDesignArea({ x: 0, y: 0, ...viewport }, rootFit);
-    const cover = fitCover(this.background.texture, viewportInDesign);
+    const cover = fitCover(this.background.texture, visibleArea);
     this.background.scale.set(cover.scale);
     this.background.position.set(cover.x, cover.y);
   }

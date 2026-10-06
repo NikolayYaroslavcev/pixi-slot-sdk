@@ -24,9 +24,19 @@ describe('evaluateLines', () => {
           { reelIndex: 1, rowIndex: 0 },
           { reelIndex: 2, rowIndex: 0 },
         ],
+        path: [0, 1, 2, 3, 4].map((reelIndex) => ({ reelIndex, rowIndex: 0 })),
         amount: 100,
       },
     ]);
+  });
+
+  it('gives the whole payline as the path to draw, beyond the matching cells', () => {
+    const grid = gridWithLine(4, ['pearl', 'pearl', 'pearl']);
+
+    const [win] = evaluateLines(grid, bet);
+
+    expect(win?.path?.map((cell) => cell.rowIndex)).toEqual([0, 1, 2, 1, 0]);
+    expect(win?.cells).toEqual(win?.path?.slice(0, 3));
   });
 
   it('counts only the matches in a row from the first reel', () => {

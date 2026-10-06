@@ -1,7 +1,9 @@
 import type { ColorSource } from 'pixi.js';
 import type { LoadingScreenStyle } from '../assets/LoadingScreen';
-import type { PresentationTiming } from '../flow/winSteps';
+import type { WinTiming } from '../flow/winSteps';
 import type { HudStyle } from '../ui/Hud';
+import type { BigWinTier } from '../wins/bigWinTier';
+import type { WinStyle } from '../wins/WinStyle';
 
 /** Settings of a game that the SDK core needs. Money is in minor units (cents). */
 export interface GameConfig {
@@ -14,7 +16,14 @@ export interface GameConfig {
   /** Canvas color behind all layers, also the loading screen background. */
   backgroundColor: ColorSource;
   loadingScreen: LoadingScreenStyle;
-  /** How long the SDK win steps stay on screen. */
-  presentation: PresentationTiming;
+  /** How wins are shown. */
+  wins: WinPresentationConfig;
   hud: HudStyle;
+}
+
+export interface WinPresentationConfig {
+  timing: WinTiming;
+  /** Big Win levels by the round's total win in bets, e.g. Big Win and Mega Win. Empty: none. */
+  bigWins: readonly BigWinTier[];
+  style: WinStyle;
 }

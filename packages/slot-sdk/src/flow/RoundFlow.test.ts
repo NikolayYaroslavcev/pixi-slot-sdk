@@ -167,7 +167,7 @@ describe('RoundFlow', () => {
     expect(reels.target).toEqual(grid);
   });
 
-  it('skips the step on screen on Stop while presenting', async () => {
+  it('ends the whole win presentation with one Stop while presenting', async () => {
     const { flow, pause } = createRoundFlow();
     const skipSignals: AbortSignal[] = [];
     pause.mockImplementation(
@@ -181,16 +181,15 @@ describe('RoundFlow', () => {
     );
 
     const round = flow.spin();
-    // The wins step, then the totalWin step: each Stop skips only the one on screen.
-    for (const stepNumber of [1, 2]) {
-      await vi.waitFor(() => {
-        expect(skipSignals).toHaveLength(stepNumber);
-      });
-      expect(flow.state).toBe('presenting');
-      flow.stop();
-    }
+    await vi.waitFor(() => {
+      expect(skipSignals).toHaveLength(1);
+    });
+    expect(flow.state).toBe('presenting');
+    flow.stop();
     await round;
-    expect(skipSignals.every((signal) => signal.aborted)).toBe(true);
+
+    // The totalWin step after the skipped wins does not wait for a second press.
+    expect(skipSignals).toHaveLength(1);
     expect(flow.state).toBe('idle');
   });
 

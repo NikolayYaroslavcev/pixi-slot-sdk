@@ -28,6 +28,12 @@ export interface Win {
   readonly cells: readonly CellPosition[];
   /** Minor units. */
   readonly amount: number;
+  /**
+   * Cells a payline passes through, one per reel, when the win is a line. The client draws
+   * the line along them; `cells` may be only its matching part. Absent for a win that is
+   * not a line, e.g. scattered symbols: such a win is shown by its cells alone.
+   */
+  readonly path?: readonly CellPosition[];
 }
 
 /** Show the wins of the field that has just been revealed. */

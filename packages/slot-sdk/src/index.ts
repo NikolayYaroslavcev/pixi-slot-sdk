@@ -2,7 +2,7 @@
 
 export { createSlotGame } from './core/createSlotGame';
 export type { SlotGame, SlotGameOptions } from './core/SlotGame';
-export type { GameConfig } from './core/GameConfig';
+export type { GameConfig, WinPresentationConfig } from './core/GameConfig';
 export type { GameContext } from './core/GameContext';
 export type { Feature } from './core/Feature';
 export type { SceneLayers } from './core/sceneLayers';
@@ -28,6 +28,18 @@ export type {
   LayoutVariantName,
 } from './layout/LayoutConfig';
 export type { StepHandler, StepRegistry } from './flow/RoundPlayer';
+export type { WinControls, WinField, WinTiming } from './flow/winSteps';
+export {
+  Highlight,
+  HighlightSystem,
+  type HighlightData,
+  type HighlightStyle,
+} from './wins/Highlight';
+export { FieldWinView } from './wins/FieldWinView';
+export type { BigWinTier } from './wins/bigWinTier';
+export type { WinStyle } from './wins/WinStyle';
+export type { ParticleStyle } from './wins/WinParticles';
+export { WinCounter, type WinCounterStyle } from './ui/WinCounter';
 export type { HudNodeName } from './ui/Hud';
 export type {
   ResultSource,
@@ -36,6 +48,7 @@ export type {
   RoundStep,
   RevealStep,
   WinsStep,
+  TotalWinStep,
   StandardStep,
   Win,
 } from './math/round';
@@ -51,5 +64,6 @@ export {
   easeOutQuad,
   easeInOutQuad,
   easeOutCubic,
+  easeOutBack,
   type Easing,
 } from './anim/easing';
