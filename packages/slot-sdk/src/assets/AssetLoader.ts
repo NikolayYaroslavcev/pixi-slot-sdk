@@ -1,5 +1,16 @@
-import { Assets, type AssetsManifest, type Renderer, type UnresolvedAsset } from 'pixi.js';
-import type { AssetEntry, AssetManifest } from './AssetManifest';
+import {
+  Assets,
+  type AssetsManifest,
+  type Renderer,
+  type Texture,
+  type UnresolvedAsset,
+} from 'pixi.js';
+import {
+  isSymbolArt,
+  type AssetEntry,
+  type AssetManifest,
+  type SymbolPlaceholder,
+} from './AssetManifest';
 import { LoadedAssets } from './LoadedAssets';
 import { createSymbolPlaceholders } from './symbolPlaceholders';
 
@@ -28,10 +39,25 @@ export class AssetLoader {
     await Assets.loadBundle(PRELOAD_BUNDLE);
   }
 
-  /** Loads the game bundle, then draws the symbol placeholders. Call after `loadPreload`. */
+  /**
+   * Loads the game bundle with the symbol art in it, then draws placeholders for the symbols
+   * without art. Call after `loadPreload`.
+   */
   async loadGame(onProgress: ProgressListener): Promise<LoadedAssets> {
     await Assets.loadBundle(GAME_BUNDLE, onProgress);
-    return new LoadedAssets(createSymbolPlaceholders(this.renderer, this.manifest.symbols));
+    const placeholders: Record<string, SymbolPlaceholder> = {};
+    const textures = new Map<string, Texture>();
+    for (const [symbolId, symbol] of Object.entries(this.manifest.symbols)) {
+      if (isSymbolArt(symbol)) {
+        textures.set(symbolId, Assets.get<Texture>(symbolAlias(symbolId)));
+      } else {
+        placeholders[symbolId] = symbol;
+      }
+    }
+    for (const [symbolId, texture] of createSymbolPlaceholders(this.renderer, placeholders)) {
+      textures.set(symbolId, texture);
+    }
+    return new LoadedAssets(textures);
   }
 
   // Pixi ignores a second Assets.init with a warning, and a retry calls loadPreload again.
@@ -44,14 +70,22 @@ export class AssetLoader {
   }
 }
 
-/** The manifest in the shape Pixi expects: two named bundles. */
+/** The manifest in the shape Pixi expects: two named bundles, symbol art inside `game`. */
 export function toPixiManifest(manifest: AssetManifest): AssetsManifest {
+  const symbolArt = Object.entries(manifest.symbols).flatMap(([symbolId, symbol]) =>
+    isSymbolArt(symbol) ? [{ alias: symbolAlias(symbolId), src: symbol.src }] : [],
+  );
   return {
     bundles: [
       { name: PRELOAD_BUNDLE, assets: manifest.preload.map(toPixiAsset) },
-      { name: GAME_BUNDLE, assets: manifest.game.map(toPixiAsset) },
+      { name: GAME_BUNDLE, assets: [...manifest.game.map(toPixiAsset), ...symbolArt] },
     ],
   };
+}
+
+/** Pixi alias of a symbol's art file. The prefix keeps it apart from the game's own aliases. */
+function symbolAlias(symbolId: string): string {
+  return `symbol:${symbolId}`;
 }
 
 function toPixiAsset({ alias, src, family }: AssetEntry): UnresolvedAsset {

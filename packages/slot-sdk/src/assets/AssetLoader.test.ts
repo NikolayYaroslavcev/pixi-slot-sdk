@@ -34,6 +34,20 @@ describe('toPixiManifest', () => {
   });
 });
 
+describe('toPixiManifest with symbol art', () => {
+  it('loads art files of symbols with the game bundle, under their own aliases', () => {
+    const withArt: AssetManifest = {
+      ...manifest,
+      symbols: { ...manifest.symbols, high: { src: 'assets/symbols/high.svg' } },
+    };
+
+    expect(toPixiManifest(withArt).bundles[1]?.assets).toEqual([
+      { alias: 'title', src: 'assets/fonts/Title.woff2', data: { family: 'Title' } },
+      { alias: 'symbol:high', src: 'assets/symbols/high.svg' },
+    ]);
+  });
+});
+
 describe('AssetLoader', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -59,6 +73,24 @@ describe('AssetLoader', () => {
     const assets = await loader.loadGame(onProgress);
 
     expect(loadBundle.mock.calls).toEqual([['preload'], ['game', onProgress]]);
+    expect(assets.symbolTexture('low')).toBe(Texture.WHITE);
+  });
+
+  it('takes the texture of a symbol with art from the loaded files', async () => {
+    spyOnAssets();
+    const art = new Texture();
+    const get = vi.spyOn(Assets, 'get').mockReturnValue(art as unknown as Record<string, unknown>);
+    const withArt: AssetManifest = {
+      ...manifest,
+      symbols: { ...manifest.symbols, high: { src: 'assets/symbols/high.svg' } },
+    };
+    const loader = new AssetLoader(withArt, {} as Renderer);
+
+    await loader.loadPreload();
+    const assets = await loader.loadGame(vi.fn());
+
+    expect(get).toHaveBeenCalledWith('symbol:high');
+    expect(assets.symbolTexture('high')).toBe(art);
     expect(assets.symbolTexture('low')).toBe(Texture.WHITE);
   });
 

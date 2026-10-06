@@ -40,6 +40,12 @@ describe('findManifestProblems', () => {
     ]);
   });
 
+  it('rejects a symbol art file without a path', () => {
+    expect(findManifestProblems(createManifest({ symbols: { low: { src: '' } } }))).toEqual([
+      'assets.symbols.low.src must not be empty',
+    ]);
+  });
+
   it('rejects a manifest without symbols', () => {
     expect(findManifestProblems(createManifest({ symbols: {} }))).toEqual([
       'assets.symbols must describe at least one symbol',

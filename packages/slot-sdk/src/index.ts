@@ -59,7 +59,13 @@ export type {
 } from './math/round';
 export { createRng, randomIndex, pickWeighted, type Rng, type Weighted } from './math/rng';
 
-export type { AssetEntry, AssetManifest, SymbolPlaceholder } from './assets/AssetManifest';
+export type {
+  AssetEntry,
+  AssetManifest,
+  SymbolArt,
+  SymbolAsset,
+  SymbolPlaceholder,
+} from './assets/AssetManifest';
 export type { LoadedAssets } from './assets/LoadedAssets';
 export type { LoadingScreenStyle } from './assets/LoadingScreen';
 

@@ -17,6 +17,17 @@ export interface SymbolPlaceholder {
 }
 
 /**
+ * Final art of a symbol: an image file, e.g. `assets/symbols/crown.svg`. It loads with the `game`
+ * bundle. The reels draw it at the cell size, so a square image fits best.
+ */
+export interface SymbolArt {
+  src: string;
+}
+
+/** A symbol is drawn from its art file, or from a placeholder until the art exists. */
+export type SymbolAsset = SymbolArt | SymbolPlaceholder;
+
+/**
  * Every resource of a game. Adding a file is one entry in `preload` or `game`.
  *
  * `SymbolId` is the union of the game's symbol ids. With it, a symbol missing from
@@ -27,8 +38,8 @@ export interface AssetManifest<SymbolId extends string = string> {
   preload: readonly AssetEntry[];
   /** Everything else. The progress bar follows this bundle. */
   game: readonly AssetEntry[];
-  /** Placeholder art of every symbol, drawn after `game` has loaded. */
-  symbols: Readonly<Record<SymbolId, SymbolPlaceholder>>;
+  /** Look of every symbol: an art file, or a placeholder drawn after `game` has loaded. */
+  symbols: Readonly<Record<SymbolId, SymbolAsset>>;
 }
 
 const FONT_FILE = /\.(woff2?|ttf|otf)$/i;
@@ -51,7 +62,16 @@ export function findManifestProblems(manifest: AssetManifest): string[] {
   if (Object.keys(manifest.symbols).length === 0) {
     problems.push('assets.symbols must describe at least one symbol');
   }
+  for (const [symbolId, symbol] of Object.entries(manifest.symbols)) {
+    if (isSymbolArt(symbol) && symbol.src === '') {
+      problems.push(`assets.symbols.${symbolId}.src must not be empty`);
+    }
+  }
   return problems;
+}
+
+export function isSymbolArt(symbol: SymbolAsset): symbol is SymbolArt {
+  return 'src' in symbol;
 }
 
 function findEntryProblems(entry: AssetEntry, path: string, seenAliases: Set<string>): string[] {

@@ -8,17 +8,17 @@ export const assets = {
     { alias: 'background', src: 'assets/background.svg' },
     { alias: 'titleFont', src: 'assets/fonts/LilitaOne-Regular.ttf', family: 'Lilita One' },
   ],
-  // Placeholder art until the final symbols are drawn. Lower symbols are cool, higher ones warm.
+  // Own vector art (docs/assets.md). Each symbol is a square tile, so it fills its cell.
   symbols: {
-    shell: { color: '#3d8fb8', label: 'Shell' },
-    starfish: { color: '#4a7fd1', label: 'Starfish' },
-    seahorse: { color: '#2fa58f', label: 'Seahorse' },
-    fish: { color: '#5aa7d6', label: 'Fish' },
-    pearl: { color: '#c77dd6', label: 'Pearl' },
-    anchor: { color: '#d6894a', label: 'Anchor' },
-    chest: { color: '#c9a23a', label: 'Chest' },
-    crown: { color: '#e0573f', label: 'Crown' },
-    octopus: { color: '#8e3fd6', label: 'WILD' },
-    key: { color: '#e8c547', label: 'KEY' },
+    shell: { src: 'assets/symbols/shell.svg' },
+    starfish: { src: 'assets/symbols/starfish.svg' },
+    seahorse: { src: 'assets/symbols/seahorse.svg' },
+    fish: { src: 'assets/symbols/fish.svg' },
+    pearl: { src: 'assets/symbols/pearl.svg' },
+    anchor: { src: 'assets/symbols/anchor.svg' },
+    chest: { src: 'assets/symbols/chest.svg' },
+    crown: { src: 'assets/symbols/crown.svg' },
+    octopus: { src: 'assets/symbols/octopus.svg' },
+    key: { src: 'assets/symbols/key.svg' },
   },
 } satisfies AssetManifest<SymbolId>;
