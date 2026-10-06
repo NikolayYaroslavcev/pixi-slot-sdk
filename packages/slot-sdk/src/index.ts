@@ -10,7 +10,10 @@ export { EventBus } from './core/EventBus';
 export type { GameEvents } from './core/GameEvents';
 export type { GameModel } from './core/GameModel';
 
-export type { World, System } from './ecs/World';
+export type { World, System, Entity } from './ecs/World';
+export type { CellPosition } from './reels/components';
+export { ReelGrid, type ReelGridSize } from './reels/ReelGrid';
+export { ReelGridView, type ReelGridViewOptions } from './reels/ReelGridView';
 export type { LayoutManager } from './layout/LayoutManager';
 export type {
   LayoutConfig,
