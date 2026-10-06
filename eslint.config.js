@@ -12,8 +12,15 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.js'],
+    files: ['**/*.js', '**/*.mjs'],
     extends: [tseslint.configs.disableTypeChecked],
+  },
+  {
+    // Node scripts, e.g. the simulation: the Node globals they use.
+    files: ['**/scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { console: 'readonly', performance: 'readonly', URL: 'readonly' },
+    },
   },
   {
     rules: {

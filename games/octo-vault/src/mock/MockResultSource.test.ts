@@ -6,11 +6,11 @@ import { reelsConfig } from '../config/reels.config';
 import { symbols, type SymbolId } from '../config/symbols';
 import { evaluateSpin } from '../math/evaluateSpin';
 import { MockResultSource } from './MockResultSource';
-import { playlist, scenarioFromAddress, scenarios, type FieldScenario } from './scenarios';
+import { playlist, scenarioFromAddress, scenarios, type ScenarioName } from './scenarios';
 
 const bet = 100;
 
-function createSource(scenario?: FieldScenario | 'error') {
+function createSource(scenario?: ScenarioName) {
   return new MockResultSource({ initialBalance: 10_000, latencyMs: 0, scenario, seed: 1 });
 }
 
@@ -99,8 +99,33 @@ describe('MockResultSource', () => {
     expect(second.balance).toBe(first.balance - bet + second.totalWin);
   });
 
-  it('goes through the playlist when no scenario is chosen', async () => {
-    const source = createSource();
+  it('lands the reels at random on their strips without a scenario, the same for the same seed', async () => {
+    const play = async () => {
+      const source = createSource();
+      const rounds = [];
+      for (let round = 0; round < 5; round += 1) {
+        rounds.push(await source.play({ bet }));
+      }
+      return rounds;
+    };
+    const rounds = await play();
+    const grids = rounds.map((result) => (result.steps[0] as RevealStep).grid);
+
+    expect(await play()).toEqual(rounds);
+    expect(new Set(grids.map((grid) => JSON.stringify(grid))).size).toBeGreaterThan(1);
+    for (const grid of grids) {
+      grid.forEach((column, reelIndex) => {
+        const strip = reelsConfig.strips[reelIndex] ?? [];
+        const stop = strip.findIndex((_symbol, index) =>
+          column.every((symbolId, row) => strip[(index + row) % strip.length] === symbolId),
+        );
+        expect(stop).toBeGreaterThanOrEqual(0);
+      });
+    }
+  });
+
+  it('goes through the playlist with the playlist scenario', async () => {
+    const source = createSource('playlist');
     const grids: unknown[] = [];
     while (grids.length < playlist.length) {
       const result = await source.play({ bet });

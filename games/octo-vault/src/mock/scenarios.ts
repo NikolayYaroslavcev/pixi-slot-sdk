@@ -93,10 +93,15 @@ export const scenarios = {
 
 export type FieldScenario = keyof typeof scenarios;
 
-/** `error` has no field: the mock rejects the round, as a server that cannot be reached. */
-export type ScenarioName = FieldScenario | 'error';
+/**
+ * `error` has no field: the mock rejects the round, as a server that cannot be reached.
+ * `playlist` plays the fields of `playlist` in turn.
+ */
+export type ScenarioName = FieldScenario | 'error' | 'playlist';
 
-/** Without a scenario in the address, the mock goes through these in turn. */
+const extraScenarios: readonly string[] = ['error', 'playlist'];
+
+/** `?scenario=playlist` goes through these in turn, to see every case by hand. */
 export const playlist: readonly FieldScenario[] = [
   'win',
   'nowin',
@@ -118,11 +123,11 @@ export function scenarioFromAddress(search: string): ScenarioName | undefined {
   if (name === null) {
     return undefined;
   }
-  if (name === 'error' || Object.hasOwn(scenarios, name)) {
+  if (extraScenarios.includes(name) || Object.hasOwn(scenarios, name)) {
     return name as ScenarioName;
   }
   console.warn(
-    `Unknown scenario "${name}". Known: ${[...Object.keys(scenarios), 'error'].join(', ')}`,
+    `Unknown scenario "${name}". Known: ${[...Object.keys(scenarios), ...extraScenarios].join(', ')}`,
   );
   return undefined;
 }

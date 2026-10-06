@@ -7,10 +7,14 @@ import { freeSpins } from './features/freeSpins/freeSpins';
 import { tentacleGrab } from './features/tentacleGrab/tentacleGrab';
 import { MockResultSource } from './mock/MockResultSource';
 import { scenarioFromAddress } from './mock/scenarios';
+import { freshSeed, seedFromAddress } from './mock/seed';
 import { reels } from './scene/reels';
 import { scenery } from './scene/scenery';
 
 const field = reels();
+const seed = seedFromAddress(window.location.search) ?? freshSeed();
+// The seed in the console reproduces this session with `?seed=`.
+console.info(`Octo Vault mock seed: ${String(seed)}`);
 
 await createSlotGame({
   config: gameConfig,
@@ -20,7 +24,7 @@ await createSlotGame({
     initialBalance: gameConfig.initialBalance,
     latencyMs: mockConfig.latencyMs,
     scenario: scenarioFromAddress(window.location.search),
-    seed: Date.now(),
+    seed,
   }),
   features: [scenery(), field, tentacleGrab(field), freeSpins(field), bonusBuy()],
 }).start();

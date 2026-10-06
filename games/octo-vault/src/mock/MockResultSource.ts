@@ -15,15 +15,19 @@ export interface MockResultSourceOptions {
   initialBalance: number;
   /** Pretend network time before every answer. */
   latencyMs: number;
-  /** Plays only this scenario. Without it the mock goes through `playlist`. */
+  /**
+   * Plays only this scenario, or every scenario in turn with `playlist`. Without it the reels
+   * stop at random on their strips, as on a real server.
+   */
   scenario?: ScenarioName;
   /** Seed of every random choice of the rules: the same seed plays the same rounds. */
   seed: number;
 }
 
 /**
- * Stands in for the game server. It keeps the wallet, picks a fixed field, plays it
- * with the game rules and answers with a round script. Same scenario and seed, same round.
+ * Stands in for the game server. It keeps the wallet, lands the reels at random or on the field
+ * of a scenario, plays the round with the game rules and answers with its script.
+ * Same scenario and seed, same rounds.
  */
 export class MockResultSource implements ResultSource {
   private balance: number;
@@ -61,16 +65,22 @@ export class MockResultSource implements ResultSource {
     throw new Error(`MockResultSource: unknown round mode "${request.mode}"`);
   }
 
-  private playRequest(request: RoundRequest, scenario: FieldScenario): PlayedRound {
-    return request.mode === bonusBuyConfig.mode
-      ? playBonusRound(request.bet, this.rng)
-      : playRound(request.bet, this.rng, scenarios[scenario]);
+  private playRequest(request: RoundRequest, scenario: FieldScenario | undefined): PlayedRound {
+    if (request.mode === bonusBuyConfig.mode) {
+      return playBonusRound(request.bet, this.rng);
+    }
+    return playRound(request.bet, this.rng, scenario && scenarios[scenario]);
   }
 
-  private nextScenario(): ScenarioName {
-    const fromPlaylist = playlist[this.roundCount % playlist.length] ?? 'nowin';
+  /** The fixed field of the next round, `error`, or undefined for a random landing. */
+  private nextScenario(): FieldScenario | 'error' | undefined {
+    const { scenario } = this.options;
+    if (scenario !== 'playlist') {
+      return scenario;
+    }
+    const fromPlaylist = playlist[this.roundCount % playlist.length];
     this.roundCount += 1;
-    return this.options.scenario ?? fromPlaylist;
+    return fromPlaylist;
   }
 }
 
