@@ -1,19 +1,20 @@
-import { createSlotGame, type ResultSource } from 'slot-sdk';
+import { createSlotGame } from 'slot-sdk';
 import { assets } from './assets';
-import { gameConfig } from './config/game.config';
+import { gameConfig, mockConfig } from './config/game.config';
 import { layout } from './layout';
+import { MockResultSource } from './mock/MockResultSource';
+import { scenarioFromAddress } from './mock/scenarios';
 import { reels } from './scene/reels';
 import { scenery } from './scene/scenery';
-
-// Nothing starts a round yet. The mock result source replaces this placeholder.
-const resultSource: ResultSource = {
-  play: () => Promise.reject(new Error('Rounds are not available yet')),
-};
 
 await createSlotGame({
   config: gameConfig,
   assets,
   layout,
-  resultSource,
+  resultSource: new MockResultSource({
+    initialBalance: gameConfig.initialBalance,
+    latencyMs: mockConfig.latencyMs,
+    scenario: scenarioFromAddress(window.location.search),
+  }),
   features: [scenery(), reels()],
 }).start();

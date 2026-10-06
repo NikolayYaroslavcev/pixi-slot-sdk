@@ -1,0 +1,91 @@
+import type { SymbolGrid } from '../config/symbols';
+
+/**
+ * Fixed fields the mock stops on, one per situation worth checking by hand.
+ * Each grid is one array per reel, from the top. Pays are not written here:
+ * the mock evaluates every field with the game math.
+ */
+export const scenarios = {
+  /** Reel 1 has only low symbols and reel 2 only high ones, so no line can pay. */
+  nowin: [
+    ['shell', 'starfish', 'seahorse', 'fish'],
+    ['pearl', 'anchor', 'chest', 'crown'],
+    ['fish', 'key', 'shell', 'starfish'],
+    ['crown', 'octopus', 'pearl', 'anchor'],
+    ['seahorse', 'fish', 'starfish', 'shell'],
+  ],
+  /** One line: 3 Anchors on the second row. */
+  win: [
+    ['shell', 'anchor', 'seahorse', 'fish'],
+    ['pearl', 'anchor', 'chest', 'crown'],
+    ['starfish', 'anchor', 'fish', 'shell'],
+    ['chest', 'seahorse', 'crown', 'pearl'],
+    ['fish', 'shell', 'starfish', 'key'],
+  ],
+  /** Two lines: 4 Crowns on the top row and 3 Fish on the bottom row. */
+  multiwin: [
+    ['crown', 'starfish', 'shell', 'fish'],
+    ['crown', 'pearl', 'anchor', 'fish'],
+    ['crown', 'seahorse', 'chest', 'fish'],
+    ['crown', 'shell', 'pearl', 'starfish'],
+    ['pearl', 'chest', 'seahorse', 'anchor'],
+  ],
+  /** Two Octopus Wilds complete 5 Chests on the second row and 4 Shells on another line. */
+  wild: [
+    ['seahorse', 'chest', 'shell', 'starfish'],
+    ['anchor', 'octopus', 'pearl', 'fish'],
+    ['shell', 'chest', 'crown', 'seahorse'],
+    ['fish', 'octopus', 'starfish', 'pearl'],
+    ['crown', 'chest', 'key', 'shell'],
+  ],
+  /** 3 Key Scatters and no line win. Free spins come in stage 10. */
+  scatter: [
+    ['key', 'shell', 'pearl', 'fish'],
+    ['anchor', 'key', 'crown', 'pearl'],
+    ['seahorse', 'fish', 'starfish', 'shell'],
+    ['key', 'crown', 'octopus', 'anchor'],
+    ['starfish', 'pearl', 'shell', 'seahorse'],
+  ],
+  /** Crowns and Wilds almost everywhere: many lines at once, far above 10 bets. */
+  bigwin: [
+    ['crown', 'crown', 'crown', 'chest'],
+    ['crown', 'octopus', 'crown', 'chest'],
+    ['crown', 'crown', 'octopus', 'chest'],
+    ['crown', 'crown', 'crown', 'chest'],
+    ['crown', 'anchor', 'crown', 'chest'],
+  ],
+} as const satisfies Record<string, SymbolGrid>;
+
+export type FieldScenario = keyof typeof scenarios;
+
+/** `error` has no field: the mock rejects the round, as a server that cannot be reached. */
+export type ScenarioName = FieldScenario | 'error';
+
+/** Without a scenario in the address, the mock goes through these in turn. */
+export const playlist: readonly FieldScenario[] = [
+  'win',
+  'nowin',
+  'multiwin',
+  'scatter',
+  'wild',
+  'nowin',
+  'bigwin',
+];
+
+/**
+ * Reads `?scenario=` from the page address. An unknown name is reported in the console
+ * and ignored, so a typo does not silently play the wrong round.
+ */
+export function scenarioFromAddress(search: string): ScenarioName | undefined {
+  const name = new URLSearchParams(search).get('scenario');
+  if (name === null) {
+    return undefined;
+  }
+  if (name === 'error' || Object.hasOwn(scenarios, name)) {
+    return name as ScenarioName;
+  }
+  console.warn(
+    `Unknown scenario "${name}". Known: ${[...Object.keys(scenarios), 'error'].join(', ')}`,
+  );
+  return undefined;
+}
