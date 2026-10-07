@@ -34,6 +34,19 @@ describe('toPixiManifest', () => {
   });
 });
 
+describe('toPixiManifest with a dense SVG', () => {
+  it('passes the resolution an SVG is drawn at', () => {
+    const dense: AssetManifest = {
+      ...manifest,
+      game: [{ alias: 'plate', src: 'assets/plate.svg', resolution: 2 }],
+    };
+
+    expect(toPixiManifest(dense).bundles[1]?.assets).toEqual([
+      { alias: 'plate', src: 'assets/plate.svg', data: { resolution: 2 } },
+    ]);
+  });
+});
+
 describe('toPixiManifest with symbol art', () => {
   it('loads art files of symbols with the game bundle, under their own aliases', () => {
     const withArt: AssetManifest = {

@@ -1,5 +1,5 @@
-import { DOMAdapter, Ticker, type ICanvas } from 'pixi.js';
-import { describe, expect, it } from 'vitest';
+import { BitmapFont, DOMAdapter, Ticker, type ICanvas } from 'pixi.js';
+import { describe, expect, it, vi } from 'vitest';
 import { WinCounter } from './WinCounter';
 
 // Text is never measured here, but Pixi asks for a canvas when it builds a style. Node has none.
@@ -7,6 +7,8 @@ DOMAdapter.set({
   ...DOMAdapter.get(),
   createCanvas: () => ({ getContext: () => null }) as unknown as ICanvas,
 });
+// Drawing the counter's bitmap font needs a canvas too; the tests only read the text.
+vi.spyOn(BitmapFont, 'install').mockImplementation(() => undefined);
 
 const style = { fontFamily: 'Arial', fontSize: 40, color: '#ffffff', outlineColor: '#000000' };
 

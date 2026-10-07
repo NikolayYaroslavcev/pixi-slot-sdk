@@ -53,7 +53,6 @@ export class LayoutManager {
     return toDesignArea({ x: 0, y: 0, ...viewport }, rootFit);
   }
 
-  /** Registered objects by node name. */
   get placedNodes(): ReadonlyMap<string, Container> {
     return this.nodes;
   }

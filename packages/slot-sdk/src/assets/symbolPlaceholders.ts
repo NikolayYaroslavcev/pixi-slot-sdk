@@ -33,7 +33,8 @@ function drawPlaceholder(renderer: Renderer, placeholder: SymbolPlaceholder): Te
       fill: '#ffffff',
       fontSize: 40,
       fontWeight: 'bold',
-      stroke: { color: '#000000', width: 6 },
+      // Round joins: a miter join leaves spikes on sharp letters such as M.
+      stroke: { color: '#000000', width: 6, join: 'round' },
     },
   });
   label.anchor.set(0.5);

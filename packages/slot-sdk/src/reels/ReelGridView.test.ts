@@ -1,4 +1,4 @@
-import { BlurFilter, Container, DOMAdapter, Sprite, Texture, type ICanvas } from 'pixi.js';
+import { Container, DOMAdapter, Sprite, Texture, type ICanvas } from 'pixi.js';
 import { describe, expect, it } from 'vitest';
 import { LoadedAssets } from '../assets/LoadedAssets';
 import { EventBus } from '../core/EventBus';
@@ -13,7 +13,7 @@ import { HighlightSystem } from '../wins/Highlight';
 
 type TestSymbol = 'a' | 'b' | 'c';
 
-// A filter asks a test canvas for WebGL precision once. Node has no canvas: answer "no WebGL".
+// Blurred symbol copies are drawn on a 2D canvas. Node has none: the copies stay the symbols.
 DOMAdapter.set({
   ...DOMAdapter.get(),
   createCanvas: () => ({ getContext: () => null }) as unknown as ICanvas,
@@ -31,7 +31,7 @@ const options = {
   gap: 10,
   padding: 20,
   panelColor: '#000000',
-  motionBlur: { fromSpeed: 5, fullSpeed: 20, strength: 10, quality: 2 },
+  motionBlur: { fromSpeed: 5, fullSpeed: 20, strength: 10, levels: 2 },
 };
 const motion = {
   startSpeed: 4,
@@ -81,12 +81,6 @@ function visibleTextures(view: ReelGridView, reelIndex: number): (Texture | unde
       reelSprites(view, reelIndex).find((sprite) => sprite.y === rowCenterY(rowIndex, options))
         ?.texture,
   );
-}
-
-function reelBlur(view: ReelGridView, reelIndex: number): BlurFilter | undefined {
-  const reel = view.container.getChildByLabel(`reel ${String(reelIndex)}`, true);
-  const [blur] = reel?.filters ?? [];
-  return blur instanceof BlurFilter ? blur : undefined;
 }
 
 describe('ReelGridView', () => {
@@ -181,28 +175,17 @@ describe('ReelGridView', () => {
     expect(rows).toEqual([-1, 0, 1, 2].map((row) => rowCenterY(row, options)));
   });
 
-  it('blurs a reel only while it moves fast', () => {
+  it('runs no filters on the reels, also while they spin', () => {
     const { system, view, frame } = createView();
-    expect(reelBlur(view, 0)?.enabled).toBe(false);
     system.start();
     void system.stop(target);
     frame(16);
     frame(200);
-    frame(16);
-    expect(reelBlur(view, 0)?.enabled).toBe(true);
-    expect(reelBlur(view, 0)?.strengthY).toBeCloseTo(10);
-    // Drawn at half size, the field gets half the blur in screen pixels.
-    view.container.scale.set(0.5);
-    view.container.updateLocalTransform();
-    view.container.worldTransform.copyFrom(view.container.localTransform);
-    frame(16);
-    expect(reelBlur(view, 0)?.strengthY).toBeCloseTo(5);
-    const filter = reelBlur(view, 0);
-    while (system.isSpinning) {
-      frame(16);
-    }
-    expect(reelBlur(view, 0)).toBe(filter);
-    expect(reelBlur(view, 0)?.enabled).toBe(false);
+    const reels = [0, 1].map((reelIndex) =>
+      view.container.getChildByLabel(`reel ${String(reelIndex)}`, true),
+    );
+    // Pixi leaves `filters` unset on a container that never had any.
+    expect(reels.map((reel) => reel?.filters)).toEqual([undefined, undefined]);
   });
 
   it('needs the motion system first', () => {

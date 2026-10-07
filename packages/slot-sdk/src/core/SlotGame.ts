@@ -1,5 +1,7 @@
 import { Application, Container, type Ticker } from 'pixi.js';
 import { AssetLoader } from '../assets/AssetLoader';
+import { GameAudio } from '../audio/GameAudio';
+import { unlockAudioOnGesture } from '../audio/unlockAudio';
 import type { AssetManifest } from '../assets/AssetManifest';
 import { LoadingScreen } from '../assets/LoadingScreen';
 import { loadAssetsWithRetry } from '../assets/loadAssetsWithRetry';
@@ -25,10 +27,15 @@ import { BigWinOverlay } from '../wins/BigWinOverlay';
 import { createSceneLayers, type SceneLayers } from './sceneLayers';
 import { configureTicker } from './ticker';
 
+/** Everything a game hands to `createSlotGame`. The SDK holds no game data of its own. */
 export interface SlotGameOptions {
+  /** Money, bets, win presentation and the look of the HUD and popups. */
   config: GameConfig;
+  /** Every file to load. The loading screen shows `preload` while `game` loads. */
   assets: AssetManifest;
+  /** Where each named object goes, in landscape and in portrait. Must place every HUD node. */
   layout: LayoutConfig;
+  /** Where round results come from: the game's mock now, a server client later. */
   resultSource: ResultSource;
   /** Installed in this order, after assets have loaded and before the first frame. */
   features?: Feature[];
@@ -43,6 +50,11 @@ export class SlotGame {
 
   constructor(private readonly options: SlotGameOptions) {}
 
+  /**
+   * Creates the canvas, shows the loading screen, loads the assets (with Retry on failure),
+   * installs the features in order and starts the frame loop. Resolves once the game is
+   * playable. Call it once.
+   */
   async start(): Promise<void> {
     if (this.started) {
       throw new Error('SlotGame: start() has already been called');
@@ -51,6 +63,8 @@ export class SlotGame {
     const { config, features = [] } = this.options;
 
     const app = await createApplication(config);
+    // Before loading: the sound library teaches Pixi Assets to load audio files.
+    const audio = await createAudio();
     const { layers, layout } = createScene(app, this.options.layout);
     const loadingScreen = new LoadingScreen(app, config.loadingScreen, config.backgroundColor);
     app.stage.addChild(loadingScreen.view);
@@ -58,7 +72,7 @@ export class SlotGame {
     const assets = await loadAssetsWithRetry(loader, loadingScreen);
 
     const world = new World();
-    const context = this.createContext({ app, layers, layout, world, assets });
+    const context = this.createContext({ app, layers, layout, world, assets, audio });
     for (const feature of features) {
       feature.install(context);
     }
@@ -72,7 +86,7 @@ export class SlotGame {
    * features only its controls.
    */
   private createContext(
-    parts: Pick<GameContext, 'app' | 'layers' | 'layout' | 'world' | 'assets'>,
+    parts: Pick<GameContext, 'app' | 'layers' | 'layout' | 'world' | 'assets' | 'audio'>,
   ): GameContext {
     const { config, resultSource } = this.options;
     const events = new EventBus<GameEvents>();
@@ -83,9 +97,9 @@ export class SlotGame {
     const { timing, bigWins } = config.wins;
     const wins = new WinSteps(player, { events, model, pause, timing, bigWins, bigWinScreen });
     const round = new RoundFlow({ events, model, resultSource, player });
-    const popup = new Popup(parts.layers.popups, parts.layout, parts.app.ticker, config.popup);
+    const popup = createPopup(parts, config.popup, events);
     const hudDependencies = { events, model, round, betLevels: config.betLevels };
-    const hud = new Hud({ ...parts, popup }, hudDependencies, config.hud);
+    const hud = new Hud({ ...parts, popup, events }, hudDependencies, config.hud);
     // Features see the round player only as a registry: playing a round is the core's job.
     return {
       ...parts,
@@ -100,6 +114,19 @@ export class SlotGame {
       popup,
     };
   }
+}
+
+/** The game's one popup. Its presses are announced like the HUD's, e.g. for a click sound. */
+function createPopup(
+  parts: Pick<GameContext, 'app' | 'layers' | 'layout'>,
+  style: GameConfig['popup'],
+  events: EventBus<GameEvents>,
+): Popup {
+  const popup = new Popup(parts.layers.popups, parts.layout, parts.app.ticker, style);
+  popup.onButtonPress(() => {
+    events.emit('buttonPressed', undefined);
+  });
+  return popup;
 }
 
 /**
@@ -119,6 +146,28 @@ async function createApplication(config: GameConfig): Promise<Application> {
   });
   document.body.appendChild(app.canvas);
   return app;
+}
+
+/**
+ * Loads `@pixi/sound` only now, in the browser: it needs `document` the moment it loads,
+ * and importing it lazily keeps it out of tests and out of the first chunk.
+ */
+async function createAudio(): Promise<GameAudio> {
+  const { sound } = await import('@pixi/sound');
+  // Pausing follows the tab only. Pausing on window blur too could leave the sound off
+  // when focus and visibility come back in a different order.
+  sound.disableAutoPause = true;
+  unlockAudioOnGesture(sound.context.audioContext, window);
+  return new GameAudio(sound, document, browserStorage());
+}
+
+/** `localStorage`, or nothing when the browser blocks it. */
+function browserStorage(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -148,7 +197,6 @@ function createPause(ticker: Ticker): Pause {
   return (ms, skip) => waitUnlessSkipped(ticker, ms, skip);
 }
 
-/** Updates the world every frame, then starts the ticker. */
 function startFrameLoop(app: Application, world: World): void {
   app.ticker.add((ticker) => {
     world.update(ticker.deltaMS);

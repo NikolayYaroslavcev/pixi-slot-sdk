@@ -44,6 +44,7 @@ describe('HudPresenter', () => {
       bet: '1.00',
       win: '0.00',
       message: 'Press SPIN',
+      spinAction: 'spin',
       spinLabel: 'SPIN',
       spinEnabled: true,
       betDownEnabled: true,
@@ -58,7 +59,12 @@ describe('HudPresenter', () => {
     );
 
     presenter.pressSpin();
-    expect(lastView()).toMatchObject({ balance: '9.00', spinLabel: 'STOP', message: 'Good luck' });
+    expect(lastView()).toMatchObject({
+      balance: '9.00',
+      spinAction: 'stop',
+      spinLabel: 'STOP',
+      message: 'Good luck',
+    });
     expect(lastView()?.betUpEnabled).toBe(false);
 
     answer(wonRound);

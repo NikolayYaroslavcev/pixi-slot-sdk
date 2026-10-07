@@ -17,12 +17,12 @@ export interface GameConfig {
   /** Canvas color behind all layers, also the loading screen background. */
   backgroundColor: ColorSource;
   loadingScreen: LoadingScreenStyle;
-  /** How wins are shown. */
   wins: WinPresentationConfig;
   hud: HudStyle;
   popup: PopupStyle;
 }
 
+/** How wins are shown: pauses and count-ups, Big Win levels, colors and fonts. */
 export interface WinPresentationConfig {
   timing: WinTiming;
   /** Big Win levels by the round's total win in bets, e.g. Big Win and Mega Win. Empty: none. */

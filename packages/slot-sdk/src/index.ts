@@ -41,11 +41,11 @@ export { FieldWinView } from './wins/FieldWinView';
 export type { BigWinTier } from './wins/bigWinTier';
 export type { WinStyle } from './wins/WinStyle';
 export type { ParticleStyle } from './wins/WinParticles';
-export { WinCounter, type WinCounterStyle } from './ui/WinCounter';
-export { LabeledValue, type LabeledValueStyle } from './ui/LabeledValue';
-export type { HudControls, HudNodeName } from './ui/Hud';
+export { LabeledValue, type LabeledValueStyle, type ValuePanelStyle } from './ui/LabeledValue';
+export type { HudControls, HudNodeName, HudStyle, SpinButtonLooks } from './ui/Hud';
 export type { Button } from './ui/Button';
 export type { Popup, PopupContent, PopupStyle } from './ui/Popup';
+export { createDim, placeOverlay, type OverlayFit } from './ui/overlay';
 export type {
   ResultSource,
   RoundRequest,
@@ -67,6 +67,7 @@ export type {
   SymbolPlaceholder,
 } from './assets/AssetManifest';
 export type { LoadedAssets } from './assets/LoadedAssets';
+export type { GameAudio, PlayOptions } from './audio/GameAudio';
 export type { LoadingScreenStyle } from './assets/LoadingScreen';
 
 export {
@@ -77,9 +78,20 @@ export {
   type TweenOptions,
   type TweenProps,
 } from './anim/tween';
+export { CharacterActor, type CharacterActorOptions } from './character/CharacterActor';
+export type {
+  ActiveAnimation,
+  AnimationEnd,
+  AnimationOptions,
+} from './character/CharacterAnimationState';
+export type { CharacterAnimation, PartPose, Pose } from './character/characterPose';
+export {
+  buildLayeredCharacter,
+  type CharacterLayer,
+  type LayeredCharacterOptions,
+} from './character/layeredCharacter';
 export { formatMoney } from './math/money';
 export {
-  linear,
   easeInQuad,
   easeOutQuad,
   easeInOutQuad,

@@ -62,6 +62,7 @@ export class ReelMotionSystem<SymbolId extends string> implements System, ReelSp
     this.motions.forEach((motion, reelIndex) => {
       startReel(motion, reelIndex * this.settings.startDelayMs);
     });
+    this.events.emit('spinStarted', undefined);
   }
 
   /**
@@ -81,7 +82,21 @@ export class ReelMotionSystem<SymbolId extends string> implements System, ReelSp
     this.landing = new Promise((resolve) => {
       this.finishSpin = resolve;
     });
+    this.events.emit('reelsLanding', { columns });
     return this.landing;
+  }
+
+  /**
+   * Keeps the reel `reelIndex` and every reel after it spinning `extraMs` longer, so they still
+   * land in order, e.g. while a game builds suspense. Works on reels that have not started
+   * braking; `hurry` takes the delay back, because the player asked for the result now.
+   */
+  delayStop(reelIndex: number, extraMs: number): void {
+    this.motions.forEach((motion, index) => {
+      if (index >= reelIndex && motion.phase !== 'idle' && motion.plan === null) {
+        motion.stopAtMs += extraMs;
+      }
+    });
   }
 
   /**

@@ -3,6 +3,7 @@ import type { GameEvents } from '../core/GameEvents';
 import type { GameModel } from '../core/GameModel';
 import type { TotalWinStep, Win, WinsStep } from '../math/round';
 import { bigWinTier, type BigWinTier } from '../wins/bigWinTier';
+import { IdleWinReplay } from './IdleWinReplay';
 import type { StepRegistry } from './RoundPlayer';
 
 /** How long each part of a win presentation lasts, in milliseconds. Set by the game. */
@@ -17,6 +18,11 @@ export interface WinTiming {
   totalWinMs: number;
   /** Lines and the Big Win overlay fade in and out this fast. */
   fadeMs: number;
+  /**
+   * Between rounds each win of the last spin comes back for this long, in turn, until the next
+   * Spin. Without it the field stays clean between rounds.
+   */
+  idleWinMs?: number;
 }
 
 /** What the `wins` step draws on the field. The SDK's `FieldWinView` is one. */
@@ -75,6 +81,11 @@ export class WinSteps implements WinControls {
   ) {
     registry.register<WinsStep>('wins', (step, skip) => this.showWins(step, skip));
     registry.register<TotalWinStep>('totalWin', (step, skip) => this.showTotal(step, skip));
+    const { events, pause, timing } = dependencies;
+    // The replay runs on the events alone; nothing calls it.
+    if (timing.idleWinMs !== undefined) {
+      new IdleWinReplay(events, pause, timing.idleWinMs, () => this.field);
+    }
   }
 
   useField(field: WinField): void {
@@ -134,9 +145,10 @@ export class WinSteps implements WinControls {
   }
 
   private async showBigWin(tier: BigWinTier, amount: number, skip: AbortSignal): Promise<void> {
-    const { bigWinScreen, pause, timing } = this.dependencies;
+    const { bigWinScreen, pause, timing, events, bigWins } = this.dependencies;
     try {
       bigWinScreen.show(tier, amount, timing.fadeMs);
+      events.emit('bigWinShown', { tierIndex: bigWins.indexOf(tier), title: tier.title });
       await pause(tier.countUpMs + tier.holdMs, skip);
       if (!skip.aborted) {
         bigWinScreen.fadeOut(timing.fadeMs);
@@ -144,6 +156,7 @@ export class WinSteps implements WinControls {
       }
     } finally {
       bigWinScreen.hide();
+      events.emit('bigWinEnded', undefined);
     }
   }
 

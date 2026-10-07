@@ -11,7 +11,7 @@ import {
 import { easeOutQuad } from '../anim/easing';
 import { tween } from '../anim/tween';
 
-/** Look of the loading screen. The game sets it in its config. */
+/** Look of the SDK loading screen: the game's logo over a progress bar. */
 export interface LoadingScreenStyle {
   /** Alias of a texture from the `preload` bundle, shown above the progress bar. */
   logo: string;
@@ -21,7 +21,11 @@ export interface LoadingScreenStyle {
 
 const BAR_WIDTH = 320;
 const BAR_HEIGHT = 12;
-const LOGO_MAX_WIDTH = 320;
+// The logo takes most of a phone's width, and stops growing on a wide screen.
+const LOGO_MAX_WIDTH = 640;
+const LOGO_SCREEN_SHARE = 0.85;
+// Room above and below the logo and bar on a short landscape screen.
+const LOGO_SCREEN_HEIGHT_SHARE = 0.6;
 const GAP = 32;
 const BUTTON_WIDTH = 160;
 const BUTTON_HEIGHT = 56;
@@ -120,22 +124,31 @@ export class LoadingScreen {
     this.app.render();
   }
 
-  // An arrow function, so it can be passed to renderer.on/off as is.
   private readonly layout = (): void => {
     const { width, height } = this.app.screen;
     this.background.clear().rect(0, 0, width, height).fill(this.backgroundColor);
-    // The bar sits at the center. The logo stands on top of it, the error replaces it.
-    this.content.position.set(width / 2, height / 2);
+    // The logo stands on the bar, the error replaces the bar. Together they are centered
+    // on the screen: the content's origin is the top of the bar.
     this.bar.position.set(-BAR_WIDTH / 2, 0);
     this.retryButton.position.set(0, this.message.height + GAP);
-    if (this.logo) {
-      const maxHeight = height / 2 - GAP;
-      const { texture } = this.logo;
-      this.logo.scale.set(Math.min(1, LOGO_MAX_WIDTH / texture.width, maxHeight / texture.height));
-      this.logo.position.set(0, -GAP);
-    }
+    const logoHeight = this.fitLogo(width, height);
+    const above = logoHeight > 0 ? logoHeight + GAP : 0;
+    this.content.position.set(width / 2, height / 2 + (above - BAR_HEIGHT) / 2);
     this.app.render();
   };
+
+  /** Scales the logo to the screen and puts it over the bar. Returns its height, 0 without a logo. */
+  private fitLogo(width: number, height: number): number {
+    if (!this.logo) {
+      return 0;
+    }
+    const { texture } = this.logo;
+    const maxWidth = Math.min(LOGO_MAX_WIDTH, width * LOGO_SCREEN_SHARE);
+    const maxHeight = height * LOGO_SCREEN_HEIGHT_SHARE;
+    this.logo.scale.set(Math.min(1, maxWidth / texture.width, maxHeight / texture.height));
+    this.logo.position.set(0, -GAP);
+    return this.logo.height;
+  }
 }
 
 /** A pill-shaped button. Its position is the middle of its top edge. */

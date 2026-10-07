@@ -26,12 +26,16 @@ export interface HudTexts {
   notEnoughBalance: string;
 }
 
+/** What the Spin button does now: start a round, stop the reels or skip the presentation. */
+export type SpinAction = 'spin' | 'stop' | 'skip';
+
 /** Everything the HUD shows, as plain data. */
 export interface HudView {
   balance: string;
   bet: string;
   win: string;
   message: string;
+  spinAction: SpinAction;
   spinLabel: string;
   spinEnabled: boolean;
   betDownEnabled: boolean;
@@ -107,15 +111,14 @@ export class HudPresenter {
     this.render(this.view());
   }
 
-  private spinLabel(): string {
-    const { round, texts } = this.dependencies;
-    switch (round.state) {
+  private spinAction(): SpinAction {
+    switch (this.dependencies.round.state) {
       case 'idle':
-        return texts.spin;
+        return 'spin';
       case 'spinning':
-        return texts.stop;
+        return 'stop';
       case 'presenting':
-        return texts.skip;
+        return 'skip';
     }
   }
 
@@ -123,13 +126,15 @@ export class HudPresenter {
     const { model, round, betLevels, texts } = this.dependencies;
     const idle = round.state === 'idle';
     const betIndex = betLevels.indexOf(model.bet);
+    const spinAction = this.spinAction();
     const shortOfMoney = idle && model.bet > model.balance;
     return {
       balance: formatMoney(model.balance),
       bet: formatMoney(model.bet),
       win: formatMoney(model.lastWin),
       message: shortOfMoney ? texts.notEnoughBalance : this.message,
-      spinLabel: this.spinLabel(),
+      spinAction,
+      spinLabel: texts[spinAction],
       spinEnabled: idle ? round.canSpin : true,
       betDownEnabled: idle && betIndex > 0,
       betUpEnabled: idle && betIndex < betLevels.length - 1,

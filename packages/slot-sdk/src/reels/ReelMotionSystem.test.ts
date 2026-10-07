@@ -57,6 +57,17 @@ function runSpin(system: ReelMotionSystem<TestSymbol>, events: EventBus<GameEven
   return { stops, ms };
 }
 
+/** Stop times of one whole spin, with `onLanding` run when the reels know their target. */
+function stopTimes(onLanding: (system: ReelMotionSystem<TestSymbol>) => void) {
+  const { events, system } = createSystem();
+  events.on('reelsLanding', () => {
+    onLanding(system);
+  });
+  system.start();
+  void system.stop(target);
+  return runSpin(system, events).stops;
+}
+
 describe('ReelMotionSystem', () => {
   it('gives every reel entity its strip and a motion at rest', () => {
     const { world, grid } = createSystem();
@@ -74,6 +85,16 @@ describe('ReelMotionSystem', () => {
     expect(positions[0]).toBeGreaterThan(0);
     expect(positions[1]).toBeGreaterThan(0);
     expect(positions[2]).toBe(0);
+  });
+
+  it('tells once that the reels started', () => {
+    const { events, system } = createSystem();
+    const started = vi.fn();
+    events.on('spinStarted', started);
+
+    system.start();
+
+    expect(started).toHaveBeenCalledTimes(1);
   });
 
   it('stops the reels left to right, stopDelayMs apart, not before minimumSpinMs', () => {
@@ -152,6 +173,38 @@ describe('ReelMotionSystem', () => {
     expect(first).toBeLessThan(settings.minimumSpinMs + settings.decelerateMs);
     expect((second ?? 0) - (first ?? 0)).toBeLessThan(settings.quickStopDelayMs + 45);
     expect(grid.columns).toEqual(target);
+  });
+
+  it('tells where the reels will land before any of them brakes', () => {
+    const { events, system } = createSystem();
+    const landing = vi.fn();
+    events.on('reelsLanding', landing);
+    system.start();
+    void system.stop(target);
+    expect(landing).toHaveBeenCalledWith({ columns: target });
+  });
+
+  it('holds back a reel and the ones after it with delayStop, still in order', () => {
+    const before = stopTimes(() => undefined);
+    const after = stopTimes((system) => {
+      system.delayStop(1, 500);
+    });
+    expect(after.map((stop) => stop.reelIndex)).toEqual([0, 1, 2]);
+    const shift = after.map((stop, index) => stop.ms - (before[index]?.ms ?? 0));
+    expect(shift[0]).toBe(0);
+    expect(shift[1]).toBeGreaterThanOrEqual(480);
+    expect(shift[2]).toBeGreaterThanOrEqual(480);
+  });
+
+  it('drops a delay when the player hurries', () => {
+    const { events, system } = createSystem();
+    events.on('reelsLanding', () => {
+      system.delayStop(0, 5000);
+    });
+    system.start();
+    void system.stop(target);
+    system.hurry();
+    expect(runSpin(system, events).ms).toBeLessThan(2000);
   });
 
   it('applies a hurry that comes before stop() to the coming stop', () => {

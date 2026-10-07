@@ -88,6 +88,9 @@ function symbolAlias(symbolId: string): string {
   return `symbol:${symbolId}`;
 }
 
-function toPixiAsset({ alias, src, family }: AssetEntry): UnresolvedAsset {
-  return family ? { alias, src, data: { family } } : { alias, src };
+function toPixiAsset({ alias, src, family, resolution }: AssetEntry): UnresolvedAsset {
+  if (family) {
+    return { alias, src, data: { family } };
+  }
+  return resolution ? { alias, src, data: { resolution } } : { alias, src };
 }

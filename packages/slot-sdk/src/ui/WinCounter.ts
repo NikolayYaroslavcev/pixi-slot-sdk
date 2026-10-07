@@ -1,7 +1,8 @@
-import { Text, type ColorSource, type TextStyleOptions, type Ticker } from 'pixi.js';
+import { BitmapText, type ColorSource, type TextStyleOptions, type Ticker } from 'pixi.js';
 import { easeOutCubic } from '../anim/easing';
 import { tween, type Tween } from '../anim/tween';
 import { formatMoney } from '../math/money';
+import { counterFont } from './counterFont';
 
 export interface WinCounterStyle {
   fontFamily: string;
@@ -12,10 +13,11 @@ export interface WinCounterStyle {
 
 /**
  * An amount of money that grows to its final value instead of jumping to it.
- * Centered on its origin. A plain class, like the rest of the HUD.
+ * Centered on its origin. Drawn with a bitmap font, so counting costs no text rendering per frame.
+ * A plain class, like the rest of the HUD.
  */
 export class WinCounter {
-  readonly view: Text;
+  readonly view: BitmapText;
   private shown = 0;
   private counting: Tween<WinCounter> | null = null;
 
@@ -23,7 +25,11 @@ export class WinCounter {
     private readonly ticker: Ticker,
     style: WinCounterStyle,
   ) {
-    this.view = new Text({ text: formatMoney(0), anchor: 0.5, style: winTextStyle(style) });
+    this.view = new BitmapText({
+      text: formatMoney(0),
+      anchor: 0.5,
+      style: { fontFamily: counterFont(winTextStyle(style)), fontSize: style.fontSize },
+    });
   }
 
   /** Minor units on screen now. Fractional while counting; the text shows whole minor units. */
@@ -54,7 +60,6 @@ export class WinCounter {
     );
   }
 
-  /** Shows `amount` right away. */
   show(amount: number): void {
     this.stop();
     this.value = amount;

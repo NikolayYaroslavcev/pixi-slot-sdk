@@ -30,6 +30,7 @@ export interface HighlightData {
   scale: number;
 }
 
+/** Component on a symbol entity while a win is on screen. `HighlightSystem` adds and removes it. */
 export const Highlight = defineComponent<HighlightData>('Highlight');
 
 /**

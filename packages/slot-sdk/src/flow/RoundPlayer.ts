@@ -20,7 +20,6 @@ export class RoundPlayer implements StepRegistry {
   /** Skip signal of the step on screen, null between rounds. */
   private currentStep: AbortController | null = null;
 
-  /** True while `play` runs. */
   get isPlaying(): boolean {
     return this.currentStep !== null;
   }

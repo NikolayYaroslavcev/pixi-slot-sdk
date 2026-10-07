@@ -1,40 +1,19 @@
-import { Container, Text, type ColorSource } from 'pixi.js';
+import { Container, Text } from 'pixi.js';
 import type { GameContext } from '../core/GameContext';
 import { Button, type ButtonStyle } from './Button';
+import { HudPresenter, type HudPresenterDependencies, type HudView } from './HudPresenter';
 import {
-  HudPresenter,
-  type HudPresenterDependencies,
-  type HudTexts,
-  type HudView,
-} from './HudPresenter';
+  hudButtonStyle,
+  hudNodeNames,
+  type ButtonArt,
+  type HudNodeName,
+  type HudStyle,
+} from './HudStyle';
 import { LabeledValue } from './LabeledValue';
 import type { Popup } from './Popup';
+import { listenForSpinKeys } from './spinKeys';
 
-/** Layout nodes of the HUD. Every game's `layout.ts` places each of them in both variants. */
-export const hudNodeNames = ['spinButton', 'balance', 'bet', 'win', 'message'] as const;
-
-export type HudNodeName = (typeof hudNodeNames)[number];
-
-/** Look of the HUD, set by the game. Sizes are design pixels; positions come from the layout. */
-export interface HudStyle {
-  fontFamily: string;
-  textColor: ColorSource;
-  captionColor: ColorSource;
-  buttonColor: ColorSource;
-  buttonTextColor: ColorSource;
-  captionFontSize: number;
-  valueFontSize: number;
-  messageFontSize: number;
-  spinButton: { radius: number; fontSize: number };
-  /** The − and + buttons around the bet. `offset` is from the bet's center to theirs. */
-  betButtons: { size: number; fontSize: number; offset: number };
-  /** Buttons a game adds with `context.hud.addButton`. */
-  extraButtons: { width: number; height: number; fontSize: number };
-  texts: HudTexts;
-}
-
-/** Keys that press Spin, as on most slot sites. */
-const spinKeys = new Set(['Space', 'Enter']);
+export { hudNodeNames, type HudNodeName, type HudStyle, type SpinButtonLooks } from './HudStyle';
 
 /** The part of the HUD that features see. */
 export interface HudControls {
@@ -44,10 +23,14 @@ export interface HudControls {
    * and when it is enabled.
    */
   addButton(nodeName: string, label: string): Button;
+  /** Adds a small round button showing the texture `icon` from the manifest, e.g. sound on/off. */
+  addIconButton(nodeName: string, icon: string): Button;
 }
 
+type HudContext = Pick<GameContext, 'app' | 'layers' | 'layout' | 'events'> & { popup: Popup };
+
 /**
- * Balance, bet with − / +, win, a message line and the Spin / Stop button.
+ * Balance, bet with − / +, win, a message line and the Spin / Stop / Skip button.
  * A plain class, not ECS. It draws what `HudPresenter` decides and passes presses back to it.
  * Keys do nothing while a popup is open: the popup has the player's attention.
  */
@@ -59,9 +42,10 @@ export class Hud implements HudControls {
   private readonly spinButton: Button;
   private readonly betDown: Button;
   private readonly betUp: Button;
+  private shownBet = '';
 
   constructor(
-    private readonly context: Pick<GameContext, 'layers' | 'layout'> & { popup: Popup },
+    private readonly context: HudContext,
     dependencies: Omit<HudPresenterDependencies, 'texts'>,
     private readonly style: HudStyle,
   ) {
@@ -70,22 +54,48 @@ export class Hud implements HudControls {
     this.balance = new LabeledValue(texts.balance, valueStyle);
     this.win = new LabeledValue(texts.win, valueStyle);
     this.bet = new LabeledValue(texts.bet, valueStyle);
-    this.message = new Text({
-      anchor: 0.5,
-      style: {
-        fill: style.textColor,
-        fontFamily: style.fontFamily,
-        fontSize: style.messageFontSize,
-      },
-    });
-    this.spinButton = new Button(spinButtonStyle(style), texts.spin);
-    this.betDown = new Button(betButtonStyle(style), '-');
-    this.betUp = new Button(betButtonStyle(style), '+');
-    this.addNodes(context, style.betButtons.offset);
+    this.message = createMessage(style);
+    const { radius, fontSize } = style.spinButton;
+    this.spinButton = this.button(style.spinButton, { radius }, fontSize, texts.spin);
+    const { size, fontSize: betFontSize } = style.betButtons;
+    const square = { width: size, height: size };
+    this.betDown = this.button(style.betButtons, square, betFontSize, '-');
+    this.betUp = this.button(style.betButtons, square, betFontSize, '+');
+    this.addNodes(style.betButtons.offset);
     const presenter = new HudPresenter({ ...dependencies, texts }, (view) => {
       this.render(view);
     });
     this.connectInput(presenter);
+  }
+
+  addButton(nodeName: string, label: string): Button {
+    const { width, height, fontSize } = this.style.extraButtons;
+    const button = this.button(this.style.extraButtons, { width, height }, fontSize, label);
+    this.place(nodeName, button);
+    return button;
+  }
+
+  addIconButton(nodeName: string, icon: string): Button {
+    const art = this.style.iconButtons ?? { radius: this.style.betButtons.size / 2 };
+    const button = this.button(art, { radius: art.radius }, this.style.betButtons.fontSize, '');
+    button.setIcon(icon);
+    this.place(nodeName, button);
+    return button;
+  }
+
+  /** A button in the HUD look. Every press is also announced, e.g. for a click sound. */
+  private button(art: ButtonArt, shape: ButtonStyle['shape'], fontSize: number, label: string) {
+    const style = hudButtonStyle(this.style, art, shape, fontSize);
+    const button = new Button(style, label, this.context.app.ticker);
+    button.onPress(() => {
+      this.context.events.emit('buttonPressed', undefined);
+    });
+    return button;
+  }
+
+  private place(nodeName: string, button: Button): void {
+    this.context.layers.hud.addChild(button.view);
+    this.context.layout.addNode(nodeName, button.view);
   }
 
   /** Buttons and keys only report presses; the presenter decides what they do. */
@@ -99,31 +109,16 @@ export class Hud implements HudControls {
     this.betUp.onPress(() => {
       presenter.changeBet(1);
     });
-    window.addEventListener('keydown', (event) => {
-      // A held key repeats: one press is one Spin, not a new round every few frames.
-      if (!spinKeys.has(event.code) || event.repeat || this.context.popup.isOpen) {
-        return;
-      }
-      event.preventDefault();
-      presenter.pressSpin();
-    });
-  }
-
-  addButton(nodeName: string, label: string): Button {
-    const { width, height, fontSize } = this.style.extraButtons;
-    const button = new Button(
-      { ...buttonColors(this.style), shape: { width, height }, fontSize },
-      label,
+    listenForSpinKeys(
+      () => {
+        presenter.pressSpin();
+      },
+      () => this.context.popup.isOpen,
     );
-    this.context.layers.hud.addChild(button.view);
-    this.context.layout.addNode(nodeName, button.view);
-    return button;
   }
 
-  private addNodes(
-    { layers, layout }: Pick<GameContext, 'layers' | 'layout'>,
-    betButtonOffset: number,
-  ): void {
+  private addNodes(betButtonOffset: number): void {
+    const { layers, layout } = this.context;
     this.betDown.view.x = -betButtonOffset;
     this.betUp.view.x = betButtonOffset;
     const betGroup = new Container();
@@ -143,30 +138,44 @@ export class Hud implements HudControls {
 
   private render(view: HudView): void {
     this.balance.setValue(view.balance);
-    this.bet.setValue(view.bet);
     this.win.setValue(view.win);
+    this.renderBet(view.bet);
     this.message.text = view.message;
-    this.spinButton.setText(view.spinLabel);
-    this.spinButton.setEnabled(view.spinEnabled);
+    this.renderSpinButton(view);
     this.betDown.setEnabled(view.betDownEnabled);
     this.betUp.setEnabled(view.betUpEnabled);
   }
+
+  /** A new bet swells briefly, so the change reads even with the eyes on the reels. */
+  private renderBet(bet: string): void {
+    this.bet.setValue(bet);
+    if (this.shownBet !== '' && this.shownBet !== bet) {
+      this.bet.pulse(this.context.app.ticker);
+    }
+    this.shownBet = bet;
+  }
+
+  private renderSpinButton(view: HudView): void {
+    const look = this.style.spinButton.looks?.[view.spinAction];
+    if (look) {
+      this.spinButton.setSkin(look.skin);
+      this.spinButton.setIcon(look.icon);
+    } else {
+      this.spinButton.setText(view.spinLabel);
+    }
+    this.spinButton.setEnabled(view.spinEnabled);
+  }
 }
 
-function spinButtonStyle(style: HudStyle): ButtonStyle {
-  const { radius, fontSize } = style.spinButton;
-  return { ...buttonColors(style), shape: { radius }, fontSize };
-}
-
-function betButtonStyle(style: HudStyle): ButtonStyle {
-  const { size, fontSize } = style.betButtons;
-  return { ...buttonColors(style), shape: { width: size, height: size }, fontSize };
-}
-
-function buttonColors(style: HudStyle): Omit<ButtonStyle, 'shape' | 'fontSize'> {
-  return {
-    color: style.buttonColor,
-    textColor: style.buttonTextColor,
-    fontFamily: style.fontFamily,
-  };
+/** The message sits on the game's background, not on a panel: a soft shadow keeps it readable. */
+function createMessage(style: HudStyle): Text {
+  return new Text({
+    anchor: 0.5,
+    style: {
+      fill: style.textColor,
+      fontFamily: style.fontFamily,
+      fontSize: style.messageFontSize,
+      dropShadow: { color: '#000000', alpha: 0.85, blur: 6, distance: 3, angle: Math.PI / 2 },
+    },
+  });
 }

@@ -1,7 +1,6 @@
 import type { Ticker } from 'pixi.js';
 import { linear, type Easing } from './easing';
 
-/** Keys of `Target` whose values are numbers, e.g. `x`, `alpha`, `rotation` of a Container. */
 type NumericKey<Target> = {
   [Key in keyof Target]: Target[Key] extends number ? Key : never;
 }[keyof Target];
@@ -9,6 +8,7 @@ type NumericKey<Target> = {
 /** End values of the animated properties. */
 export type TweenProps<Target> = Partial<Pick<Target, NumericKey<Target>>>;
 
+/** Timing of one `tween`. */
 export interface TweenOptions {
   /** Milliseconds of ticker time. */
   duration: number;
@@ -43,7 +43,6 @@ export class Tween<Target extends object> implements PromiseLike<void> {
     ticker.add(this.update);
   }
 
-  // Makes the tween awaitable like a Promise.
   readonly then: PromiseLike<void>['then'] = (onFulfilled, onRejected) =>
     this.done.then(onFulfilled, onRejected);
 
@@ -54,7 +53,6 @@ export class Tween<Target extends object> implements PromiseLike<void> {
     this.resolveDone();
   }
 
-  // An arrow function, so the ticker calls it with the right `this`.
   private readonly update = (ticker: Ticker): void => {
     // deltaMS is capped by ticker.minFPS, so one long frame never makes the animation jump.
     this.elapsedMs += ticker.deltaMS;
@@ -106,14 +104,17 @@ export async function waitUnlessSkipped(
   if (skip.aborted) {
     timer.finish();
   }
-  skip.addEventListener(
-    'abort',
-    () => {
-      timer.finish();
-    },
-    { once: true },
-  );
-  await timer;
+  const finish = (): void => {
+    timer.finish();
+  };
+  skip.addEventListener('abort', finish, { once: true });
+  try {
+    await timer;
+  } finally {
+    // The Idle win replay keeps one signal for many waits. Without this, each wait would leave
+    // a listener on it.
+    skip.removeEventListener('abort', finish);
+  }
 }
 
 function pickValues<Target extends object>(

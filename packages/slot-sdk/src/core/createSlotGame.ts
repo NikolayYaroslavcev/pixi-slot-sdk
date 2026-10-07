@@ -8,6 +8,10 @@ import { SlotGame, type SlotGameOptions } from './SlotGame';
  * Entry point of the SDK for a game. Checks the options and returns a game ready to `start()`.
  * Throws one error that lists every problem found, so a broken config is fixed in one pass.
  *
+ * @param options The game: config, asset manifest, layout, result source and features.
+ * @returns The game, not started yet: call `start()` to load assets and show the first frame.
+ * @throws When the options are invalid, e.g. a bet outside `betLevels` or a missing HUD node.
+ *
  * ```ts
  * await createSlotGame({ config, assets, layout, resultSource, features: [myFeature()] }).start();
  * ```

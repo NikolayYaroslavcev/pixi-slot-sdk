@@ -1,6 +1,6 @@
 import type { ColorSource } from 'pixi.js';
 
-/** One file to load. */
+/** One file of the manifest: an image, a sound or a font. Code reads it by `alias`. */
 export interface AssetEntry {
   /** Name the game uses for the file, unique across both bundles. */
   alias: string;
@@ -8,6 +8,11 @@ export interface AssetEntry {
   src: string;
   /** Required for a font file: the name to put in `fontFamily` of a text style. */
   family?: string;
+  /**
+   * For an SVG: drawn this many times denser than its own size, so art made at the exact size it
+   * is shown (e.g. a button skin that must not stretch) stays sharp on high-density screens.
+   */
+  resolution?: number;
 }
 
 /** Temporary look of a symbol until its art exists: a colored tile with a label. */
@@ -24,7 +29,7 @@ export interface SymbolArt {
   src: string;
 }
 
-/** A symbol is drawn from its art file, or from a placeholder until the art exists. */
+/** What a symbol looks like: its art, or a placeholder until the art exists. */
 export type SymbolAsset = SymbolArt | SymbolPlaceholder;
 
 /**

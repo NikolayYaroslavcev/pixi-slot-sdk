@@ -1,18 +1,24 @@
 import {
+  Assets,
   Graphics,
   Particle,
   ParticleContainer,
   Rectangle,
   type ColorSource,
   type Renderer,
+  type Texture,
 } from 'pixi.js';
 
 /** How Big Win particles fly. Distances are design pixels, times milliseconds. */
 export interface ParticleStyle {
-  /** Particles take these colors at random. */
+  /** Particles take these colors at random. White keeps a texture's own colors. */
   colors: readonly ColorSource[];
   /** Radius of a particle at scale 1. */
   radius: number;
+  /** Alias of a texture from the manifest, e.g. a coin. Without it, a soft round dot. */
+  texture?: string;
+  /** Largest turn of a particle, radians per second, e.g. for coins that tumble. */
+  spin?: number;
   lifeMs: number;
   /** Largest speed a particle is thrown with, per second. */
   speed: number;
@@ -25,12 +31,13 @@ interface Motion {
   particle: Particle;
   velocityX: number;
   velocityY: number;
+  spin: number;
   ageMs: number;
 }
 
 /**
- * A fountain of glowing particles thrown up from one point and falling back.
- * One `ParticleContainer`: hundreds of particles cost a single draw call.
+ * A fountain of particles thrown up from one point and falling back: glowing dots, or the game's
+ * own texture such as coins. One `ParticleContainer`: hundreds of particles cost a single draw call.
  */
 export class WinParticles {
   readonly view: ParticleContainer;
@@ -39,17 +46,22 @@ export class WinParticles {
   /** Part of the next particle accumulated by the frames since the last one. */
   private due = 0;
 
+  /** Scale of the texture that gives a particle `radius` at size 1. */
+  private readonly baseScale: number;
+
   constructor(
     renderer: Renderer,
     private readonly style: ParticleStyle,
   ) {
-    const dot = new Graphics().circle(0, 0, style.radius).fill(0xffffff);
-    const texture = renderer.generateTexture(dot);
-    dot.destroy();
+    const texture = style.texture
+      ? Assets.get<Texture>(style.texture)
+      : dotTexture(renderer, style.radius);
+    this.baseScale = (style.radius * 2) / texture.width;
     this.view = new ParticleContainer({
       texture,
-      blendMode: 'add',
-      dynamicProperties: { position: true, vertex: true, color: true },
+      // Glowing dots add up into light; a texture keeps its own look.
+      blendMode: style.texture ? 'normal' : 'add',
+      dynamicProperties: { position: true, vertex: true, color: true, rotation: true },
       // Without bounds the container would count as empty and could be culled.
       boundsArea: new Rectangle(-4000, -4000, 8000, 8000),
     });
@@ -82,7 +94,7 @@ export class WinParticles {
     // Mostly up, fanned out to the sides.
     const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.6;
     const throwSpeed = speed * (0.5 + Math.random() * 0.5);
-    const size = 0.5 + Math.random();
+    const size = (0.5 + Math.random()) * this.baseScale;
     const color = colors[Math.floor(Math.random() * colors.length)] ?? 0xffffff;
     const particle = new Particle({
       texture: this.view.texture,
@@ -97,6 +109,7 @@ export class WinParticles {
       particle,
       velocityX: Math.cos(angle) * throwSpeed,
       velocityY: Math.sin(angle) * throwSpeed,
+      spin: (Math.random() - 0.5) * 2 * (this.style.spin ?? 0),
       ageMs: 0,
     });
   }
@@ -116,6 +129,7 @@ export class WinParticles {
       motion.velocityY += this.style.gravity * seconds;
       particle.x += motion.velocityX * seconds;
       particle.y += motion.velocityY * seconds;
+      particle.rotation += motion.spin * seconds;
       particle.alpha = Math.max(1 - motion.ageMs / this.style.lifeMs, 0);
       if (motion.ageMs >= this.style.lifeMs) {
         particles.splice(index, 1);
@@ -126,4 +140,11 @@ export class WinParticles {
       this.view.update();
     }
   }
+}
+
+function dotTexture(renderer: Renderer, radius: number): Texture {
+  const dot = new Graphics().circle(0, 0, radius).fill(0xffffff);
+  const texture = renderer.generateTexture(dot);
+  dot.destroy();
+  return texture;
 }

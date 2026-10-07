@@ -15,7 +15,7 @@ export interface WinStyle {
   counterFontSize: number;
   /** The amount of a single win, next to its line. */
   amountFontSize: number;
-  /** Color the Big Win overlay darkens the screen with, and how strongly (0–1). */
+  /** Color the Big Win overlay darkens the screen with, and how strongly, from 0 to 1. */
   overlayColor: ColorSource;
   overlayAlpha: number;
   /** Title of a tier with `titleScale` 1. */

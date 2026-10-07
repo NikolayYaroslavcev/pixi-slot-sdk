@@ -3,6 +3,7 @@ export type Easing = (progress: number) => number;
 
 export const linear: Easing = (progress) => progress;
 
+// Standard curves: `In` starts slow, `Out` ends slow, `InOut` does both. Quad is gentle, cubic stronger.
 export const easeInQuad: Easing = (progress) => progress * progress;
 
 export const easeOutQuad: Easing = (progress) => 1 - (1 - progress) ** 2;

@@ -1,5 +1,6 @@
 import type { Application } from 'pixi.js';
 import type { LoadedAssets } from '../assets/LoadedAssets';
+import type { GameAudio } from '../audio/GameAudio';
 import type { World } from '../ecs/World';
 import type { RoundControls } from '../flow/RoundFlow';
 import type { HudControls } from '../ui/Hud';
@@ -20,12 +21,19 @@ import type { SceneLayers } from './sceneLayers';
  * and no global access.
  */
 export interface GameContext {
+  /** The Pixi application: renderer, ticker, stage. */
   readonly app: Application;
+  /** Containers in draw order, from `background` to `debug`. */
   readonly layers: SceneLayers;
+  /** ECS world of the reels and symbols. A feature adds its components and systems here. */
   readonly world: World;
+  /** Typed events between parts that do not know each other, e.g. a reel stop and its sound. */
   readonly events: EventBus<GameEvents>;
+  /** Balance, bet and last win. Changes are published as events. */
   readonly model: GameModel;
+  /** Places named objects for the current screen. `addNode` gives an object its layout node. */
   readonly layout: LayoutManager;
+  /** The config the game passed to `createSlotGame`. */
   readonly config: GameConfig;
   /** Resources loaded from the manifest before the features were installed. */
   readonly assets: LoadedAssets;
@@ -40,4 +48,6 @@ export interface GameContext {
   readonly hud: HudControls;
   /** One modal dialog for the whole game, e.g. to confirm a purchase. */
   readonly popup: Popup;
+  /** Sounds from the manifest, mute and its saved state. */
+  readonly audio: GameAudio;
 }

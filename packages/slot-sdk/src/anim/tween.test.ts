@@ -151,4 +151,16 @@ describe('waitUnlessSkipped', () => {
 
     await expect(waitUnlessSkipped(ticker, 10_000, AbortSignal.abort())).resolves.toBeUndefined();
   });
+
+  it('leaves no listener on a signal that outlives the wait', async () => {
+    const { ticker, advance } = createManualTicker();
+    const skip = new AbortController();
+    const removeListener = vi.spyOn(skip.signal, 'removeEventListener');
+    const waiting = waitUnlessSkipped(ticker, 100, skip.signal);
+
+    advance(120);
+    await waiting;
+
+    expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
+  });
 });

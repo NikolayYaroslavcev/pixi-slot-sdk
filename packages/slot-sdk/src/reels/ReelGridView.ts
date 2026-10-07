@@ -1,26 +1,17 @@
-import { BlurFilter, Container, Graphics, Rectangle, Sprite, type ColorSource } from 'pixi.js';
+import { Container, Graphics, Rectangle, Sprite, type ColorSource } from 'pixi.js';
 import type { LoadedAssets } from '../assets/LoadedAssets';
 import type { System, World } from '../ecs/World';
 import { Highlight, type HighlightData } from '../wins/Highlight';
 import { ReelMotion, ReelStrip, type CellPosition } from './components';
 import { HeldSymbols } from './HeldSymbols';
+import { motionBlurLevel, MotionBlurTextures, type MotionBlurOptions } from './motionBlur';
 import { cellCenter, cellsSize, reelCenterX, rowCenterY, type CellMetrics } from './reelGeometry';
 import type { ReelGrid } from './ReelGrid';
 import type { ReelMotionData } from './reelMotion';
 import { poolSlot, slotSymbol, type FieldColumn } from './reelSlots';
 import { showHighlight, showTexture } from './symbolLook';
 
-/** Vertical blur of a moving reel, growing with its speed. Speeds are in symbols per second. */
-export interface MotionBlurOptions {
-  /** Below this speed there is no blur, so a reel near its stop is sharp. */
-  fromSpeed: number;
-  /** At this speed and above the blur is at full `strength`. */
-  fullSpeed: number;
-  /** Blur strength at full speed, in design pixels: it shrinks with the field on a small screen. */
-  strength: number;
-  /** Blur passes. More is smoother and slower. */
-  quality: number;
-}
+export type { MotionBlurOptions } from './motionBlur';
 
 /** How the field looks. Sizes are in design coordinates. */
 export interface ReelGridViewOptions extends CellMetrics {
@@ -34,7 +25,6 @@ export interface ReelGridViewOptions extends CellMetrics {
 interface ReelColumn {
   readonly container: Container;
   readonly sprites: readonly Sprite[];
-  readonly blur: BlurFilter;
   readonly field: FieldColumn;
   readonly motion: ReelMotionData;
   readonly strip: readonly string[];
@@ -49,6 +39,7 @@ interface ReelColumn {
  * below for the symbols that are scrolling in and out. Every frame each sprite is placed
  * by the reel's `ReelMotion` and gets the texture of the slot it shows now. A mask hides
  * the spare sprites. Sprites live here, not in components: the world stays free of Pixi.
+ * A fast reel shows blurred copies of its symbols (`MotionBlurTextures`), chosen by its speed.
  * A symbol with a `Highlight` is drawn with its brightness and size. A symbol with `Held`
  * is drawn still in its cell, above its spinning reel (`HeldSymbols`).
  *
@@ -59,6 +50,7 @@ export class ReelGridView implements System {
   readonly container = new Container({ label: 'reels' });
   private readonly columns: ReelColumn[];
   private readonly held: HeldSymbols;
+  private readonly blurred: MotionBlurTextures;
 
   constructor(
     private readonly world: World,
@@ -66,6 +58,7 @@ export class ReelGridView implements System {
     private readonly assets: LoadedAssets,
     private readonly options: ReelGridViewOptions,
   ) {
+    this.blurred = new MotionBlurTextures(options.motionBlur, options.cellHeight);
     const cells = cellsSize(grid.size, options);
     const width = cells.width + options.padding * 2;
     const height = cells.height + options.padding * 2;
@@ -78,6 +71,7 @@ export class ReelGridView implements System {
     this.columns = Array.from({ length: grid.size.reelCount }, (_reel, reelIndex) =>
       this.createColumn(grid, reelIndex),
     );
+    this.prepareBlur();
     this.held = new HeldSymbols(world, grid, assets, options);
     symbols.addChild(...this.columns.map((column) => column.container), this.held.container);
     // Fixed bounds: the layout anchors the field by its panel, whatever the symbols do.
@@ -93,6 +87,14 @@ export class ReelGridView implements System {
     return { x: center.x + this.options.padding, y: center.y + this.options.padding };
   }
 
+  /** Blurred copies of every symbol on the strips, drawn while the game loads. */
+  private prepareBlur(): void {
+    const symbolIds = new Set(this.columns.flatMap((column) => column.strip));
+    for (const symbolId of symbolIds) {
+      this.blurred.prepare(this.assets.symbolTexture(symbolId));
+    }
+  }
+
   update(): void {
     // Plain loops: this runs every frame and creates nothing.
     for (const column of this.columns) {
@@ -103,6 +105,7 @@ export class ReelGridView implements System {
 
   private drawColumn(column: ReelColumn): void {
     const { motion, sprites } = column;
+    const blurLevel = motionBlurLevel(motion.speed, this.options.motionBlur);
     for (let poolIndex = 0; poolIndex < sprites.length; poolIndex += 1) {
       const sprite = sprites[poolIndex];
       if (!sprite) {
@@ -111,10 +114,9 @@ export class ReelGridView implements System {
       const slot = poolSlot(poolIndex, motion.position, sprites.length);
       sprite.y = rowCenterY(slot + motion.position, this.options);
       const symbolId = slotSymbol(slot, motion, column.strip, column.field);
-      showTexture(sprite, this.assets.symbolTexture(symbolId));
+      showTexture(sprite, this.blurred.get(this.assets.symbolTexture(symbolId), blurLevel));
       showHighlight(sprite, this.highlightAt(column, slot - motion.restSlot), this.options);
     }
-    this.blurBySpeed(column.blur, motion.speed);
   }
 
   /** `rowIndex` is the field row the sprite shows; outside the field there is no highlight. */
@@ -124,19 +126,6 @@ export class ReelGridView implements System {
     }
     column.cell.rowIndex = rowIndex;
     return this.world.get(this.grid.symbolEntity(column.cell), Highlight);
-  }
-
-  private blurBySpeed(blur: BlurFilter, speed: number): void {
-    const { fromSpeed, fullSpeed, strength } = this.options.motionBlur;
-    const amount = Math.min(
-      Math.max((Math.abs(speed) - fromSpeed) / (fullSpeed - fromSpeed), 0),
-      1,
-    );
-    // A disabled filter is skipped entirely, so a reel at rest costs nothing extra.
-    blur.enabled = amount > 0;
-    // A filter blurs in screen pixels. The world scale of the field turns design pixels into them.
-    const screenScale = Math.abs(this.container.worldTransform.d);
-    blur.strengthY = strength * amount * screenScale;
   }
 
   private createColumn(grid: ReelGrid<string>, reelIndex: number): ReelColumn {
@@ -153,15 +142,11 @@ export class ReelGridView implements System {
       { length: grid.size.rowCount + 2 },
       () => new Sprite({ anchor: 0.5, x }),
     );
-    const { quality } = this.options.motionBlur;
-    const blur = new BlurFilter({ strengthX: 0, strengthY: 0, quality });
-    blur.enabled = false;
-    const container = new Container({ label: `reel ${String(reelIndex)}`, filters: [blur] });
+    const container = new Container({ label: `reel ${String(reelIndex)}` });
     container.addChild(...sprites);
     return {
       container,
       sprites,
-      blur,
       motion,
       strip: strip.symbols,
       field: fieldColumn(grid, reelIndex),

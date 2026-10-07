@@ -29,7 +29,6 @@ export interface RevealStep extends RoundStep {
 
 /** One paying combination. A game adds its own details, such as the line or the symbol. */
 export interface Win {
-  /** Cells that form the combination. */
   readonly cells: readonly CellPosition[];
   /** Minor units. */
   readonly amount: number;

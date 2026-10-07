@@ -17,7 +17,6 @@ export type SceneLayers = {
   readonly debug: Container;
 };
 
-/** Creates the layers and adds them to `designRoot` in back-to-front order. */
 export function createSceneLayers(designRoot: Container): SceneLayers {
   // Object keys keep insertion order, so this literal is the single source of the draw order.
   const layers: SceneLayers = {

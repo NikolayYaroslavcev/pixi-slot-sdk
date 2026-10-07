@@ -117,6 +117,21 @@ describe('WinSteps: totalWin', () => {
 
     expect(bigWinScreen.calls[0]).toBe('show MEGA 4321');
   });
+
+  it('tells which level is on screen and when it is gone, also after a skip', async () => {
+    const { events, player } = createWinSteps(pauseUntilSkip());
+    const shown = vi.fn();
+    const ended = vi.fn();
+    events.on('bigWinShown', shown);
+    events.on('bigWinEnded', ended);
+
+    const playing = player.play([totalWin(5000)]);
+    player.skip();
+    await playing;
+
+    expect(shown).toHaveBeenCalledWith({ tierIndex: 1, title: 'MEGA' });
+    expect(ended).toHaveBeenCalledOnce();
+  });
 });
 
 describe('WinSteps: skip', () => {
