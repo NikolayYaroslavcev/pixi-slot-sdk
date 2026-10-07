@@ -70,7 +70,7 @@ const layers = {
   },
   // Big Win: the treasure at the captain's feet, beside the belt, coins and sparks flying.
   chest: { pivot: at(89, 145), position: at(30, 330), scale: 0.7, alpha: 0 },
-  coins: { pivot: at(67, 68), position: at(122, 250), scale: 0.7, alpha: 0 },
+  coins: { pivot: at(67, 68), position: at(30, 250), scale: 0.7, alpha: 0 },
   coin_trail: { pivot: at(73, 74), position: at(215, 150), scale: 0.9, alpha: 0, blendMode: 'add' },
   sparkles: { pivot: at(173, 80), position: at(122, 140), scale: 1.05, alpha: 0, blendMode: 'add' },
 } as const satisfies Record<string, Omit<CharacterLayer, 'texture'>>;
