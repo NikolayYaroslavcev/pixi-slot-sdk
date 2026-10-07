@@ -45,8 +45,8 @@ const layers = {
   tentacle_6: tentacle(at(15, 160), at(175, 270), -6, 0.95),
   // In front: the coat is worn over the lower body, its open neck under the chin, with the
   // compass hanging from the belt.
-  coat: { parent: 'body', pivot: at(127, 0), position: at(122, 150), scale: 1.2 },
-  coat_collar: { parent: 'body', pivot: at(72, 20), position: at(126, 178), scale: 1.05 },
+  coat: { parent: 'body', pivot: at(127, 0), position: at(122, 140), scale: 1.2 },
+  coat_collar: { parent: 'body', pivot: at(72, 20), position: at(126, 168), scale: 1.05 },
   compass: { parent: 'body', pivot: at(45, 8), position: at(186, 250), scale: 0.4 },
   mouth_grin: { parent: 'body', pivot: at(54, 38), position: at(138, 145), scale: 0.95, alpha: 0 },
   eyes_angry: { parent: 'body', pivot: at(61, 42), position: at(143, 98), scale: 1.22, alpha: 0 },
