@@ -25,7 +25,7 @@ These belong to the project and have no third-party terms.
 | Background (pirate cove at sunset) | `public/assets/scene/pirate-cove.webp`                                             |                                                                                                                                |
 | Logo «Pirate's Fortune»            | `public/assets/logo.webp`                                                          |                                                                                                                                |
 
-The captain's sources stay outside `public/` and are not part of the build.
+The captain's sources stay outside `public/` and are not part of the build. To replace the art, put new layers into `art/pirate-octopus-animation/`, run `node scripts/clean-captain.mjs` and check the result on the stand `captain.html` (`npm run dev`, then `/captain.html`).
 
 ## Third-party
 

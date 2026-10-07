@@ -31,11 +31,10 @@ const tentacle = (
   }) as const;
 
 const layers = {
-  glow_gold: { pivot: at(53, 76), position: at(122, 150), scale: 3, alpha: 0, blendMode: 'add' },
+  glow_gold: { pivot: at(47, 52), position: at(122, 130), scale: 3.2, alpha: 0, blendMode: 'add' },
   body: { pivot: at(122, 250) },
   // Behind the body, back to front: two tentacles rising behind the head, the others spreading
-  // from under the coat, the coat and the shadow the head casts on it. The body's art fades out
-  // at the bottom, so the head sits in the coat.
+  // from under the coat.
   tentacle_1: tentacle(at(25, 165), at(62, 212), -40, 0.8),
   tentacle_3: tentacle(at(165, 160), at(182, 205), 15, 0.8, { mirror: true }),
   tentacle_7: tentacle(at(8, 115), at(70, 232), -8, 0.85, { mirror: true }),
@@ -44,10 +43,11 @@ const layers = {
   tentacle_4: tentacle(at(149, 168), at(168, 262), 45, 0.8, { mirror: true }),
   tentacle_8: tentacle(at(8, 125), at(70, 268), 8, 0.95, { mirror: true }),
   tentacle_6: tentacle(at(15, 160), at(175, 270), -6, 0.95),
-  coat: { parent: 'body', behind: true, pivot: at(127, 12), position: at(124, 128) },
-  shadow: { parent: 'body', behind: true, pivot: at(85, 35), position: at(125, 185) },
-  compass: { parent: 'body', pivot: at(45, 8), position: at(200, 228), scale: 0.32 },
-  earring: { parent: 'body', pivot: at(30, 10), position: at(223, 108), scale: 0.33 },
+  // In front: the coat is worn over the lower body, its open neck under the chin, with the
+  // compass hanging from the belt.
+  coat: { parent: 'body', pivot: at(127, 0), position: at(122, 150), scale: 1.2 },
+  coat_collar: { parent: 'body', pivot: at(72, 20), position: at(126, 178), scale: 1.05 },
+  compass: { parent: 'body', pivot: at(45, 8), position: at(186, 250), scale: 0.4 },
   mouth_grin: { parent: 'body', pivot: at(54, 38), position: at(138, 145), scale: 0.95, alpha: 0 },
   eyes_angry: { parent: 'body', pivot: at(61, 42), position: at(143, 98), scale: 1.22, alpha: 0 },
   // One closed eye, mirrored for the other: the face is turned, so the right eye is smaller.
@@ -73,8 +73,8 @@ const layers = {
     rotation: deg(-6),
     scale: 0.78,
   },
-  // Big Win: the treasure at the captain's feet, coins and sparks flying.
-  chest: { pivot: at(91, 150), position: at(122, 318), scale: 0.62, alpha: 0 },
+  // Big Win: the treasure at the captain's feet, beside the belt, coins and sparks flying.
+  chest: { pivot: at(89, 145), position: at(30, 330), scale: 0.7, alpha: 0 },
   coins: { pivot: at(67, 68), position: at(122, 250), scale: 0.7, alpha: 0 },
   coin_trail: { pivot: at(73, 74), position: at(215, 150), scale: 0.9, alpha: 0, blendMode: 'add' },
   sparkles: { pivot: at(173, 80), position: at(122, 140), scale: 1.05, alpha: 0, blendMode: 'add' },

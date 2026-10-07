@@ -61,7 +61,6 @@ const idle: Animation = {
           scaleY: 1 + wave(t, d, 1, 0.018),
         },
         hat: { rotation: wave(t, d, 1, 0.025, 0.3) },
-        earring: { rotation: wave(t, d, 2, 0.12) },
         compass: { rotation: wave(t, d, 1, 0.1, 0.4) },
       },
       sway((phase) => wave(t, d, 1, 0.045, phase)),
@@ -82,7 +81,6 @@ const spin: Animation = {
           rotation: wave(t, d, 1, 0.02),
         },
         hat: { rotation: wave(t, d, 2, 0.035) },
-        earring: { rotation: wave(t, d, 4, 0.2) },
         compass: { rotation: wave(t, d, 2, 0.18) },
       },
       sway((phase) => wave(t, d, 2, 0.08, phase)),
@@ -130,14 +128,6 @@ const grab: Animation = {
       {
         body: { rotation: lean(0.06), x: lean(6) },
         hat: { rotation: lean(-0.06) },
-        earring: {
-          rotation: keys(t, [
-            [0, 0],
-            [180, -0.3],
-            [450, 0.2],
-            [700, 0],
-          ]),
-        },
       },
       sway((phase) => wave(t, this.durationMs, 1, 0.04, phase)),
       face('angry', true),
@@ -196,7 +186,6 @@ const win: Animation = {
       {
         body: { y: keys(t, winTracks.hop), scaleY: keys(t, winTracks.squash) },
         hat: { y: keys(t, winTracks.hat) },
-        earring: { rotation: wave(t, d, 3, 0.25) },
         sparkles: { alpha: keys(t, winTracks.sparkle), scaleX: size, scaleY: size },
       },
       sway((phase) => wave(t, d, 2, 0.06, phase), keys(t, winTracks.cheer)),
@@ -217,7 +206,6 @@ const bigWin: Animation = {
       {
         body: { y: hop(t, d, 2, 26), scaleY: 1 + wave(t, d, 2, 0.04, 0.25) },
         hat: { y: hop(t, d, 2, 10), rotation: wave(t, d, 2, 0.06) },
-        earring: { rotation: wave(t, d, 4, 0.3) },
         compass: { rotation: wave(t, d, 2, 0.3) },
         glow_gold: { alpha: 0.85 + wave(t, d, 2, 0.15), scaleX: 1.15 + wave(t, d, 2, 0.06) },
         sparkles: { alpha: 0.8 + wave(t, d, 4, 0.2), rotation: wave(t, d, 1, 0.06) },

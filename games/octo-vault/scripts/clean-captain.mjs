@@ -27,11 +27,15 @@ const target = join(assets, 'captain');
  * `feltHull`: the outline is open too, so the cloth fills the convex hull of the gold trim
  * below `fromRow` instead (above it the feather has gold glints of its own).
  * `openNeck`: dark pixels above this row are the empty neck of the coat, cleared so the chin
- * of the body shows through. `fadeRows`: the art fades out between these rows, so the body,
- * cut straight at the bottom, sinks into the coat behind it.
+ * of the body shows through. `clearTop`: rows of torn collar outline above the coat, dropped.
+ * `neckline`: a soft half-ellipse cut into the top of the coat, `halfWidth` × `depth` around
+ * column `x`, so the coat opens under the chin instead of ending in a straight line.
+ * `trimDarkSides`: dark pixels this close to the left and right edges are leftovers of the sheet
+ * frame. `fadeBottom`: the bottom rows fade out, so the hat sinks onto the head.
+ * `lightOnly`: a glow drawn additively keeps only its light; its dark smoke turns clear. Every layer then has its straight sheet cuts faded out.
  */
 const layers = {
-  body: { fadeRows: [178, 205] },
+  body: {},
   tentacle_1: {},
   tentacle_2: {},
   tentacle_3: {},
@@ -43,13 +47,19 @@ const layers = {
   eyes_angry: { minShare: 0.2 },
   // eyes_closed.png holds one whole closed eye (the left); the game mirrors it for the right one.
   eye_closed: { from: 'eyes_closed', keep: [3, 50, 62, 118] },
-  mouth_grin: {},
+  mouth_grin: {
+    felt: [
+      [70, 10, 14],
+      [95, 18, 22],
+    ],
+  },
   hat: {
     felt: [
       [52, 38, 50],
       [16, 10, 16],
     ],
     feltHull: { fromRow: 45 },
+    fadeBottom: 10,
   },
   coat: {
     minShare: 0.02,
@@ -58,13 +68,24 @@ const layers = {
       [14, 10, 14],
     ],
     openNeck: 30,
+    clearTop: 14,
+    neckline: { x: 127, halfWidth: 62, depth: 42 },
+    trimDarkSides: 12,
   },
-  earring: {},
+  // The collar the coat lost to the sheet cut: two gold-trimmed lapels, worn over the coat's top.
+  coat_collar: {
+    minShare: 0.1,
+    neckline: { x: 72, halfWidth: 46, depth: 26 },
+    felt: [
+      [40, 30, 42],
+      [14, 10, 14],
+    ],
+  },
   compass: {},
-  glow_gold: { minShare: 0.002, captionFrom: 150 },
-  sparkles: { minShare: 0.002, captionFrom: 140 },
+  glow_gold: { minShare: 0.002, captionFrom: 150, lightOnly: true },
+  sparkles: { minShare: 0.002, captionFrom: 140, lightOnly: true },
   coins: { minShare: 0.01, background: 110 },
-  coin_trail: { minShare: 0.01, captionFrom: 150 },
+  coin_trail: { minShare: 0.01, captionFrom: 150, lightOnly: true },
   chest: { background: 110 },
 };
 
@@ -83,11 +104,93 @@ function clean(image, options) {
     const { felt, feltHull } = options;
     fillHoles(image, felt, feltHull ? hullMask(image, feltHull.fromRow) : null);
   }
+  shape(image, options);
+  return smoothEdges(softenCuts(crop(image, 2)));
+}
+
+/** The touches particular to some layers: the coat's neck and sides, the hat's brim, glows. */
+function shape(image, options) {
   openNeck(image, options.openNeck ?? 0);
-  if (options.fadeRows) {
-    fadeRows(image, options.fadeRows);
+  clearRows(image, options.clearTop ?? 0);
+  if (options.trimDarkSides) {
+    trimDarkSides(image, options.trimDarkSides);
   }
-  return crop(image, 2);
+  if (options.neckline) {
+    cutNeckline(image, options.neckline);
+  }
+  if (options.fadeBottom) {
+    fadeBottom(image, options.fadeBottom);
+  }
+  if (options.lightOnly) {
+    keepLight(image);
+  }
+}
+
+/**
+ * Anti-aliases the outline: alpha is capped by its 3 × 3 average, so the stair-steps the
+ * background removal left along the edge turn into a soft half-pixel rim.
+ */
+function smoothEdges(image) {
+  const { width, height, data } = image;
+  const alpha = Uint8Array.from({ length: width * height }, (_, i) => data[i * 4 + 3]);
+  for (let i = 0; i < width * height; i++) {
+    const x = i % width;
+    const y = (i / width) | 0;
+    let sum = 0;
+    for (const n of neighbours(x, y, width, height)) sum += alpha[n];
+    // Pixels outside the image count as clear.
+    const mean = (sum + alpha[i]) / 9;
+    data[i * 4 + 3] = Math.min(alpha[i], Math.round(mean));
+  }
+  return image;
+}
+
+/** A run of solid pixels this long along a side of the cropped art is a straight cut of the sheet. */
+const CUT_RUN = 14;
+/** A cut side fades out over this many pixels, so no straight edge shows on screen. */
+const CUT_FADE = 16;
+
+/**
+ * Fades out the sides of the art cut straight by the sheet: the base of a tentacle, the tip of
+ * the feather at the edge of the hat. A natural outline touches its box at a few pixels only.
+ */
+function softenCuts(image) {
+  const { width, height, data } = image;
+  const cut = cutSides(image);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const distances = [
+        cut.left ? x : Infinity,
+        cut.right ? width - 1 - x : Infinity,
+        cut.top ? y : Infinity,
+        cut.bottom ? height - 1 - y : Infinity,
+      ];
+      const fade = Math.min(1, Math.min(...distances) / CUT_FADE);
+      data[(y * width + x) * 4 + 3] *= fade;
+    }
+  }
+  return image;
+}
+
+/** Which sides of the art hold a straight run of solid pixels in their outer rows. */
+function cutSides({ width, height, data }) {
+  const solid = (x, y) => data[(y * width + x) * 4 + 3] > 200;
+  const longestRun = (length, at) => {
+    let [best, run] = [0, 0];
+    for (let k = 0; k < length; k++) {
+      run = at(k) ? run + 1 : 0;
+      best = Math.max(best, run);
+    }
+    return best;
+  };
+  const side = (length, at) =>
+    [0, 1, 2, 3].some((d) => longestRun(length, (k) => at(k, d)) >= CUT_RUN);
+  return {
+    left: side(height, (k, d) => solid(d, k)),
+    right: side(height, (k, d) => solid(width - 1 - d, k)),
+    top: side(width, (k, d) => solid(k, d)),
+    bottom: side(width, (k, d) => solid(k, height - 1 - d)),
+  };
 }
 
 /** Clears the caption, the sliver of the neighbour and a dark background square. */
@@ -118,10 +221,52 @@ function keepArt({ width, height, data }, minShare) {
   }
 }
 
-/** Fades the art out from row `from` (opaque) to row `to` (gone). */
-function fadeRows({ width, height, data }, [from, to]) {
-  for (let y = from; y < height; y++) {
-    const keep = Math.max(0, (to - y) / (to - from));
+/** Alpha follows brightness, so dark smoke around a glow vanishes instead of browning the scene. */
+function keepLight({ width, height, data }) {
+  for (let i = 0; i < width * height; i++) {
+    const p = i * 4;
+    const brightness = Math.max(data[p], data[p + 1], data[p + 2]) / 255;
+    data[p + 3] *= Math.max(0, (brightness - 0.35) / 0.65) ** 1.5;
+  }
+}
+
+/** Clears the top `rows` rows. */
+function clearRows({ width, data }, rows) {
+  data.fill(0, 0, rows * width * 4);
+}
+
+/** Clears dark pixels within `columns` of the left and right edges. */
+function trimDarkSides({ width, height, data }, columns) {
+  for (let i = 0; i < width * height; i++) {
+    const x = i % width;
+    const p = i * 4;
+    const nearSide = x < columns || x >= width - columns;
+    if (nearSide && data[p] + data[p + 1] + data[p + 2] < 150) {
+      data[p + 3] = 0;
+    }
+  }
+}
+
+/** Fades out a half-ellipse hanging from the top edge: the open neck of the coat. */
+function cutNeckline({ width, height, data }, { x: cx, halfWidth, depth }) {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const reach = Math.hypot((x - cx) / halfWidth, y / depth);
+      // Clear inside, opaque from 1.25 of the radius out: a soft rim, not a line.
+      const keep = Math.min(1, Math.max(0, (reach - 1) / 0.25));
+      data[(y * width + x) * 4 + 3] *= keep;
+    }
+  }
+}
+
+/** Fades the bottom `rows` rows of the art out, measured from its lowest visible pixel. */
+function fadeBottom({ width, height, data }, rows) {
+  let bottom = 0;
+  for (let i = 0; i < width * height; i++) {
+    if (data[i * 4 + 3] > 200) bottom = (i / width) | 0;
+  }
+  for (let y = bottom - rows; y < height; y++) {
+    const keep = Math.max(0, (bottom - y) / rows);
     for (let x = 0; x < width; x++) {
       data[(y * width + x) * 4 + 3] *= keep;
     }
@@ -376,23 +521,7 @@ function crop({ width, height, data }, padding) {
   return { width: w, height: h, data: out, left, top };
 }
 
-/**
- * The soft shadow the head casts on the coat: a dark ellipse fading out, `width` × `height`.
- * The only picture made here rather than cleaned; it is plain shading, not art.
- */
-function contactShadow(width, height) {
-  const data = Buffer.alloc(width * height * 4);
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const reach = Math.hypot((x - width / 2) / (width / 2), (y - height / 2) / (height / 2));
-      data.set([20, 4, 8, Math.round(150 * Math.max(0, 1 - reach) ** 1.5)], (y * width + x) * 4);
-    }
-  }
-  return { width, height, data };
-}
-
 mkdirSync(target, { recursive: true });
-writeFileSync(join(target, 'shadow.png'), encodePng(contactShadow(170, 70)));
 for (const [name, options] of Object.entries(layers)) {
   const file = join(source, `${options.from ?? name}.png`);
   const cleaned = clean(decodePng(readFileSync(file)), options);
