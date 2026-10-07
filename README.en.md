@@ -128,6 +128,22 @@ runs in `npm run simulate`.
 
 Money is stored as integer minor units. The math uses a seeded Rng instead of `Math.random()`.
 
+## Patterns and why
+
+| Pattern                                  | Where                                       | Why                                                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Plugin** (`Feature`)                   | `core/Feature.ts`, every game mechanic      | A mechanic is one line in `main.ts` and gets what it needs through `install(context)`. The SDK does not change when a game adds a mechanic, so many different games share one core.                                                                                                                                                                         |
+| **Dependency injection** (`GameContext`) | `core/GameContext.ts`                       | Everything a feature depends on is passed in one explicit object. No singletons and no global lookup by name: dependencies are visible in the code and easy to replace in tests.                                                                                                                                                                            |
+| **ECS** (`World`, components, systems)   | `ecs/`, `reels/`                            | The reels are many similar entities (reels, cells, symbols) whose data and behaviour change separately. A mechanic adds a component (e.g. `Held` for sticky Wilds) and a system without touching the reel classes. The ECS has no Pixi, so spinning logic is tested in Node. ECS is used only where it pays off: the HUD and popups are plain Pixi objects. |
+| **State machine**                        | `flow/StateMachine.ts`, `flow/RoundFlow.ts` | A round is always in one of three states: `idle`, `spinning`, `presenting`. An illegal transition (a second spin while spinning) throws instead of corrupting the game. A new mechanic adds a step, not a state.                                                                                                                                            |
+| **Command / Script** (round steps)       | `math/round.ts`, `flow/RoundPlayer.ts`      | The server sends the round as a list of steps and the client plays them in order, with a handler per step type (Strategy). The client computes nothing, so the presentation cannot drift from the money.                                                                                                                                                    |
+| **Observer** (`EventBus`)                | `core/EventBus.ts`, `core/GameEvents.ts`    | Parts that do not know each other talk through typed events: the sound hears a reel stop, the character sees a spin start.                                                                                                                                                                                                                                  |
+| **Adapter** (`ResultSource`)             | `math/round.ts`, `mock/`                    | The mock and a real server implement one interface. Connecting a backend means changing one line in `main.ts`.                                                                                                                                                                                                                                              |
+| **Presenter**                            | `ui/HudPresenter.ts`                        | HUD logic (what to show, when buttons are enabled) is separate from drawing and covered by tests.                                                                                                                                                                                                                                                           |
+
+Everything specific to a game (symbols, payouts, strips, timings, layout) lives in the game's
+`config/` as data. The SDK code only reads it.
+
 ## New game
 
 ```sh
@@ -151,6 +167,38 @@ More on the template files: [templates/game/README.md](templates/game/README.md)
 
 Game files live in `public/assets/`, and `src/assets.ts` lists them with aliases. A symbol without
 art is a compile error. If a file fails to load, the player sees a Retry button.
+
+To add an image or a sound:
+
+1. Put the file into `public/assets/`, e.g. `public/assets/scene/ship.webp`.
+2. Add it to the `game` list in `src/assets.ts`: `{ alias: 'ship', src: 'assets/scene/ship.webp' }`.
+   A font is added the same way, with a `family` field.
+3. Use it by its alias in a feature:
+
+```ts
+import { Assets, Sprite, type Texture } from 'pixi.js';
+import type { Feature } from 'slot-sdk';
+
+export function ship(): Feature {
+  return {
+    install(context) {
+      const sprite = new Sprite(Assets.get<Texture>('ship')); // image
+      context.layers.background.addChild(sprite);
+      context.layout.addNode('ship', sprite); // its place on screen is set in src/layout.ts
+      context.events.on('spinStarted', () => {
+        context.audio.play('click'); // sound
+      });
+    },
+  };
+}
+```
+
+4. Give the `ship` node a place in `src/layout.ts`, in both `landscape` and `portrait`. Without it,
+   `addNode` throws an error naming the node.
+5. Add the feature in `src/main.ts`: `features: [..., ship()]`.
+
+Symbol art goes into `symbols` of the same file: `{ src: 'assets/symbols/crown.svg' }`. Until the
+art exists, a symbol is drawn as a colored placeholder (`{ color, label }`).
 
 Pirate's Fortune art (symbols, frame, sounds) is generated by scripts in
 `games/octo-vault/scripts/`. Sources and licenses: [CREDITS.md](CREDITS.md).
