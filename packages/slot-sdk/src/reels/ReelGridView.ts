@@ -81,6 +81,11 @@ export class ReelGridView implements System {
     this.update();
   }
 
+  /** Height of a cell, in the coordinates of `container`. */
+  get cellHeight(): number {
+    return this.options.cellHeight;
+  }
+
   /** Center of a cell in the coordinates of `container`. */
   cellCenter(position: CellPosition): { x: number; y: number } {
     const center = cellCenter(position, this.options);

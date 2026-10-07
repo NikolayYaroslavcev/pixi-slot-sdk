@@ -33,8 +33,9 @@ export class FieldWinView implements WinField {
   private readonly style: WinStyle;
   private readonly ticker: Ticker;
   private readonly fadeMs: number;
-  /** Width of the field panel: the amount pill stays inside it. */
+  /** Size of the field panel: the amount pill stays inside it. */
   private readonly fieldWidth: number;
+  private readonly fieldHeight: number;
   /** Wins of the step on screen: a win keeps its line color when it is shown alone. */
   private wins: readonly Win[] = [];
   private appearing: Tween<Container> | null = null;
@@ -56,6 +57,7 @@ export class FieldWinView implements WinField {
     });
     const bounds = field.container.getLocalBounds();
     this.fieldWidth = bounds.width;
+    this.fieldHeight = bounds.height;
     this.counter.view.position.set(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
     this.amount.addChild(this.amountPill, this.amountText);
     this.container.addChild(this.lines, this.counter.view, this.amount);
@@ -126,14 +128,24 @@ export class FieldWinView implements WinField {
       .stroke({ color: this.lineColor(win), width: lineWidth / 2 });
     const { x, y } = this.amountPosition(win.cells);
     const halfWidth = Math.min(width, this.fieldWidth) / 2;
-    this.amount.position.set(Math.min(Math.max(x, halfWidth), this.fieldWidth - halfWidth), y);
+    this.amount.position.set(
+      Math.min(Math.max(x, halfWidth), this.fieldWidth - halfWidth),
+      Math.min(y, this.fieldHeight - height / 2),
+    );
     this.amount.visible = true;
   }
 
-  /** Over the last symbol of the win, where the eye ends reading it from the left. */
+  /**
+   * On the bottom edge of the last symbol of the win, where the eye ends reading it from the
+   * left: the symbol itself stays in sight.
+   */
   private amountPosition(cells: readonly CellPosition[]): Point {
     const last = cells.at(-1);
-    return last ? this.field.cellCenter(last) : this.counter.view.position;
+    if (!last) {
+      return this.counter.view.position;
+    }
+    const center = this.field.cellCenter(last);
+    return { x: center.x, y: center.y + this.field.cellHeight / 2 };
   }
 
   private appear(): void {
