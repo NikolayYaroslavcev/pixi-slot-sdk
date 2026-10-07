@@ -32,18 +32,21 @@ const target = join(assets, 'captain');
  * column `x`, so the coat opens under the chin instead of ending in a straight line.
  * `trimDarkSides`: dark pixels this close to the left and right edges are leftovers of the sheet
  * frame. `fadeBottom`: the bottom rows fade out, so the hat sinks onto the head.
+ * `dropRed`: red pixels are cleared (the torn scarf of the collar; the red skin behind shows instead).
+ * `defringe`: grey-black fringe of the sheet background is peeled off the outline of red skin;
+ * the skin's own outline is dark red, so it stays.
  * `lightOnly`: a glow drawn additively keeps only its light; its dark smoke turns clear. Every layer then has its straight sheet cuts faded out.
  */
 const layers = {
-  body: {},
-  tentacle_1: {},
-  tentacle_2: {},
-  tentacle_3: {},
-  tentacle_4: { clearLeft: 26 },
-  tentacle_5: {},
-  tentacle_6: {},
-  tentacle_7: {},
-  tentacle_8: {},
+  body: { defringe: true },
+  tentacle_1: { defringe: true },
+  tentacle_2: { defringe: true },
+  tentacle_3: { defringe: true },
+  tentacle_4: { clearLeft: 26, defringe: true },
+  tentacle_5: { defringe: true },
+  tentacle_6: { defringe: true },
+  tentacle_7: { defringe: true },
+  tentacle_8: { defringe: true },
   eyes_angry: { minShare: 0.2 },
   // eyes_closed.png holds one whole closed eye (the left); the game mirrors it for the right one.
   eye_closed: { from: 'eyes_closed', keep: [3, 50, 62, 118] },
@@ -69,17 +72,19 @@ const layers = {
     ],
     openNeck: 30,
     clearTop: 14,
-    neckline: { x: 127, halfWidth: 62, depth: 42 },
+    neckline: { x: 127, halfWidth: 72, depth: 56 },
     trimDarkSides: 12,
   },
   // The collar the coat lost to the sheet cut: two gold-trimmed lapels, worn over the coat's top.
+  // Only the lapels are kept: the torn scarf between them goes, the red body shows there.
   coat_collar: {
     minShare: 0.1,
-    neckline: { x: 72, halfWidth: 46, depth: 26 },
     felt: [
       [40, 30, 42],
       [14, 10, 14],
     ],
+    neckline: { x: 72, halfWidth: 52, depth: 34 },
+    dropRed: true,
   },
   compass: {},
   glow_gold: { minShare: 0.002, captionFrom: 150, lightOnly: true },
@@ -123,6 +128,12 @@ function shape(image, options) {
   }
   if (options.lightOnly) {
     keepLight(image);
+  }
+  if (options.dropRed) {
+    dropRed(image);
+  }
+  if (options.defringe) {
+    peelFringe(image);
   }
 }
 
@@ -217,6 +228,57 @@ function keepArt({ width, height, data }, minShare) {
     const halo = data[p + 3] < 230 && luminance < 35;
     if (!near[i] || halo) {
       data[p + 3] = 0;
+    }
+  }
+}
+
+/** Clears the red pixels. */
+function dropRed({ width, height, data }) {
+  for (let i = 0; i < width * height; i++) {
+    const [r, g, b] = [data[i * 4], data[i * 4 + 1], data[i * 4 + 2]];
+    if (r > 70 && r > 2 * g && r > 1.6 * b) {
+      data[i * 4 + 3] = 0;
+    }
+  }
+  // Specks of its shadow are left floating; they go with it.
+  const kept = keepPieces(
+    mask(width, height, (i) => data[i * 4 + 3] > 30),
+    width,
+    height,
+    0.02,
+  );
+  for (let i = 0; i < width * height; i++) {
+    if (!kept[i]) data[i * 4 + 3] = 0;
+  }
+}
+
+/** The fringe is peeled this many pixels deep at most. */
+const FRINGE_DEPTH = 4;
+
+/**
+ * Clears the dark grey pixels at the outline, layer by layer from the clear outside inward:
+ * left from the dark sheet background, unlike the skin's dark red outline. Then thins that
+ * outline by its outer pixel.
+ */
+function peelFringe({ width, height, data }) {
+  const fringe = (i) => {
+    const [r, g, b] = [data[i * 4], data[i * 4 + 1], data[i * 4 + 2]];
+    return Math.max(r, g, b) < 110 && r - Math.max(g, b) < 30;
+  };
+  for (let pass = 0; pass < FRINGE_DEPTH; pass++) {
+    peelEdge({ width, height, data }, fringe);
+  }
+  // The outline itself is drawn 2–3 pixels thick and ragged; its outer pixel goes too.
+  peelEdge({ width, height, data }, (i) => Math.max(data[i * 4], data[i * 4 + 1]) < 80);
+}
+
+/** Clears the visible pixels next to clear ones that pass `test`. */
+function peelEdge({ width, height, data }, test) {
+  const clear = mask(width, height, (i) => data[i * 4 + 3] < 30);
+  const edge = dilate(clear, width, height, 1);
+  for (let i = 0; i < width * height; i++) {
+    if (edge[i] && !clear[i] && test(i)) {
+      data[i * 4 + 3] = 0;
     }
   }
 }
