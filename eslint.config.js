@@ -31,11 +31,11 @@ export default defineConfig([
   },
   {
     // A describe block groups many short cases, so its length says nothing about readability.
-    files: ['**/*.test.ts'],
+    files: ['**/*.test.ts', '**/*.test.mjs'],
     rules: { 'max-lines-per-function': 'off' },
   },
   {
-    files: ['games/**'],
+    files: ['games/**', 'templates/**'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -44,6 +44,10 @@ export default defineConfig([
             {
               group: ['slot-sdk/*', '!slot-sdk/vite', '**/packages/**'],
               message: 'Games use the SDK only through its public entry point "slot-sdk".',
+            },
+            {
+              group: ['**/games/**', '**/templates/**'],
+              message: 'A game stands alone: it does not import another game or the template.',
             },
           ],
         },

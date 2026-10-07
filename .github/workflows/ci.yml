@@ -18,3 +18,16 @@ jobs:
       - run: npm run typecheck
       - run: npm run test
       - run: npm run build
+      # The template must keep producing a working game: create a throwaway one and check it like a real game.
+      - name: Create a game from the template
+        run: npm run create-game template-check
+      - name: Check the created game
+        run: |
+          npx eslint games/template-check
+          npx prettier --check games/template-check
+          npm run typecheck -w games/template-check
+          npx vitest run games/template-check
+          npm run build -w games/template-check
+      - name: Remove the created game
+        if: always()
+        run: rm -rf games/template-check
