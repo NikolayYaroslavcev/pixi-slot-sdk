@@ -52,7 +52,7 @@ export const layout: LayoutConfig<NodeName> = {
     height: 1920,
     nodes: {
       title: { x: 668, y: 205, scale: 0.62 },
-      character: { x: 182, y: 368, scale: 0.88 },
+      character: { x: 215, y: 372, scale: 0.8 },
       reels: { x: 540, y: 790, scale: 0.9, anchor: center },
       freeSpinsCount: { x: 690, y: 392, scale: 0.68 },
       freeSpinsWin: { x: 920, y: 392, scale: 0.68 },
