@@ -7,7 +7,7 @@ import { gridWithLine, noWinGrid } from './testGrids';
 describe('findScatters', () => {
   it('finds Scatters in any position, reel by reel', () => {
     const grid: SymbolGrid = noWinGrid.map((column, reelIndex) =>
-      reelIndex === 1 || reelIndex === 4 ? ['key', ...column.slice(1)] : column,
+      reelIndex === 1 || reelIndex === 4 ? ['chest', ...column.slice(1)] : column,
     );
 
     expect(findScatters(grid)).toEqual([
@@ -30,7 +30,7 @@ describe('evaluateSpin', () => {
     const grid = gridWithLine(
       3,
       ['ace', 'ace', 'ace'],
-      gridWithLine(0, ['skull', 'skull', 'skull']),
+      gridWithLine(0, ['compass', 'compass', 'compass']),
     );
 
     const outcome = evaluateSpin(grid, 100);
@@ -42,8 +42,8 @@ describe('evaluateSpin', () => {
   it('reports Scatters together with line wins', () => {
     const grid = gridWithLine(
       1,
-      ['key', 'jack', 'key', 'bottle', 'key'],
-      gridWithLine(0, ['wheel', 'wheel', 'wheel']),
+      ['chest', 'jack', 'chest', 'rum', 'chest'],
+      gridWithLine(0, ['map', 'map', 'map']),
     );
 
     const outcome = evaluateSpin(grid, 100);

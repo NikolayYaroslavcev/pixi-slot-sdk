@@ -10,11 +10,11 @@ function idsOfTier(tier: SymbolTier): string[] {
 }
 
 describe('Octo Vault symbols', () => {
-  it('has 4 low, 4 high, the Octopus Wild and the Key Scatter', () => {
+  it('has 4 low, 4 high, the Octopus Wild and the Chest Scatter', () => {
     expect(idsOfTier('low')).toHaveLength(4);
     expect(idsOfTier('high')).toHaveLength(4);
     expect(idsOfTier('wild')).toEqual(['octopus']);
-    expect(idsOfTier('scatter')).toEqual(['key']);
+    expect(idsOfTier('scatter')).toEqual(['chest']);
   });
 
   it('has placeholder art for exactly the symbols of the game', () => {

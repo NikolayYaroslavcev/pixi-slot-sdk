@@ -58,7 +58,7 @@ describe('Wild multipliers on lines', () => {
 
   it('only count on the matching cells of the line', () => {
     // The 5th cell is a Wild with ×5, but the line ends at the Scatter on reel 4.
-    const grid = gridWithLine(0, ['anchor', 'octopus', 'anchor', 'key', 'octopus']);
+    const grid = gridWithLine(0, ['anchor', 'octopus', 'anchor', 'chest', 'octopus']);
     const [win] = evaluateLines(grid, bet, multipliersOf(grid, [[4, 0, 5]]));
 
     expect(win?.count).toBe(3);
@@ -68,11 +68,7 @@ describe('Wild multipliers on lines', () => {
   it('multiply every line through the Wild once, and nothing else', () => {
     // Lines 1 (top row) and 13 (0, 1, 0, 1, 0) both pass the ×2 Wild on reel 3.
     const wild = { reelIndex: 2, rowIndex: 0 };
-    const grid = gridWithLine(
-      12,
-      ['bottle', 'bottle'],
-      gridWithLine(0, ['bottle', 'bottle', 'octopus']),
-    );
+    const grid = gridWithLine(12, ['rum', 'rum'], gridWithLine(0, ['rum', 'rum', 'octopus']));
     const outcome = evaluateSpin(grid, bet, multipliersOf(grid, [[2, 0, 2]]));
     const throughWild = outcome.wins.filter((win) => includesCell(win.cells, wild));
 

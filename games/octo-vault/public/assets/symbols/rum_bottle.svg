@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>Rum bottle</title>
+<defs>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#fff7c9"/><stop offset=".22" stop-color="#ffd862"/>
+  <stop offset=".48" stop-color="#c9801a"/><stop offset=".6" stop-color="#ffe08a"/>
+  <stop offset=".82" stop-color="#a65812"/><stop offset="1" stop-color="#4f2305"/></linearGradient>
+  <linearGradient id="goldEdge" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#fff7c9"/><stop offset=".22" stop-color="#ffd862"/>
+  <stop offset=".48" stop-color="#c9801a"/><stop offset=".6" stop-color="#ffe08a"/>
+  <stop offset=".82" stop-color="#a65812"/><stop offset="1" stop-color="#4f2305"/></linearGradient>
+  <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#6a3518"/><stop offset=".45" stop-color="#43200d"/><stop offset="1" stop-color="#241006"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="256" cy="246" r="215" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#ffa236" stop-opacity="0.42"/>
+    <stop offset=".55" stop-color="#ffa236" stop-opacity="0.147"/>
+    <stop offset="1" stop-color="#ffa236" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="vignette" cx="256" cy="256" r="300" gradientUnits="userSpaceOnUse">
+    <stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/>
+  </radialGradient>
+  <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".45" stop-color="#fff" stop-opacity=".08"/>
+    <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <clipPath id="face"><rect x="42" y="42" width="428" height="428" rx="38"/></clipPath>
+  <filter id="drop" x="-20%" y="-20%" width="140%" height="150%">
+    <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#0d0401" flood-opacity=".75"/>
+  </filter>
+</defs>
+
+  <rect x="10" y="10" width="492" height="492" rx="66" fill="#140702"/>
+  <rect x="18" y="18" width="476" height="476" rx="60" fill="url(#goldEdge)"/>
+  <rect x="20" y="20" width="472" height="472" rx="58" fill="none" stroke="#fff3b8" stroke-opacity=".6" stroke-width="2"/>
+  <rect x="34" y="34" width="444" height="444" rx="44" fill="#2a1104"/>
+  <g clip-path="url(#face)">
+    <rect x="42" y="42" width="428" height="428" fill="url(#wood)"/>
+    <path d="M30 58 q110 2.7 226 0 t226 7.3" stroke="#120602" stroke-opacity="0.16" stroke-width="2.3" fill="none"/><path d="M30 83 q110 4.7 226 0 t226 -5.5" stroke="#120602" stroke-opacity="0.16" stroke-width="4.4" fill="none"/><path d="M30 110 q110 2.1 226 0 t226 6.2" stroke="#120602" stroke-opacity="0.23" stroke-width="3.6" fill="none"/><path d="M30 136 q110 -0.8 226 0 t226 -1.0" stroke="#120602" stroke-opacity="0.19" stroke-width="2.8" fill="none"/><path d="M30 169 q110 -6.9 226 0 t226 5.0" stroke="#120602" stroke-opacity="0.12" stroke-width="2.9" fill="none"/><path d="M30 198 q110 0.7 226 0 t226 1.7" stroke="#120602" stroke-opacity="0.20" stroke-width="4.2" fill="none"/><path d="M30 225 q110 6.1 226 0 t226 -8.3" stroke="#120602" stroke-opacity="0.13" stroke-width="3.2" fill="none"/><path d="M30 259 q110 -7.5 226 0 t226 5.1" stroke="#120602" stroke-opacity="0.20" stroke-width="4.6" fill="none"/><path d="M30 286 q110 4.8 226 0 t226 5.2" stroke="#120602" stroke-opacity="0.19" stroke-width="4.0" fill="none"/><path d="M30 312 q110 7.0 226 0 t226 4.8" stroke="#120602" stroke-opacity="0.22" stroke-width="3.9" fill="none"/><path d="M30 341 q110 4.4 226 0 t226 -4.0" stroke="#120602" stroke-opacity="0.14" stroke-width="3.5" fill="none"/><path d="M30 366 q110 -2.2 226 0 t226 0.1" stroke="#120602" stroke-opacity="0.23" stroke-width="3.2" fill="none"/><path d="M30 391 q110 3.3 226 0 t226 3.9" stroke="#120602" stroke-opacity="0.23" stroke-width="2.1" fill="none"/><path d="M30 423 q110 -5.8 226 0 t226 -2.6" stroke="#120602" stroke-opacity="0.22" stroke-width="3.0" fill="none"/><path d="M30 446 q110 -0.7 226 0 t226 6.0" stroke="#120602" stroke-opacity="0.19" stroke-width="2.1" fill="none"/><path d="M30 469 q110 -3.4 226 0 t226 8.5" stroke="#120602" stroke-opacity="0.18" stroke-width="4.0" fill="none"/>
+    <rect x="42" y="42" width="428" height="428" fill="url(#glow)"/>
+    <rect x="42" y="42" width="428" height="428" fill="url(#vignette)"/>
+    <path d="M42 42h428v6q-214 26-428 0z" fill="#fff" fill-opacity=".1"/>
+  </g>
+  <rect x="42" y="42" width="428" height="428" rx="38" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="4"/>
+  <circle cx="74" cy="74" r="9" fill="url(#gold)" stroke="#3a1806" stroke-width="3"/><circle cx="71" cy="71" r="3" fill="#fff6c9"/><circle cx="74" cy="438" r="9" fill="url(#gold)" stroke="#3a1806" stroke-width="3"/><circle cx="71" cy="435" r="3" fill="#fff6c9"/><circle cx="438" cy="74" r="9" fill="url(#gold)" stroke="#3a1806" stroke-width="3"/><circle cx="435" cy="71" r="3" fill="#fff6c9"/><circle cx="438" cy="438" r="9" fill="url(#gold)" stroke="#3a1806" stroke-width="3"/><circle cx="435" cy="435" r="3" fill="#fff6c9"/>
+<g transform="translate(256 244) scale(1.05) translate(-256 -256)">
+  <defs>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0d2e1c"/><stop offset=".3" stop-color="#3d8f57"/><stop offset=".55" stop-color="#1f5b37"/><stop offset="1" stop-color="#08190f"/>
+    </linearGradient>
+    <linearGradient id="liquor" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5a2006"/><stop offset=".35" stop-color="#e8952e"/><stop offset=".6" stop-color="#b8601a"/><stop offset="1" stop-color="#3a1404"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbebc2"/><stop offset="1" stop-color="#d7b277"/></linearGradient>
+    <linearGradient id="cork" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a4a22"/><stop offset=".4" stop-color="#d49a5a"/><stop offset="1" stop-color="#6a3a16"/></linearGradient>
+    <clipPath id="bottle"><path id="bottlePath" d="M224 120h64v62q0 30 38 54q30 20 30 58v122q0 34-34 34H190q-34 0-34-34V294q0-38 30-58q38-24 38-54z"/></clipPath>
+  </defs>
+  <g filter="url(#drop)">
+    <path d="M224 120h64v62q0 30 38 54q30 20 30 58v122q0 34-34 34H190q-34 0-34-34V294q0-38 30-58q38-24 38-54z" fill="url(#glass)" stroke="#06140b" stroke-width="8"/>
+    <g clip-path="url(#bottle)">
+      <rect x="150" y="268" width="212" height="190" fill="url(#liquor)" opacity=".92"/>
+      <path d="M150 268q53 -10 106 0t106 0v6q-53 10-106 0t-106 0z" fill="#ffd08a" opacity=".7"/>
+    </g>
+    <rect x="174" y="302" width="164" height="96" rx="10" fill="url(#paper)" stroke="#6b3a12" stroke-width="5"/>
+    <rect x="184" y="312" width="144" height="76" rx="6" fill="none" stroke="#9a5a22" stroke-width="2"/>
+    <path d="M208 336l20-14 28 8 28-8 20 14-20 12 20 14-20 12-28-8-28 8-20-12 20-14z" fill="none" stroke="#7a3410" stroke-width="5" stroke-linejoin="round" opacity=".55"/>
+    <circle cx="256" cy="350" r="17" fill="#f3e3c0" stroke="#4a1e08" stroke-width="5"/>
+    <circle cx="250" cy="347" r="3.5" fill="#4a1e08"/><circle cx="262" cy="347" r="3.5" fill="#4a1e08"/>
+    <rect x="218" y="84" width="76" height="46" rx="10" fill="url(#cork)" stroke="#3a1a06" stroke-width="5"/>
+    <path d="M214 124h84v18q-6 14-12 2q-6 22-14 4q-8 18-16 0q-8 22-16 2q-8 16-14 0q-6 14-12-6z" fill="#b51d24" stroke="#5a0a0e" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M222 128h68" stroke="#ff7a6a" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+  </g>
+  <path d="M234 132v52q-2 30-40 58q-22 18-22 52v120" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".45"/>
+  <path d="M338 300v110" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".22"/></g>
+</svg>

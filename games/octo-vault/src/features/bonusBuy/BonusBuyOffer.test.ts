@@ -24,7 +24,7 @@ describe('BonusBuyOffer', () => {
     const { offer } = createOffer();
 
     expect(offer.price).toBe(price);
-    expect(offer.label).toContain(formatMoney(price));
+    expect(offer.priceLabel).toBe(formatMoney(price));
   });
 
   it('asks for confirmation with the price, then buys the bonus round for it', async () => {

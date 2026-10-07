@@ -12,12 +12,12 @@ describe('evaluateLines', () => {
   });
 
   it('pays 3 equal symbols from the first reel by the paytable', () => {
-    const grid = gridWithLine(0, ['wheel', 'wheel', 'wheel']);
+    const grid = gridWithLine(0, ['map', 'map', 'map']);
 
     expect(evaluateLines(grid, bet)).toEqual([
       {
         lineIndex: 0,
-        symbolId: 'wheel',
+        symbolId: 'map',
         count: 3,
         cells: [
           { reelIndex: 0, rowIndex: 0 },
@@ -32,7 +32,7 @@ describe('evaluateLines', () => {
   });
 
   it('gives the whole payline as the path to draw, beyond the matching cells', () => {
-    const grid = gridWithLine(4, ['bottle', 'bottle', 'bottle']);
+    const grid = gridWithLine(4, ['rum', 'rum', 'rum']);
 
     const [win] = evaluateLines(grid, bet);
 
@@ -50,18 +50,20 @@ describe('evaluateLines', () => {
   });
 
   it('pays nothing for 2 in a row or for matches that do not start on the first reel', () => {
-    expect(evaluateLines(gridWithLine(0, ['skull', 'skull']), bet)).toEqual([]);
-    expect(evaluateLines(gridWithLine(0, ['jack', 'skull', 'skull', 'skull']), bet)).toEqual([]);
+    expect(evaluateLines(gridWithLine(0, ['compass', 'compass']), bet)).toEqual([]);
+    expect(evaluateLines(gridWithLine(0, ['jack', 'compass', 'compass', 'compass']), bet)).toEqual(
+      [],
+    );
   });
 
-  it('pays the longest combination: 5 Skulls is the top line pay', () => {
+  it('pays the longest combination: 5 Compasses is the top line pay', () => {
     const [win] = evaluateLines(
-      gridWithLine(3, ['skull', 'skull', 'skull', 'skull', 'skull']),
+      gridWithLine(3, ['compass', 'compass', 'compass', 'compass', 'compass']),
       bet,
     );
 
-    expect(win).toMatchObject({ lineIndex: 3, symbolId: 'skull', count: 5 });
-    expect(win?.amount).toBe(bet * paytable.skull[5]);
+    expect(win).toMatchObject({ lineIndex: 3, symbolId: 'compass', count: 5 });
+    expect(win?.amount).toBe(bet * paytable.compass[5]);
   });
 
   // On the base field a Wild can also join equal neighbours of other lines,
@@ -75,37 +77,35 @@ describe('evaluateLines', () => {
   });
 
   it('pays leading Wilds as the first regular symbol after them', () => {
-    // The base field has a Bottle on reel 4 of the top row, so the line is 4 long.
-    const grid = gridWithLine(0, ['octopus', 'octopus', 'bottle']);
+    // The base field has a Rum bottle on reel 4 of the top row, so the line is 4 long.
+    const grid = gridWithLine(0, ['octopus', 'octopus', 'rum']);
 
     expect(evaluateLines(grid, bet)).toContainEqual(
-      expect.objectContaining({ lineIndex: 0, symbolId: 'bottle', count: 4 }),
+      expect.objectContaining({ lineIndex: 0, symbolId: 'rum', count: 4 }),
     );
   });
 
-  it('pays a line of only Wilds as the Skull', () => {
+  it('pays a line of only Wilds as the Compass', () => {
     const grid = gridWithLine(0, ['octopus', 'octopus', 'octopus', 'octopus', 'octopus']);
 
     expect(evaluateLines(grid, bet)).toContainEqual(
-      expect.objectContaining({ lineIndex: 0, symbolId: 'skull', count: 5 }),
+      expect.objectContaining({ lineIndex: 0, symbolId: 'compass', count: 5 }),
     );
   });
 
   it('never pays the Scatter on a line, and the Scatter breaks a line', () => {
-    expect(evaluateLines(gridWithLine(0, ['key', 'key', 'key', 'key', 'key']), bet)).toEqual([]);
-    expect(evaluateLines(gridWithLine(0, ['jack', 'key', 'jack', 'jack']), bet)).toEqual([]);
     expect(
-      evaluateLines(gridWithLine(0, ['octopus', 'octopus', 'octopus', 'key']), bet),
-    ).toContainEqual(expect.objectContaining({ lineIndex: 0, symbolId: 'skull', count: 3 }));
+      evaluateLines(gridWithLine(0, ['chest', 'chest', 'chest', 'chest', 'chest']), bet),
+    ).toEqual([]);
+    expect(evaluateLines(gridWithLine(0, ['jack', 'chest', 'jack', 'jack']), bet)).toEqual([]);
+    expect(
+      evaluateLines(gridWithLine(0, ['octopus', 'octopus', 'octopus', 'chest']), bet),
+    ).toContainEqual(expect.objectContaining({ lineIndex: 0, symbolId: 'compass', count: 3 }));
   });
 
   it('pays every winning line, even when lines share cells', () => {
     // Line 1 (top row) and line 5 (V shape) both start in the top-left cell.
-    const grid = gridWithLine(
-      4,
-      ['bottle', 'bottle', 'bottle'],
-      gridWithLine(0, ['bottle', 'bottle', 'bottle']),
-    );
+    const grid = gridWithLine(4, ['rum', 'rum', 'rum'], gridWithLine(0, ['rum', 'rum', 'rum']));
 
     const wins = evaluateLines(grid, bet);
     const top = wins.find((win) => win.lineIndex === 0);
@@ -117,10 +117,10 @@ describe('evaluateLines', () => {
   });
 
   it('pays all 15 lines on a field of one symbol', () => {
-    const wins = evaluateLines(gridOf('skull'), bet);
+    const wins = evaluateLines(gridOf('compass'), bet);
 
     expect(wins).toHaveLength(paylines.length);
-    expect(wins.every((win) => win.count === 5 && win.amount === bet * paytable.skull[5])).toBe(
+    expect(wins.every((win) => win.count === 5 && win.amount === bet * paytable.compass[5])).toBe(
       true,
     );
   });

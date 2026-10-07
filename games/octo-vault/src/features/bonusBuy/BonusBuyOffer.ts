@@ -1,3 +1,4 @@
+import type { Container } from 'pixi.js';
 import { formatMoney, type GameModel, type Popup, type RoundControls } from 'slot-sdk';
 import { bonusBuyConfig, bonusBuyTexts, type BonusBuySettings } from '../../config/features.config';
 import { bonusPrice } from '../../math/bonusBuy';
@@ -6,12 +7,14 @@ export interface BonusBuyDependencies {
   round: Pick<RoundControls, 'canBuy' | 'buy'>;
   model: Pick<GameModel, 'bet'>;
   popup: Pick<Popup, 'open'>;
+  /** Shown in the confirmation above the buttons, e.g. a treasure chest. */
+  picture?: Container;
 }
 
 /**
  * The logic of Bonus Buy without Pixi: the price at the current bet, whether it can be bought
- * now, and the purchase itself — ask first, then buy. Free spins start from the bought round's
- * script; the balance changes only through the round flow, like for a spin.
+ * now, and the purchase itself, which asks first and then buys. Free spins start from the bought
+ * round's script; the balance changes only through the round flow, like for a spin.
  */
 export class BonusBuyOffer {
   constructor(
@@ -29,9 +32,9 @@ export class BonusBuyOffer {
     return this.dependencies.round.canBuy(this.price);
   }
 
-  /** The button text: what it is and what it costs now. */
-  get label(): string {
-    return `${bonusBuyTexts.button}\n${formatMoney(this.price)}`;
+  /** What the button's second line says: the price at the current bet. */
+  get priceLabel(): string {
+    return formatMoney(this.price);
   }
 
   /** Asks the player to confirm and buys on "yes". Cancel changes nothing. */
@@ -44,6 +47,7 @@ export class BonusBuyOffer {
       message: bonusBuyTexts.message
         .replace('{spins}', String(this.settings.freeSpins))
         .replace('{price}', formatMoney(this.price)),
+      body: this.dependencies.picture,
       buttons: [
         { label: bonusBuyTexts.confirm, value: 'buy' },
         { label: bonusBuyTexts.cancel, value: 'cancel' },

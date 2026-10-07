@@ -35,7 +35,6 @@ export class FreeSpinsPanel {
     this.hide();
   }
 
-  /** The layout nodes of the panel by name. */
   get nodes(): { freeSpinsCount: Container; freeSpinsWin: Container } {
     return { freeSpinsCount: this.countNode, freeSpinsWin: this.winNode };
   }

@@ -1,4 +1,4 @@
-import { Assets, Sprite, type Texture } from 'pixi.js';
+import { Assets, NineSliceSprite, type Texture } from 'pixi.js';
 import {
   FieldWinView,
   HighlightSystem,
@@ -8,7 +8,7 @@ import {
   type Feature,
 } from 'slot-sdk';
 import { reelsConfig } from '../config/reels.config';
-import { reelFrameOffset } from '../config/scenery.config';
+import { reelFrameLook } from '../config/scenery.config';
 import type { SymbolId } from '../config/symbols';
 
 /** The parts of the field that the game's mechanics work with. */
@@ -52,9 +52,7 @@ export function reels(): ReelsFeature {
       context.world.addSystem(view);
       // The frame goes over the symbols: its dividers sit in the gaps between reels and its
       // shade darkens the top and bottom rows a little, as if the reels were deep in the frame.
-      const frame = new Sprite(Assets.get<Texture>('reelFrame'));
-      frame.position.copyFrom(reelFrameOffset);
-      view.container.addChild(frame);
+      view.container.addChild(createFrame(view));
       context.layers.reels.addChild(view.container);
       context.layout.addNode('reels', view.container);
       context.round.useReels(spinner);
@@ -62,4 +60,28 @@ export function reels(): ReelsFeature {
       parts = { grid, view, spinner, highlight };
     },
   };
+}
+
+/**
+ * The frame stretched around the field panel: its window lies exactly over the panel. The window
+ * is as far from each edge of the texture, so with the border drawn `thickness` times its size
+ * the middle of the nine-slice stretches to the panel.
+ */
+function createFrame(view: ReelGridView): NineSliceSprite {
+  const texture = Assets.get<Texture>('reelFrame');
+  const { window, corner, thickness } = reelFrameLook;
+  const panel = view.container.boundsArea as { width: number; height: number };
+  const border = { x: texture.width - window.width, y: texture.height - window.height };
+  const frame = new NineSliceSprite({
+    texture,
+    leftWidth: corner,
+    rightWidth: corner,
+    topHeight: corner,
+    bottomHeight: corner,
+    width: (panel.width + border.x * thickness) / thickness,
+    height: (panel.height + border.y * thickness) / thickness,
+  });
+  frame.scale.set(thickness);
+  frame.position.set(-window.x * thickness, -window.y * thickness);
+  return frame;
 }

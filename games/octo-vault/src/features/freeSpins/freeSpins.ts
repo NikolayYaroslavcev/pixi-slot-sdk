@@ -12,7 +12,7 @@ import { holdStickyWilds, releaseStickyWilds } from './stickyWilds';
  * - `freeSpinsStart`: the Scatters light up and the intro card says how many spins.
  * - `freeSpinsUpdate`: the counter moves on and the sticky Wilds are held for the next spin.
  * - `freeSpinsEnd`: the Wilds are released and the summary card shows the series win.
- * Whenever the round is back in `idle` — after the series or after a failed round — the feature
+ * Whenever the round is back in `idle`, after the series or after a failed round, the feature
  * is cleared, so nothing of a broken series stays on screen.
  */
 export function freeSpins(reels: ReelsFeature): Feature {
@@ -57,7 +57,7 @@ class FreeSpinsSeries {
     this.setActive(true);
     this.panel.show({ spin: 0, count: step.count, seriesWin: 0 });
     this.field.highlight.show(step.scatters);
-    this.banner.show(freeSpinsLook.texts.intro, String(step.count));
+    this.banner.show(freeSpinsLook.titles.intro, String(step.count));
     try {
       await this.pause(freeSpinsLook.introMs, skip);
     } finally {
@@ -74,7 +74,7 @@ class FreeSpinsSeries {
   async end(step: FreeSpinsEndStep, skip: AbortSignal): Promise<void> {
     releaseStickyWilds(this.context.world);
     this.panel.show({ spin: step.count, count: step.count, seriesWin: step.seriesWin });
-    this.banner.show(freeSpinsLook.texts.summary, formatMoney(step.seriesWin));
+    this.banner.show(freeSpinsLook.titles.summary, formatMoney(step.seriesWin));
     try {
       await this.pause(freeSpinsLook.summaryMs, skip);
     } finally {

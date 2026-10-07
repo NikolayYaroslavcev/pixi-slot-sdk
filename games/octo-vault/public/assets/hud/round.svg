@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 6 148 148" width="148" height="148">
+<defs>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#fff3a4"/><stop offset=".25" stop-color="#ffd45a"/>
+    <stop offset=".58" stop-color="#c47a14"/><stop offset="1" stop-color="#6b3008"/>
+  </linearGradient>
+  <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#754019"/><stop offset=".5" stop-color="#32170b"/><stop offset="1" stop-color="#160a06"/>
+  </linearGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+    <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000" flood-opacity=".75"/>
+  </filter>
+</defs>
+
+<g filter="url(#shadow)">
+<circle cx="80" cy="80" r="61" fill="url(#wood)" stroke="url(#gold)" stroke-width="10"/>
+</g>
+</svg>

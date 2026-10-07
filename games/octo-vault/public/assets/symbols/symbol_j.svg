@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>Royal J</title>
+<defs>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#fff7c9"/><stop offset=".22" stop-color="#ffd862"/>
+  <stop offset=".48" stop-color="#c9801a"/><stop offset=".6" stop-color="#ffe08a"/>
+  <stop offset=".82" stop-color="#a65812"/><stop offset="1" stop-color="#4f2305"/></linearGradient>
+  <linearGradient id="goldEdge" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#fff7c9"/><stop offset=".22" stop-color="#ffd862"/>
+  <stop offset=".48" stop-color="#c9801a"/><stop offset=".6" stop-color="#ffe08a"/>
+  <stop offset=".82" stop-color="#a65812"/><stop offset="1" stop-color="#4f2305"/></linearGradient>
+  <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#6a3518"/><stop offset=".45" stop-color="#43200d"/><stop offset="1" stop-color="#241006"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="256" cy="246" r="215" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#ffb347" stop-opacity="0.42"/>
+    <stop offset=".55" stop-color="#ffb347" stop-opacity="0.147"/>
+    <stop offset="1" stop-color="#ffb347" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="vignette" cx="256" cy="256" r="300" gradientUnits="userSpaceOnUse">
+    <stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/>
+  </radialGradient>
+  <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".45" stop-color="#fff" stop-opacity=".08"/>
+    <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <clipPath id="face"><rect x="42" y="42" width="428" height="428" rx="38"/></clipPath>
+  <filter id="drop" x="-20%" y="-20%" width="140%" height="150%">
+    <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#0d0401" flood-opacity=".75"/>
+  </filter>
+</defs>
+
+  <rect x="10" y="10" width="492" height="492" rx="66" fill="#140702"/>
+  <rect x="18" y="18" width="476" height="476" rx="60" fill="url(#goldEdge)"/>
+  <rect x="20" y="20" width="472" height="472" rx="58" fill="none" stroke="#fff3b8" stroke-opacity=".6" stroke-width="2"/>
+  <rect x="34" y="34" width="444" height="444" rx="44" fill="#2a1104"/>
+  <g clip-path="url(#face)">
+    <rect x="42" y="42" width="428" height="428" fill="url(#wood)"/>
+    <path d="M30 58 q110 -4.7 226 0 t226 -6.5" stroke="#120602" stroke-opacity="0.23" stroke-width="3.4" fill="none"/><path d="M30 85 q110 -0.8 226 0 t226 5.6" stroke="#120602" stroke-opacity="0.23" stroke-width="2.3" fill="none"/><path d="M30 118 q110 -6.4 226 0 t226 -4.8" stroke="#120602" stroke-opacity="0.19" stroke-width="3.4" fill="none"/><path d="M30 144 q110 6.5 226 0 t226 -3.1" stroke="#120602" stroke-opacity="0.20" stroke-width="4.8" fill="none"/><path d="M30 167 q110 5.4 226 0 t226 -5.1" stroke="#120602" stroke-opacity="0.15" stroke-width="2.3" fill="none"/><path d="M30 191 q110 -5.1 226 0 t226 8.5" stroke="#120602" stroke-opacity="0.13" stroke-width="3.0" fill="none"/><path d="M30 225 q110 1.2 226 0 t226 -7.6" stroke="#120602" stroke-opacity="0.14" stroke-width="4.7" fill="none"/><path d="M30 259 q110 -4.5 226 0 t226 0.6" stroke="#120602" stroke-opacity="0.12" stroke-width="3.9" fill="none"/><path d="M30 293 q110 -7.3 226 0 t226 2.7" stroke="#120602" stroke-opacity="0.17" stroke-width="3.3" fill="none"/><path d="M30 326 q110 -1.2 226 0 t226 -0.8" stroke="#120602" stroke-opacity="0.16" stroke-width="3.3" fill="none"/><path d="M30 356 q110 7.1 226 0 t226 6.4" stroke="#120602" stroke-opacity="0.15" stroke-width="4.3" fill="none"/><path d="M30 379 q110 6.5 226 0 t226 -2.6" stroke="#120602" stroke-opacity="0.18" stroke-width="4.5" fill="none"/><path d="M30 403 q110 0.9 226 0 t226 1.1" stroke="#120602" stroke-opacity="0.18" stroke-width="4.0" fill="none"/><path d="M30 432 q110 5.7 226 0 t226 -4.5" stroke="#120602" stroke-opacity="0.12" stroke-width="3.7" fill="none"/><path d="M30 464 q110 1.7 226 0 t226 -6.0" stroke="#120602" stroke-opacity="0.18" stroke-width="3.8" fill="none"/>
+    <rect x="42" y="42" width="428" height="428" fill="url(#glow)"/>
+    <rect x="42" y="42" width="428" height="428" fill="url(#vignette)"/>
+    <path d="M42 42h428v6q-214 26-428 0z" fill="#fff" fill-opacity=".1"/>
+  </g>
+  <rect x="42" y="42" width="428" height="428" rx="38" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="4"/>
+  <circle cx="74" cy="74" r="9" fill="url(#gold)" stroke="#3a1806" stroke-width="3"/><circle cx="71" cy="71" r="3" fill="#fff6c9"/><circle cx="74" cy="438" r="9" fill="url(#gold)" stroke="#3a1806" stroke-width="3"/><circle cx="71" cy="435" r="3" fill="#fff6c9"/><circle cx="438" cy="74" r="9" fill="url(#gold)" stroke="#3a1806" stroke-width="3"/><circle cx="435" cy="71" r="3" fill="#fff6c9"/><circle cx="438" cy="438" r="9" fill="url(#gold)" stroke="#3a1806" stroke-width="3"/><circle cx="435" cy="435" r="3" fill="#fff6c9"/>
+
+  <defs><linearGradient id="gem" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#7ec4ff"/><stop offset=".55" stop-color="#1d5fc4"/><stop offset="1" stop-color="#0b0612"/></linearGradient></defs>
+  <g filter="url(#drop)">
+    <path d="M182.7 342.3Q182.7 332.7 188.4 320Q194 307.3 200.6 302.7Q213.1 311.9 226 311.9L236.2 310.3Q254 305 254.7 281.9L254.7 197.8L228.3 197.8Q222.7 197.8 220.4 183.6Q219.4 176.6 219.4 169.4Q219.4 162.1 220.4 155.2Q222.7 141 228.3 141L306.8 141Q313.4 141 316.7 144.8Q320 148.6 320 153.9L320 309.6Q320 342 298.4 358.8Q276.8 375.6 246.6 375.6Q216.4 375.6 199.6 366.7Q182.7 357.8 182.7 342.3Z" fill="#1c0802" stroke="#1c0802" stroke-width="40" stroke-linejoin="round"/>
+    <path d="M182.7 342.3Q182.7 332.7 188.4 320Q194 307.3 200.6 302.7Q213.1 311.9 226 311.9L236.2 310.3Q254 305 254.7 281.9L254.7 197.8L228.3 197.8Q222.7 197.8 220.4 183.6Q219.4 176.6 219.4 169.4Q219.4 162.1 220.4 155.2Q222.7 141 228.3 141L306.8 141Q313.4 141 316.7 144.8Q320 148.6 320 153.9L320 309.6Q320 342 298.4 358.8Q276.8 375.6 246.6 375.6Q216.4 375.6 199.6 366.7Q182.7 357.8 182.7 342.3Z" fill="url(#gem)" stroke="url(#gold)" stroke-width="16" stroke-linejoin="round" paint-order="stroke"/>
+  </g>
+  <path d="M182.7 342.3Q182.7 332.7 188.4 320Q194 307.3 200.6 302.7Q213.1 311.9 226 311.9L236.2 310.3Q254 305 254.7 281.9L254.7 197.8L228.3 197.8Q222.7 197.8 220.4 183.6Q219.4 176.6 219.4 169.4Q219.4 162.1 220.4 155.2Q222.7 141 228.3 141L306.8 141Q313.4 141 316.7 144.8Q320 148.6 320 153.9L320 309.6Q320 342 298.4 358.8Q276.8 375.6 246.6 375.6Q216.4 375.6 199.6 366.7Q182.7 357.8 182.7 342.3Z" fill="url(#shine)"/>
+</svg>

@@ -14,10 +14,10 @@ const even: TentacleGrabSettings = {
 
 const octopus: CellPosition = { reelIndex: 1, rowIndex: 1 };
 
-/** `noWinGrid` with Keys along the top row and an Octopus in the second row of reel 2. */
+/** `noWinGrid` with Chests along the top row and an Octopus in the second row of reel 2. */
 const field: SymbolGrid = withSymbol(
   noWinGrid.map((column) =>
-    column.map((symbolId, row): SymbolId => (row === 0 ? 'key' : symbolId)),
+    column.map((symbolId, row): SymbolId => (row === 0 ? 'chest' : symbolId)),
   ),
   octopus,
   'octopus',
@@ -66,7 +66,7 @@ describe('grabTentacles', () => {
     for (let round = 0; round < 300; round += 1) {
       const { grabs } = grabTentacles(plainField(field), [octopus], rng, even);
       for (const { cell } of grabs.flatMap((grab) => grab.hits)) {
-        expect(field[cell.reelIndex]?.[cell.rowIndex]).not.toBe('key');
+        expect(field[cell.reelIndex]?.[cell.rowIndex]).not.toBe('chest');
         expect(cell).not.toEqual(octopus);
       }
     }
@@ -89,7 +89,7 @@ describe('grabTentacles', () => {
 
   it('throws no tentacle when every other cell is a Scatter', () => {
     const grid = withSymbol(
-      field.map((column) => column.map((): SymbolId => 'key')),
+      field.map((column) => column.map((): SymbolId => 'chest')),
       octopus,
       'octopus',
     );

@@ -1,32 +1,48 @@
-import { Container, Sprite, Text, Texture, type ColorSource, type Ticker } from 'pixi.js';
-import { easeOutBack, tween, type GameContext, type Tween } from 'slot-sdk';
+import {
+  Assets,
+  Container,
+  Sprite,
+  Text,
+  type ColorSource,
+  type Texture,
+  type Ticker,
+} from 'pixi.js';
+import {
+  createDim,
+  easeOutBack,
+  placeOverlay,
+  tween,
+  type GameContext,
+  type Tween,
+} from 'slot-sdk';
 
 /** Look of the free spins intro and summary. Sizes are design pixels. */
 export interface FreeSpinsBannerLook {
+  /** Scale of the lettered plaque (`wins/free-spins*.svg`). */
+  titleScale: number;
   fontFamily: string;
-  titleColor: ColorSource;
   valueColor: ColorSource;
   outlineColor: ColorSource;
-  titleSize: number;
   valueSize: number;
   dimColor: ColorSource;
   dimAlpha: number;
   popMs: number;
 }
 
-/** Share of the design width the texts may take, so they never touch the edges. */
+/** Share of the design width the card may take, so it never touches the edges. */
 const maxContentWidth = 0.9;
 
 /**
- * The full-screen card between the base game and free spins: "FREE SPINS / 8" before the series,
- * "FREE SPINS WIN / 45.00" after it. Lives in the `winOverlay` layer, under the HUD, so Skip stays
- * in reach. It follows resizes and rotations every frame it is shown.
+ * The full-screen card between the base game and free spins: the FREE SPINS plaque over the
+ * number of spins before the series, the TOTAL WIN plaque over the series win after it. Lives in
+ * the `winOverlay` layer, under the HUD, so Skip stays in reach. It follows resizes and rotations
+ * every frame it is shown.
  */
 export class FreeSpinsBanner {
   private readonly root = new Container({ label: 'freeSpinsBanner', visible: false });
-  private readonly dim = new Sprite(Texture.WHITE);
+  private readonly dim;
   private readonly content = new Container();
-  private readonly title: Text;
+  private readonly title = new Sprite({ anchor: 0.5 });
   private readonly value: Text;
   private readonly pop = { scale: 1 };
   private popping: Tween<{ scale: number }> | null = null;
@@ -39,30 +55,28 @@ export class FreeSpinsBanner {
   ) {
     this.ticker = context.app.ticker;
     this.layout = context.layout;
-    this.dim.tint = look.dimColor;
-    this.dim.alpha = look.dimAlpha;
-    const text = (fill: ColorSource, fontSize: number): Text =>
-      new Text({
-        anchor: 0.5,
-        style: {
-          fill,
-          fontSize,
-          fontFamily: look.fontFamily,
-          stroke: { color: look.outlineColor, width: fontSize / 8, join: 'round' },
-        },
-      });
-    this.title = text(look.titleColor, look.titleSize);
-    this.title.y = -look.titleSize * 0.6;
-    this.value = text(look.valueColor, look.valueSize);
-    this.value.y = look.valueSize * 0.45;
+    this.dim = createDim(look.dimColor, look.dimAlpha);
+    this.value = new Text({
+      anchor: 0.5,
+      style: {
+        fill: look.valueColor,
+        fontSize: look.valueSize,
+        fontFamily: look.fontFamily,
+        stroke: { color: look.outlineColor, width: look.valueSize / 8, join: 'round' },
+      },
+    });
     this.content.addChild(this.title, this.value);
     this.root.addChild(this.dim, this.content);
     context.layers.winOverlay.addChild(this.root);
   }
 
-  show(title: string, value: string): void {
-    this.title.text = title;
+  /** Shows the plaque with the texture alias `art` and `value` under it. */
+  show(art: string, value: string): void {
+    this.title.texture = Assets.get<Texture>(art);
+    this.title.scale.set(this.look.titleScale);
+    this.title.y = -this.title.height * 0.4;
     this.value.text = value;
+    this.value.y = this.title.height * 0.1 + this.look.valueSize * 0.45;
     this.pop.scale = 0.5;
     this.popping = tween(
       this.ticker,
@@ -82,18 +96,15 @@ export class FreeSpinsBanner {
     this.root.visible = false;
   }
 
-  /** Covers the whole canvas with the dim and centers the texts in the design area. */
   private readonly place = (): void => {
-    const area = this.layout.visibleArea;
-    const variant = this.layout.variant;
-    if (!area || !variant) {
-      return;
-    }
-    this.dim.position.set(area.x, area.y);
-    this.dim.setSize(area.width, area.height);
-    this.content.position.set(variant.width / 2, variant.height / 2);
-    const naturalWidth = this.content.getLocalBounds().width;
-    const fit = Math.min(1, (variant.width * maxContentWidth) / naturalWidth);
-    this.content.scale.set(fit * this.pop.scale);
+    placeOverlay(
+      this.layout,
+      { dim: this.dim, content: this.content },
+      {
+        width: this.content.getLocalBounds().width,
+        maxWidthShare: maxContentWidth,
+        scale: this.pop.scale,
+      },
+    );
   };
 }

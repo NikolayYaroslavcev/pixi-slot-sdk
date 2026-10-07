@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 210" width="520" height="210">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff6b8"/><stop offset=".35" stop-color="#f4bd42"/><stop offset=".8" stop-color="#d28a1e"/><stop offset="1" stop-color="#8a4a0c"/></linearGradient>
+<filter id="s"><feDropShadow dx="0" dy="11" stdDeviation="8" flood-color="#000" flood-opacity=".75"/></filter>
+</defs>
+<g filter="url(#s)">
+<rect x="14" y="14" width="492" height="182" rx="91" fill="#1d0c06" stroke="#100503" stroke-width="10"/>
+<rect x="25" y="25" width="470" height="160" rx="80" fill="url(#g)" stroke="#ffe16d" stroke-width="8"/>
+</g></svg>

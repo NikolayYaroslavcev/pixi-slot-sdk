@@ -33,10 +33,10 @@ describe('Octo Vault paytable', () => {
     }
     const lowTop = Math.max(paytable.jack[5], paytable.queen[5], paytable.king[5], paytable.ace[5]);
     const highBottom = Math.min(
-      paytable.bottle[5],
+      paytable.rum[5],
       paytable.anchor[5],
-      paytable.wheel[5],
-      paytable.skull[5],
+      paytable.map[5],
+      paytable.compass[5],
     );
     expect(highBottom).toBeGreaterThan(lowTop);
   });

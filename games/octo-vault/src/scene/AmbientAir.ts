@@ -1,12 +1,13 @@
 import { Container, Sprite, Texture, type ColorSource, type Ticker } from 'pixi.js';
 import { easeOutQuad, tween, type LayoutManager, type Tween } from 'slot-sdk';
 
-/** How the water moves. Sizes are design pixels, speeds design pixels per second. */
-export interface AmbientSeaLook {
+/** How the air of the cove moves. Sizes are design pixels, speeds design pixels per second. */
+export interface AmbientAirLook {
   rays: { alpha: number; swayDegrees: number; periodMs: number };
-  bubbles: DrifterLook;
-  plankton: DrifterLook & { alpha: number; color: ColorSource };
-  /** Free spins darken the water to this color, at this strength. */
+  /** Two kinds of glowing specks rising through the light, each in its own color. */
+  dust: DrifterLook & { alpha: number; color: ColorSource };
+  embers: DrifterLook & { alpha: number; color: ColorSource };
+  /** Free spins tint the scene to this color, at this strength. */
   freeSpins: { color: ColorSource; alpha: number; fadeMs: number };
 }
 
@@ -22,7 +23,7 @@ export interface DrifterLook {
 
 type Area = { x: number; y: number; width: number; height: number };
 
-/** Something rising through the water. Created once, moved back under the screen when it leaves. */
+/** A speck rising through the light. Created once, moved back under the screen when it leaves. */
 interface Drifter {
   readonly sprite: Sprite;
   readonly look: DrifterLook;
@@ -33,13 +34,13 @@ interface Drifter {
 }
 
 /**
- * Life in the background: two shafts of light swaying from the surface, bubbles and plankton
- * rising. A fixed set of sprites is created once and moved every frame; whatever leaves the
+ * Life in the background: two shafts of sunlight swaying slowly, and dust and embers rising
+ * in them. A fixed set of sprites is created once and moved every frame; whatever leaves the
  * top comes back from below. It covers the whole visible area, read every frame, so resizes
- * and rotations need nothing extra. Free spins darken the water with a tinted cover.
+ * and rotations need nothing extra. Free spins tint the scene with a colored cover.
  */
-export class AmbientSea {
-  readonly view = new Container({ label: 'ambientSea' });
+export class AmbientAir {
+  readonly view = new Container({ label: 'ambientAir' });
   private readonly rays: Sprite[];
   private readonly drifters: Drifter[];
   private readonly mood = new Sprite(Texture.WHITE);
@@ -48,35 +49,37 @@ export class AmbientSea {
   private started = false;
 
   constructor(
-    textures: { rays: Texture; bubble: Texture },
+    textures: { rays: Texture; mote: Texture },
     private readonly layout: Pick<LayoutManager, 'visibleArea'>,
     private readonly ticker: Ticker,
-    private readonly look: AmbientSeaLook,
+    private readonly look: AmbientAirLook,
   ) {
     this.rays = [0, 1].map(
       () => new Sprite({ texture: textures.rays, anchor: { x: 0.5, y: 0 }, blendMode: 'add' }),
     );
     const create = (drifterLook: DrifterLook): Drifter[] =>
       Array.from({ length: drifterLook.count }, () => ({
-        sprite: new Sprite({ texture: textures.bubble, anchor: 0.5 }),
+        sprite: new Sprite({ texture: textures.mote, anchor: 0.5 }),
         look: drifterLook,
         speed: 0,
         share: 0,
         phase: 0,
       }));
-    const plankton = create(look.plankton);
-    for (const speck of plankton) {
-      speck.sprite.alpha = look.plankton.alpha;
-      speck.sprite.tint = look.plankton.color;
-    }
-    this.drifters = [...plankton, ...create(look.bubbles)];
+    const tinted = (drifterLook: AmbientAirLook['dust']): Drifter[] =>
+      create(drifterLook).map((speck) => {
+        speck.sprite.alpha = drifterLook.alpha;
+        speck.sprite.tint = drifterLook.color;
+        speck.sprite.blendMode = 'add';
+        return speck;
+      });
+    this.drifters = [...tinted(look.dust), ...tinted(look.embers)];
     this.mood.tint = look.freeSpins.color;
     this.mood.alpha = 0;
     this.view.addChild(...this.rays, ...this.drifters.map((each) => each.sprite), this.mood);
     ticker.add(this.update);
   }
 
-  /** Darkens the water for free spins, or clears it, over a short fade. */
+  /** Tints the scene for free spins, or clears it, over a short fade. */
   setFreeSpins(active: boolean): void {
     this.moodFade?.finish();
     const { alpha, fadeMs } = this.look.freeSpins;
@@ -88,7 +91,7 @@ export class AmbientSea {
     );
   }
 
-  // An arrow function, so the ticker calls it with the right `this`. Creates nothing per frame.
+  // Creates nothing per frame.
   private readonly update = (ticker: Ticker): void => {
     const area = this.layout.visibleArea;
     if (!area) {
@@ -107,7 +110,7 @@ export class AmbientSea {
     }
   };
 
-  /** The first frame finds the sea already full: drifters start all over the screen. */
+  /** The first frame finds the air already full: drifters start all over the screen. */
   private scatter(area: Area): void {
     this.started = true;
     for (const drifter of this.drifters) {

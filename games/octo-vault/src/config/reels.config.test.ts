@@ -13,10 +13,10 @@ describe('Octo Vault reel strips', () => {
     }
   });
 
-  it('has the Octopus only on reels 2–4 and the Key on every reel', () => {
+  it('has the Octopus only on reels 2–4 and the Chest on every reel', () => {
     strips.forEach((strip, reelIndex) => {
       expect(strip.includes('octopus')).toBe(reelIndex >= 1 && reelIndex <= 3);
-      expect(strip).toContain('key');
+      expect(strip).toContain('chest');
     });
   });
 

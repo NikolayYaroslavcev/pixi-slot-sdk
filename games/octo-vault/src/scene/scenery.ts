@@ -1,11 +1,12 @@
 import { Assets, Sprite, type Texture } from 'pixi.js';
 import type { Feature } from 'slot-sdk';
-import { ambientSeaLook } from '../config/scenery.config';
-import { AmbientSea } from './AmbientSea';
+import { ambientAirLook, titleLogoLook } from '../config/scenery.config';
+import { AmbientAir } from './AmbientAir';
+import { TitleLogo } from './TitleLogo';
 
 /**
- * Everything behind and around the reels: the deep-sea background with its moving water,
- * and the game logo. Free spins darken the water (`freeSpinsActive`).
+ * Everything behind and around the reels: the pirate cove at sunset with light and embers
+ * moving in it, and the game logo. Free spins tint the cove (`freeSpinsActive`).
  */
 export function scenery(): Feature {
   return {
@@ -16,17 +17,22 @@ export function scenery(): Feature {
 
       const textures = {
         rays: Assets.get<Texture>('lightRays'),
-        bubble: Assets.get<Texture>('bubble'),
+        mote: Assets.get<Texture>('mote'),
       };
-      const sea = new AmbientSea(textures, context.layout, context.app.ticker, ambientSeaLook);
-      context.layers.background.addChild(sea.view);
+      const air = new AmbientAir(textures, context.layout, context.app.ticker, ambientAirLook);
+      context.layers.background.addChild(air.view);
       context.events.on('freeSpinsActive', (active) => {
-        sea.setFreeSpins(active);
+        air.setFreeSpins(active);
       });
 
-      const logo = new Sprite({ texture: Assets.get<Texture>('logo'), anchor: 0.5 });
-      context.layers.scene.addChild(logo);
-      context.layout.addNode('title', logo);
+      const logo = new TitleLogo(
+        Assets.get<Texture>('logo'),
+        Assets.get<Texture>('spark'),
+        context.app.ticker,
+        titleLogoLook,
+      );
+      context.layers.scene.addChild(logo.view);
+      context.layout.addNode('title', logo.view);
     },
   };
 }
