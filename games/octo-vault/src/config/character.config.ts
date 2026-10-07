@@ -6,13 +6,13 @@ import type { CharacterMoment } from '../features/character/CharacterDirector';
  * cleaned of sheet frames and captions by scripts/clean-captain.mjs into public/assets/captain/.
  * Each layer is its own picture: `pivot` is a point of that picture (the base of a tentacle,
  * where the hat sits) and `position` is where that point goes on the body, in body pixels.
- * Parts are listed back to front; tentacle bases hide under the coat. The face is painted on
+ * Parts are listed back to front; tentacle bases hide behind the body. The face is painted on
  * the body (a sly grin); the other expressions cover it and start hidden (`alpha: 0`).
  */
 const deg = (degrees: number): number => (degrees * Math.PI) / 180;
 const at = (x: number, y: number): { x: number; y: number } => ({ x, y });
 
-/** A tentacle behind the body: its base under the coat, turned and sized to spread around. */
+/** A tentacle behind the body: its base hidden by it, turned and sized to spread around. */
 const tentacle = (
   pivot: { x: number; y: number },
   position: { x: number; y: number },
@@ -33,21 +33,16 @@ const tentacle = (
 const layers = {
   glow_gold: { pivot: at(47, 52), position: at(122, 130), scale: 3.2, alpha: 0, blendMode: 'add' },
   body: { pivot: at(122, 250) },
-  // Behind the body, back to front: two tentacles rising behind the head, the others spreading
-  // from under the coat.
+  // Behind the body, back to front: two tentacles rising behind the head, two to each side and
+  // two hanging under the body, where its art fades out, so it ends in tentacles.
   tentacle_1: tentacle(at(25, 165), at(62, 212), -40, 0.8),
   tentacle_3: tentacle(at(165, 160), at(182, 205), 15, 0.8, { mirror: true }),
   tentacle_7: tentacle(at(8, 115), at(70, 232), -8, 0.85, { mirror: true }),
   tentacle_5: tentacle(at(25, 168), at(172, 238), 30, 0.8),
-  tentacle_2: tentacle(at(35, 160), at(80, 262), -45, 0.8),
-  tentacle_4: tentacle(at(149, 168), at(168, 262), 45, 0.8, { mirror: true }),
-  tentacle_8: tentacle(at(8, 125), at(70, 268), 8, 0.95, { mirror: true }),
-  tentacle_6: tentacle(at(15, 160), at(175, 270), -6, 0.95),
-  // In front: the coat is worn over the lower body, its open neck under the chin, with the
-  // compass hanging from the belt.
-  coat: { parent: 'body', pivot: at(127, 0), position: at(122, 140), scale: 1.2 },
-  coat_collar: { parent: 'body', pivot: at(72, 20), position: at(126, 168), scale: 1.05 },
-  compass: { parent: 'body', pivot: at(45, 8), position: at(186, 250), scale: 0.4 },
+  tentacle_2: tentacle(at(35, 160), at(108, 222), -45, 0.8),
+  tentacle_4: tentacle(at(149, 168), at(138, 222), 45, 0.8, { mirror: true }),
+  tentacle_8: tentacle(at(8, 125), at(105, 185), 150, 0.95, { mirror: true }),
+  tentacle_6: tentacle(at(15, 160), at(140, 185), -150, 0.95),
   mouth_grin: { parent: 'body', pivot: at(54, 38), position: at(138, 145), scale: 0.95, alpha: 0 },
   eyes_angry: { parent: 'body', pivot: at(61, 42), position: at(143, 98), scale: 1.22, alpha: 0 },
   // One closed eye, mirrored for the other: the face is turned, so the right eye is smaller.
@@ -106,7 +101,7 @@ export const characterConfig = {
     ]),
   ) as Record<OctopusPart, CharacterLayer<OctopusPart>>,
   /** The point the layout places: between the lowest tentacles, in body pixels. */
-  origin: at(122, 300),
+  origin: at(122, 282),
   /** Crossfade between animations. */
   mixMs: 220,
   /**
@@ -124,17 +119,17 @@ export const characterConfig = {
 };
 
 /**
- * The Grab, acted by the captain: a tentacle grows from under his coat to each grabbed cell,
+ * The Grab, acted by the captain: a tentacle grows from his body to each grabbed cell,
  * coils around it and pulls back, while the tentacle it grows from tucks away. These are the
- * tentacles on the side of the reels, used in turn; `from` is where each leaves the coat, in
+ * tentacles on the side of the reels, used in turn; `from` is where each leaves the body, in
  * body pixels. Widths are body pixels too; colors follow the v3 tentacles.
  */
 export const captainArmLook = {
   tentacles: [
-    { part: 'tentacle_5', from: at(200, 222) },
-    { part: 'tentacle_6', from: at(205, 262) },
-    { part: 'tentacle_4', from: at(196, 246) },
-    { part: 'tentacle_3', from: at(196, 196) },
+    { part: 'tentacle_5', from: at(212, 186) },
+    { part: 'tentacle_6', from: at(196, 198) },
+    { part: 'tentacle_4', from: at(204, 194) },
+    { part: 'tentacle_3', from: at(218, 176) },
   ],
   reachMs: 340,
   curlMs: 150,

@@ -61,7 +61,6 @@ const idle: Animation = {
           scaleY: 1 + wave(t, d, 1, 0.018),
         },
         hat: { rotation: wave(t, d, 1, 0.025, 0.3) },
-        compass: { rotation: wave(t, d, 1, 0.1, 0.4) },
       },
       sway((phase) => wave(t, d, 1, 0.045, phase)),
       face(blinking ? 'closed' : 'open', false),
@@ -81,7 +80,6 @@ const spin: Animation = {
           rotation: wave(t, d, 1, 0.02),
         },
         hat: { rotation: wave(t, d, 2, 0.035) },
-        compass: { rotation: wave(t, d, 2, 0.18) },
       },
       sway((phase) => wave(t, d, 2, 0.08, phase)),
       face('open', false),
@@ -206,7 +204,6 @@ const bigWin: Animation = {
       {
         body: { y: hop(t, d, 2, 26), scaleY: 1 + wave(t, d, 2, 0.04, 0.25) },
         hat: { y: hop(t, d, 2, 10), rotation: wave(t, d, 2, 0.06) },
-        compass: { rotation: wave(t, d, 2, 0.3) },
         glow_gold: { alpha: 0.85 + wave(t, d, 2, 0.15), scaleX: 1.15 + wave(t, d, 2, 0.06) },
         sparkles: { alpha: 0.8 + wave(t, d, 4, 0.2), rotation: wave(t, d, 1, 0.06) },
         chest: { alpha: 1, scaleY: 1 + wave(t, d, 2, 0.03) },

@@ -26,12 +26,7 @@ const target = join(assets, 'captain');
  * filled with this vertical gradient `[top, bottom]` until the layer is exported again.
  * `feltHull`: the outline is open too, so the cloth fills the convex hull of the gold trim
  * below `fromRow` instead (above it the feather has gold glints of its own).
- * `keepTop`: the top is the art's own edge (the shoulders), never softened as a sheet cut.
- * `neckline`: a half-ellipse cut into the top of the coat, `halfWidth` × `depth` around
- * column `x`, so the coat opens under the chin instead of ending in a straight line.
- * `trimDarkSides`: dark pixels this close to the left and right edges are leftovers of the sheet
- * frame. `fadeBottom`: the bottom rows fade out, so the hat sinks onto the head.
- * `dropRed`: red pixels are cleared (the torn scarf of the collar; the red skin behind shows instead).
+ * `fadeBottom`: the bottom rows fade out, so the hat sinks onto the head.
  * `defringe`: grey-black fringe of the sheet background is peeled off the outline of red skin;
  * the skin's own outline is dark red, so it stays.
  * `lightOnly`: a glow drawn additively keeps only its light; its dark smoke turns clear.
@@ -64,28 +59,6 @@ const layers = {
     feltHull: { fromRow: 45 },
     fadeBottom: 10,
   },
-  coat: {
-    minShare: 0.02,
-    felt: [
-      [40, 30, 42],
-      [14, 10, 14],
-    ],
-    neckline: { x: 127, halfWidth: 62, depth: 42 },
-    keepTop: true,
-    trimDarkSides: 12,
-  },
-  // The collar the coat lost to the sheet cut: two gold-trimmed lapels, worn over the coat's top.
-  // Only the lapels are kept: the torn scarf between them goes, the red body shows there.
-  coat_collar: {
-    minShare: 0.1,
-    felt: [
-      [40, 30, 42],
-      [14, 10, 14],
-    ],
-    neckline: { x: 72, halfWidth: 52, depth: 34 },
-    dropRed: true,
-  },
-  compass: {},
   glow_gold: { minShare: 0.002, captionFrom: 150, lightOnly: true },
   sparkles: { minShare: 0.002, captionFrom: 140, lightOnly: true },
   coins: { minShare: 0.01, background: 110 },
@@ -109,25 +82,16 @@ function clean(image, options) {
     fillHoles(image, felt, feltHull ? hullMask(image, feltHull.fromRow) : null);
   }
   shape(image, options);
-  return smoothEdges(softenCuts(crop(image, 2), options));
+  return smoothEdges(softenCuts(crop(image, 2)));
 }
 
-/** The touches particular to some layers: the coat's neck and sides, the hat's brim, glows. */
+/** The touches particular to some layers: the hat's brim, glows, the fringe of the skin. */
 function shape(image, options) {
-  if (options.trimDarkSides) {
-    trimDarkSides(image, options.trimDarkSides);
-  }
-  if (options.neckline) {
-    cutNeckline(image, options.neckline);
-  }
   if (options.fadeBottom) {
     fadeBottom(image, options.fadeBottom);
   }
   if (options.lightOnly) {
     keepLight(image);
-  }
-  if (options.dropRed) {
-    dropRed(image);
   }
   if (options.defringe) {
     peelFringe(image);
@@ -162,9 +126,9 @@ const CUT_FADE = 16;
  * Fades out the sides of the art cut straight by the sheet: the base of a tentacle, the tip of
  * the feather at the edge of the hat. A natural outline touches its box at a few pixels only.
  */
-function softenCuts(image, { keepTop = false } = {}) {
+function softenCuts(image) {
   const { width, height, data } = image;
-  const cut = { ...cutSides(image), ...(keepTop ? { top: false } : {}) };
+  const cut = cutSides(image);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const distances = [
@@ -229,26 +193,6 @@ function keepArt({ width, height, data }, minShare) {
   }
 }
 
-/** Clears the red pixels. */
-function dropRed({ width, height, data }) {
-  for (let i = 0; i < width * height; i++) {
-    const [r, g, b] = [data[i * 4], data[i * 4 + 1], data[i * 4 + 2]];
-    if (r > 70 && r > 2 * g && r > 1.6 * b) {
-      data[i * 4 + 3] = 0;
-    }
-  }
-  // Specks of its shadow are left floating; they go with it.
-  const kept = keepPieces(
-    mask(width, height, (i) => data[i * 4 + 3] > 30),
-    width,
-    height,
-    0.02,
-  );
-  for (let i = 0; i < width * height; i++) {
-    if (!kept[i]) data[i * 4 + 3] = 0;
-  }
-}
-
 /** The fringe is peeled this many pixels deep at most. */
 const FRINGE_DEPTH = 4;
 
@@ -286,30 +230,6 @@ function keepLight({ width, height, data }) {
     const p = i * 4;
     const brightness = Math.max(data[p], data[p + 1], data[p + 2]) / 255;
     data[p + 3] *= Math.max(0, (brightness - 0.35) / 0.65) ** 1.5;
-  }
-}
-
-/** Clears dark pixels within `columns` of the left and right edges. */
-function trimDarkSides({ width, height, data }, columns) {
-  for (let i = 0; i < width * height; i++) {
-    const x = i % width;
-    const p = i * 4;
-    const nearSide = x < columns || x >= width - columns;
-    if (nearSide && data[p] + data[p + 1] + data[p + 2] < 150) {
-      data[p + 3] = 0;
-    }
-  }
-}
-
-/** Fades out a half-ellipse hanging from the top edge: the open neck of the coat. */
-function cutNeckline({ width, height, data }, { x: cx, halfWidth, depth }) {
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const reach = Math.hypot((x - cx) / halfWidth, y / depth);
-      // Clear inside, opaque from 1.08 of the radius out: a crisp rim that is still not aliased.
-      const keep = Math.min(1, Math.max(0, (reach - 1) / 0.08));
-      data[(y * width + x) * 4 + 3] *= keep;
-    }
   }
 }
 

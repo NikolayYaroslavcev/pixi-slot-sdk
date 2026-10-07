@@ -17,7 +17,7 @@ type Motion = PromiseLike<void> & { finish(): void };
 /** Points along a drawn tentacle: enough for a smooth curve across the whole field. */
 const samples = 28;
 
-/** A tentacle of the captain that can reach out, and where it leaves his coat. */
+/** A tentacle of the captain that can reach out, and where it leaves his body. */
 export interface ArmSource {
   /** The tentacle layer the arm stands for; tucked away while the arm is out. */
   readonly part: Container;
@@ -41,7 +41,7 @@ interface Arm extends ArmSource {
 
 /**
  * The captain's own tentacles in the Grab. Each grabbed cell gets a tentacle that grows from
- * under the captain's coat to that very cell, coils around it and pulls back after the cell has
+ * from the captain's body to that very cell, coils around it and pulls back after the cell has
  * turned. The cells come from the round script, as before; this only draws. Tentacles take
  * turns, so several grabs in a row reach out together.
  */
